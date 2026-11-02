@@ -132,7 +132,7 @@
         <div class="hero-top">
           <div>
             <div class="eyebrow">${greet} · ${E.dateLabel(E.now())}</div>
-            <h1>${esc(fam.name)}的冰箱</h1>
+            <h1>${esc(fam.name || '我')}的冰箱</h1>
             <div class="hero-sub">共 ${foods.length} 件食材${c.p ? ' · <b>' + c.p + ' 件临期待处理</b>' : ' · 状态良好'}</div>
           </div>
           <div class="family-chip">👨‍👩‍👧 ${fam.members.length} 人</div>
@@ -194,6 +194,7 @@
     let tabs = `<div class="chips" style="padding-top:10px">
       <button class="chip ${tab === 'fit' ? 'on' : ''}" data-tabrec="fit">用我的食材做</button>
       <button class="chip ${tab === 'all' ? 'on' : ''}" data-tabrec="all">全部菜谱</button>
+      <button class="chip ${tab === 'video' ? 'on' : ''}" data-tabrec="video">视频做菜</button>
       <button class="chip ${tab === 'pair' ? 'on' : ''}" data-tabrec="pair">相生相克</button>
     </div>`;
 
@@ -218,6 +219,8 @@
       </div>`;
       body += list.length ? list.map(d => dishRow(d, false)).join('')
         : `<div class="empty"><div class="e">🔍</div><div class="t">没找到相关菜谱</div></div>`;
+    } else if (tab === 'video') {
+      body = videoLibBody();
     } else {
       const pairs = E.pairList(foods, false);
       const present = pairs.filter(p => p.present);
@@ -591,7 +594,23 @@
       <div class="panel">
         <h3><span class="dot"></span>🍽 吃什么菜系</h3>
         <div class="chips" style="padding:10px 0 2px">
+          <button class="chip ${!P.cuisine ? 'on' : ''}" data-party-cuisine="">不限</button>
           ${D.CUISINES.map(c => `<button class="chip ${P.cuisine === c ? 'on' : ''}" data-party-cuisine="${c}">${c}</button>`).join('')}
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3><span class="dot"></span>🍜 想吃的菜 / 口味</h3>
+        <div class="onb-field" style="margin-top:10px">
+          <label>朋友点名的菜（可不填，多个用顿号隔开）</label>
+          <input id="partyWish" value="${esc(P.wish || '')}" placeholder="如：水煮鱼、红烧肉、糖醋排骨" maxlength="40">
+        </div>
+        <div class="onb-field" style="margin-top:10px">
+          <label>口味偏好（可不填）</label>
+          <input id="partyTaste" value="${esc(P.taste || '')}" placeholder="如：微辣、清淡点、川菜、少放油" maxlength="30">
+        </div>
+        <div class="tiny muted" style="margin-top:9px;line-height:1.6">
+          菜谱库有的直接排进这桌；没有的会列出来，并给出到平台搜做法的入口
         </div>
       </div>
 
@@ -624,6 +643,19 @@
 
       <div class="section-head"><div class="t">菜单<small>点开看教程</small></div></div>
       ${p.dishes.map(d => dishRow(d, E.ingredientState(d, st.foods).every(s => s.ok))).join('')}
+
+      ${(p.wishMiss && p.wishMiss.length) ? `<div class="section-head"><div class="t">没找到菜谱<small>${p.wishMiss.length} 样</small></div></div>
+        <div class="panel" style="margin-top:9px">
+          <div class="p-body" style="margin-top:0">这几样菜谱库还没有，去平台搜同款做法，照着做完再拍照入库。</div>
+          ${p.wishMiss.map(w => `<div class="ing">
+            <div class="l">🍜 ${esc(w)}</div>
+            <div class="q">
+              <button class="pchip" data-ext="${E.videoSearch('bilibili', w)}">B站</button>
+              <button class="pchip" data-ext="${E.videoSearch('douyin', w)}">抖音</button>
+              <button class="pchip" data-ext="${E.videoSearch('xhs', w)}">小红书</button>
+            </div>
+          </div>`).join('')}
+        </div>` : ''}
 
       <div class="section-head"><div class="t">需要补购<small>${p.missing.length} 样</small></div></div>
       <div class="panel" style="margin-top:8px">
@@ -683,24 +715,7 @@
         <h1>家里都有谁？</h1>
         <div class="onb-sub">年龄和性别决定菜的软硬与营养配比，之后随时能改</div>
 
-        <div class="member-list">
-          ${ob.members.map((m, i) => `
-            <div class="mrow">
-              <div class="mr-top">
-                <input data-onb="mname" data-i="${i}" value="${esc(m.name || '')}" placeholder="称呼，如：奶奶" maxlength="6">
-                <button class="mr-del" data-action="onbDel" data-i="${i}">✕</button>
-              </div>
-              <div class="mr-bot">
-                <select data-onb="role" data-i="${i}">
-                  ${['成人', '老人', '幼儿'].map(r => `<option value="${r}" ${m.role === r ? 'selected' : ''}>${r}</option>`).join('')}
-                </select>
-                <select data-onb="gender" data-i="${i}">
-                  ${['女', '男'].map(g => `<option value="${g}" ${m.gender === g ? 'selected' : ''}>${g}</option>`).join('')}
-                </select>
-                <input type="number" data-onb="age" data-i="${i}" value="${m.age}" min="0" max="110" placeholder="年龄">
-              </div>
-            </div>`).join('')}
-        </div>
+        <div class="member-list">${ob.members.map(memberRowHtml).join('')}</div>
 
         <button class="onb-add" data-action="onbAdd">+ 添加成员</button>
         <div class="onb-preset">
@@ -781,17 +796,170 @@
     };
   }
 
+  /* ---------------- 视频库 ---------------- */
+  function videoLibBody() {
+    const q = (w.DD_VIEW.vq || '').trim();
+    const hit = d => !q || d.name.indexOf(q) >= 0;
+    const withVideo = D.DISHES.filter(d => d.videos.length && hit(d));
+    const others = D.DISHES.filter(d => !d.videos.length && hit(d));
+
+    return `
+      <div class="searchbar" style="margin-top:10px">
+        <span style="font-size:13px">🔍</span>
+        <input id="videoSearch" placeholder="搜菜名，看示范视频" value="${esc(q)}">
+      </div>
+
+      <div class="section-head"><div class="t">站内示范<small>${withVideo.length} 道</small></div>
+        <div class="more">点封面直接在站内播</div></div>
+      ${withVideo.length ? withVideo.map(d => `
+        <div class="vcard">
+          <button class="vcover" data-play="${d.videos[0].bvid}" data-title="${esc(d.videos[0].title)}">
+            <span class="vplay-s">▶</span>
+          </button>
+          <div class="vinfo">
+            <div class="vname">${d.emoji} ${esc(d.name)}</div>
+            <div class="vtitle">${esc(d.videos[0].title)}</div>
+            <div class="vrowbtn">
+              <button class="vchip" data-play="${d.videos[0].bvid}" data-title="${esc(d.videos[0].title)}">▶ 站内播放</button>
+              <button class="vchip" data-ext="${E.videoPage(d.videos[0].bvid)}">在 B 站打开 ›</button>
+            </div>
+          </div>
+        </div>`).join('') : '<div class="empty"><div class="e">📺</div><div class="t">没有匹配的视频</div></div>'}
+
+      <div class="section-head"><div class="t">去平台搜<small>其余 ${others.length} 道</small></div></div>
+      <div class="panel" style="margin-top:9px;padding:4px 14px">
+        ${others.length ? others.map(d => `
+          <div class="vrowline">
+            <span class="vn">${d.emoji} ${esc(d.name)}</span>
+            <span class="vp">
+              <button class="pchip" data-ext="${E.videoSearch('bilibili', d.name)}">B站</button>
+              <button class="pchip" data-ext="${E.videoSearch('douyin', d.name)}">抖音</button>
+              <button class="pchip" data-ext="${E.videoSearch('xhs', d.name)}">小红书</button>
+            </span>
+          </div>`).join('') : '<div class="p-body" style="margin-top:0">没有更多</div>'}
+      </div>
+
+      <div class="tiny muted" style="text-align:center;margin-top:14px;line-height:1.7">
+        站内播放走哔哩哔哩官方播放器；平台链接在新标签打开，<br>如果浏览器拦了弹窗，会给出可复制的链接。
+      </div>`;
+  }
+
+  /* ---------------- 登录 ---------------- */
+  function viewLogin() {
+    const V = w.DD_VIEW.login;
+    return {
+      title: '登录', tab: 'me',
+      html: `
+      <div class="login">
+        <div class="login-logo">🧊</div>
+        <h1>登录冰箱对对碰</h1>
+        <div class="login-sub">登录后录入家里几口人、都几岁，AI 才知道该给谁做什么菜</div>
+
+        <div class="onb-field" style="margin-top:22px">
+          <label>手机号</label>
+          <input id="loginPhone" inputmode="numeric" maxlength="11" placeholder="11 位手机号"
+            value="${esc(V.phone)}">
+        </div>
+
+        <div class="onb-field" style="margin-top:14px">
+          <label>验证码</label>
+          <div class="code-row">
+            <input id="loginCode" inputmode="numeric" maxlength="6" placeholder="6 位验证码" value="${esc(V.code)}">
+            <button class="btn ghost sm" style="flex:none;width:106px" data-action="sendCode">${V.sent ? '重新获取' : '获取验证码'}</button>
+          </div>
+          ${V.sent ? '<div class="code-hint">演示环境验证码固定为 <b>123456</b>，不会真的发短信</div>' : ''}
+        </div>
+
+        <button class="btn primary full" style="margin-top:18px" data-action="loginSubmit">登录 / 注册</button>
+        <button class="onb-skip" data-action="loginDemo">先看看演示（用示例家庭）</button>
+
+        <div class="login-tip">首次登录会自动进入「家里几口人」档案页</div>
+
+        <div class="onb-feats" style="margin-top:26px">
+          <div><span>📷</span>拍一张照，AI 自动认食材、填保质期</div>
+          <div><span>🟢</span>绿黄紫黑四色，一眼看出谁要坏了</div>
+          <div><span>🍽</span>按家人年龄，自动排每天吃什么</div>
+        </div>
+      </div>`
+    };
+  }
+
+  /* ---------------- 家庭档案（登录后第二屏） ---------------- */
+  function viewFamilySetup() {
+    const ob = w.DD_VIEW.onb;
+    const n = ob.members.length;
+    return {
+      title: '家庭档案', tab: 'me', back: true,
+      html: `
+      <div class="onb-step">登录成功 · 最后一步</div>
+      <h1 style="font-size:21px;font-weight:800;letter-spacing:.2px;margin-top:6px">家里有几口人？</h1>
+      <div class="onb-sub">点数字快速生成对应人数，再填称呼和年龄——每天的菜单就是按这些排的</div>
+
+      <div class="count-row">
+        ${[1, 2, 3, 4, 5, 6, 7, 8].map(k => `<button class="cnt ${n === k ? 'on' : ''}" data-count="${k}">${k}</button>`).join('')}
+      </div>
+
+      <div class="member-list">${ob.members.map(memberRowHtml).join('')}</div>
+      <button class="onb-add" data-action="onbAdd">+ 再加一位</button>
+
+      <div class="onb-preset">
+        <span>快速填入</span>
+        <button data-action="onbPreset" data-p="two">两口之家</button>
+        <button data-action="onbPreset" data-p="three">三口之家</button>
+        <button data-action="onbPreset" data-p="four">三代同堂</button>
+      </div>
+
+      <div class="onb-field">
+        <label>忌口 / 不吃（可留空）</label>
+        <input data-onb="taboos" value="${esc(ob.taboos)}" placeholder="如：香菜、辣、海鲜" maxlength="20">
+      </div>
+
+      <button class="btn primary full" style="margin-top:16px" data-action="famDone">保存并生成菜单 ›</button>`
+    };
+  }
+
+  function memberRowHtml(m, i) {
+    return `<div class="mrow">
+      <div class="mr-top">
+        <input data-onb="mname" data-i="${i}" value="${esc(m.name || '')}" placeholder="称呼，如：奶奶" maxlength="6">
+        <button class="mr-del" data-action="onbDel" data-i="${i}">✕</button>
+      </div>
+      <div class="mr-bot">
+        <select data-onb="role" data-i="${i}">
+          ${['成人', '老人', '幼儿'].map(r => `<option value="${r}" ${m.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+        </select>
+        <select data-onb="gender" data-i="${i}">
+          ${['女', '男'].map(g => `<option value="${g}" ${m.gender === g ? 'selected' : ''}>${g}</option>`).join('')}
+        </select>
+        <input type="number" data-onb="age" data-i="${i}" value="${m.age}" min="0" max="110" placeholder="年龄">
+      </div>
+    </div>`;
+  }
+
   /* ---------------- 我的 ---------------- */
   function viewMe() {
     const st = S.state;
+    if (!st.family.loggedIn) return viewLogin();
+
     const sum = E.summary(st);
     const cart = st.cart || [];
     const off = st.clockOffset || 0;
+    const phone = st.family.phone || '';
+    const masked = phone ? phone.replace(/^(\d{3})\d{4}(\d{4})$/, '$1****$2') : '未绑定手机号';
 
     return {
       title: '我的', tab: 'me',
       html: `
-      <div class="hello"><div>
+      <div class="acct">
+        <div class="acct-av">🧑‍🍳</div>
+        <div class="acct-in">
+          <div class="acct-nm">${esc(st.family.name)}</div>
+          <div class="acct-ph">${masked} · ${(st.family.members || []).length} 位家人</div>
+        </div>
+        <div class="acct-ok">已登录</div>
+      </div>
+
+      <div class="hello" style="margin-top:14px"><div>
         <h1>${esc(st.family.name)}的厨房</h1>
         <p>使用第 ${Math.max(1, Math.ceil((E.now() - st.createdAt) / 86400000))} 天 · 冰箱 ${sum.total} 件</p>
       </div></div>
@@ -805,9 +973,9 @@
       <div class="section-head"><div class="t">家庭档案</div>
         <button class="more" data-action="editFamily">编辑 ›</button></div>
       <div class="panel" style="margin-top:9px;padding:7px 14px">
-        ${(st.family.members || []).length ? st.family.members.map(m => `<div class="ing">
+        ${(st.family.members || []).length ? st.family.members.map((m, i) => `<div class="ing">
           <div class="l">${m.role === '幼儿' ? '👶' : m.role === '老人' ? '👵' : (m.gender === '男' ? '👨' : '👩')}
-            ${esc(m.name || m.role)} · ${esc(m.role)}</div>
+            ${esc(m.name || ('家人' + (i + 1)))} · ${esc(m.role)}</div>
           <div class="q">${m.age} 岁${m.gender ? ' · ' + m.gender : ''}</div>
         </div>`).join('') : '<div class="p-body" style="margin-top:0">还没填家庭成员</div>'}
         ${st.family.taboos ? `<div class="tiny muted" style="padding:8px 0 4px">忌口：${esc(st.family.taboos)}</div>` : ''}
@@ -850,6 +1018,10 @@
         <div class="p-body" style="margin-top:0">所有数据存在本机浏览器（localStorage），不会上传。刷新或关闭后仍在。</div>
         <div class="btn-row"><button class="btn soft" data-action="reset">恢复示例数据</button></div>
       </div>
+
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn ghost" data-action="logout">退出登录</button>
+      </div>
       <div style="height:10px"></div>
       `
     };
@@ -867,6 +1039,8 @@
       case 'week': return viewWeek();
       case 'party': return viewParty();
       case 'onboarding': return viewOnboarding();
+      case 'login': return viewLogin();
+      case 'family': return viewFamilySetup();
       case 'search': return viewSearch();
       default: return viewFridge();
     }

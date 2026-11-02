@@ -1,4 +1,4 @@
-/* CDP 自动化验收：注册引导 → 今日菜单 → 视频 → 搜索 → 一周配餐 → 聚餐 → 拍照 */
+/* CDP 验收 v4：登录 → 家庭档案 → 首页 → 视频库 → 搜索 → 聚餐(手输菜) → 拍照 → 我的 → 退出 */
 import { spawn } from 'node:child_process';
 import { writeFileSync, mkdirSync, rmSync } from 'node:fs';
 
@@ -90,121 +90,99 @@ const errors = [];
   const click = async (sel) => {
     const ok = await run(`(() => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) return false; el.click(); return true; })()`);
     if (!ok) throw new Error('元素不存在: ' + sel);
-    await sleep(260);
+    await sleep(280);
   };
   const type = async (sel, text) => {
     await run(`(() => { const el = document.querySelector(${JSON.stringify(sel)}); if(!el) return false;
       el.value = ${JSON.stringify(text)}; el.dispatchEvent(new Event('input', { bubbles: true })); return true; })()`);
-    await sleep(260);
+    await sleep(240);
   };
 
   const report = {};
 
-  /* ---------- 1. 注册引导 ---------- */
-  report.onbStep1 = await run(`!!document.querySelector('.onb') && document.querySelectorAll('.tabbar').length === 1 && getComputedStyle(document.querySelector('.tabbar')).display`);
-  await shot('01-onboarding-1');
+  /* ---------- 1. 登录 ---------- */
+  report.loginScreen = await run(`!!document.querySelector('.login')`);
+  await shot('01-login');
 
-  await type('#onbName', '林妈妈');
-  await click('[data-action="onbNext"]');
-  await shot('02-onboarding-2');
-  report.memberRows = await run(`document.querySelectorAll('.mrow').length`);
+  await type('#loginPhone', '13800001111');
+  await click('[data-action="sendCode"]');
+  await shot('02-login-code');
+  report.codeHint = await run(`!!document.querySelector('.code-hint')`);
 
-  await click('[data-action="onbDone"]');
+  await type('#loginCode', '123456');
+  await click('[data-action="loginSubmit"]');
+  await sleep(400);
+
+  /* ---------- 2. 家庭档案（几口人） ---------- */
+  report.familyStep = await run(`document.querySelectorAll('.cnt').length`);
+  await shot('03-family-setup');
+  await click('[data-count="3"]');
+  report.memberRows3 = await run(`document.querySelectorAll('.mrow').length`);
+  await shot('04-family-3');
+
+  await click('[data-action="famDone"]');
   await sleep(500);
-  await shot('03-fridge');
-  report.registered = await run(`!!(window.DD_STORE && DD_STORE.state.family.registered)`);
-  report.familyName = await run(`DD_STORE.state.family.name`);
+  await shot('05-fridge');
+  report.loggedIn = await run(`DD_STORE.state.family.loggedIn`);
+  report.members = await run(`DD_STORE.state.family.members.length`);
   report.todayMeals = await run(`document.querySelectorAll('.panel .meal').length`);
 
-  /* ---------- 2. 菜谱 + 视频 ---------- */
+  /* ---------- 3. 视频库 ---------- */
   await click('[data-nav="recipe"]');
-  await shot('04-recipe');
+  await click('[data-tabrec="video"]');
+  await shot('06-video-lib');
+  report.vcards = await run(`document.querySelectorAll('.vcard').length`);
+  report.platformRows = await run(`document.querySelectorAll('.vrowline').length`);
 
-  await run(`(() => {
-    const btn = Array.from(document.querySelectorAll('.dish[data-dish]'))
-      .find(b => b.textContent.indexOf('番茄炒蛋') >= 0);
-    if (btn) btn.click();
-    return !!btn;
-  })()`);
-  await sleep(320);
-  await shot('05-dish');
-  report.videoRows = await run(`document.querySelectorAll('.vrow').length`);
-  report.platformChips = await run(`document.querySelectorAll('.vchip').length`);
-
-  await click('.vrow[data-play]');
-  await sleep(600);
-  await shot('06-video');
-  report.iframeSrc = await run(`(document.querySelector('.vframe iframe') || {}).src || ''`);
+  await click('.vcover');
+  await sleep(400);
+  await shot('07-video-player');
+  await click('.vposter');
+  await sleep(400);
+  report.iframe = await run(`(document.querySelector('.vframe iframe')||{}).src||''`);
   await click('[data-action="closeModal"]');
 
-  /* ---------- 3. 全局搜索 ---------- */
+  /* ---------- 4. 搜索 ---------- */
   await click('#navSearch');
-  await shot('07-search-empty');
   await type('#globalSearch', '番茄');
-  await shot('08-search-result');
+  await shot('08-search');
   report.searchDishes = await run(`document.querySelectorAll('.dish[data-dish]').length`);
+  await click('.nav-back');
 
-  await run(`history.length`); // noop
-  await click('[data-action="back"], .nav-back').catch(() => {});
-  await sleep(200);
-  await click('[data-nav="fridge"]');
-
-  /* ---------- 4. 一周配餐 ---------- */
-  await click('[data-nav="plan"]');
-  await click('[data-action="genWeek"]');
-  await sleep(500);
-  await shot('09-week');
-  report.weekDays = await run(`document.querySelectorAll('.weekday').length`);
-
-  /* ---------- 5. 聚餐定制 ---------- */
+  /* ---------- 5. 聚餐：手输想吃的菜 ---------- */
   await click('[data-nav="plan"]');
   await click('[data-action="openParty"]');
-  await shot('10-party-form');
-
-  await click('[data-party-date="fri"]');
+  await shot('09-party-form');
+  await type('#partyWish', '水煮鱼、番茄炒蛋');
+  await type('#partyTaste', '微辣，朋友爱吃川菜');
   await click('[data-party-cuisine="川菜"]');
-  await click('[data-action="partyStep"][data-k="men"][data-d="1"]');
-  await click('[data-action="partyStep"][data-k="kids"][data-d="-1"]');
-  await shot('11-party-form-filled');
+  await shot('10-party-form-filled');
 
   await click('[data-action="genParty"]');
   await sleep(400);
-  await shot('12-party-result');
-  report.party = await run(`(() => {
-    const h = document.querySelector('.panel h3');
-    return h ? h.textContent.trim() : '';
+  await shot('11-party-result');
+  report.party = await run(`(() => { const h=document.querySelector('.panel h3'); return h?h.textContent.trim():''; })()`);
+  report.wishMiss = await run(`(() => {
+    const rows = Array.from(document.querySelectorAll('.ing .l')).map(e=>e.textContent.trim());
+    return rows.filter(x=>x.indexOf('🍜')>=0);
   })()`);
-  report.partyMissing = await run(`document.querySelectorAll('.cart-item').length`);
 
-  await click('[data-action="cartAdd"]');
-  await sleep(300);
-  report.cartCount = await run(`(DD_STORE.state.cart || []).length`);
-
-  /* ---------- 6. 拍照入库 ---------- */
-  await click('[data-nav="fridge"]');
-  await click('.tab.cam');
-  await shot('13-camera');
-  await click('[data-action="camSample"]');
-  await sleep(1500);
-  await shot('14-camera-result');
-  const before = await run(`document.querySelectorAll('.food').length`);
-  await click('[data-action="camConfirm"]');
-  await sleep(400);
-  const after = await run(`document.querySelectorAll('.food').length`);
-  report.added = after - before;
-
-  /* ---------- 7. 我的 / 桌面 ---------- */
+  /* ---------- 6. 我的（已登录） ---------- */
   await click('[data-nav="me"]');
-  await shot('15-me');
-  report.meFamilyRows = await run(`document.querySelectorAll('.ing').length`);
+  await shot('12-me');
+  report.meLogged = await run(`!!document.querySelector('.acct') && !!document.querySelector('[data-action="logout"]')`);
 
+  await click('[data-action="logout"]');
+  await sleep(300);
+  await shot('13-logout');
+  report.afterLogout = await run(`!!document.querySelector('.login') && !DD_STORE.state.family.loggedIn`);
+
+  /* 桌面宽度 */
   await cdp.send('Emulation.clearDeviceMetricsOverride');
   await sleep(300);
-  await shot('16-desktop');
-  report.desktop = await run(`(() => {
-    const a = document.querySelector('#app').getBoundingClientRect();
-    return { w: Math.round(a.width), left: Math.round(a.left), vw: innerWidth };
-  })()`);
+  await shot('14-desktop');
+  report.desktop = await run(`(() => { const a=document.querySelector('#app').getBoundingClientRect();
+    return { w: Math.round(a.width), left: Math.round(a.left), vw: innerWidth }; })()`);
 
   report.errors = errors;
   console.log(JSON.stringify(report, null, 2));

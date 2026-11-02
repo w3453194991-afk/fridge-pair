@@ -244,7 +244,17 @@
   }
 
   /* ---------- 聚餐规划 ----------
-     opts: { men, women, kids, cuisine, dateLabel } 或直接传人数 */
+     opts: { men, women, kids, cuisine, dateLabel, wish, taste } 或直接传人数 */
+  function parseTaste(t) {
+    if (!t) return '';
+    if (/川|辣|麻|花椒/.test(t)) return '川菜';
+    if (/粤|煲|老火|靓汤|蒸/.test(t)) return '粤菜';
+    if (/西|意面|牛排|沙拉|奶香|黄油/.test(t)) return '西式';
+    if (/清淡|养生|少油|软|烂|老人/.test(t)) return '清淡';
+    if (/家常/.test(t)) return '家常';
+    return '';
+  }
+
   function partyPlan(state, opts) {
     if (typeof opts === 'number') opts = { people: opts };
     opts = opts || {};
@@ -252,8 +262,12 @@
     const men = opts.men | 0, women = opts.women | 0, kids = opts.kids | 0;
     const people = Math.max(1, men + women + kids || opts.people || 4);
     const portions = Math.max(1, men * 1.2 + women * 1.0 + kids * 0.6 || people);
-    const cuisine = opts.cuisine || '';
+    const tasteCuisine = parseTaste(opts.taste || '');
+    const cuisine = opts.cuisine || tasteCuisine || '';
     const target = Math.min(8, Math.max(3, Math.ceil(portions * 1.05)));
+
+    const wishNames = String(opts.wish || '')
+      .split(/[、,，;；\s+／/]+/).map(s => s.trim()).filter(Boolean).slice(0, 6);
 
     const foods = state.foods;
     const sorted = D.DISHES.slice().sort(function (a, b) {
@@ -300,6 +314,18 @@
       if (hard) picked[picked.length - 1] = hard;
     }
 
+    // 朋友点名的菜：能在菜谱库里找到的，直接排进这一桌
+    const wishHit = [], wishMiss = [];
+    wishNames.forEach(function (nm) {
+      const hit = D.DISHES.filter(d => d.name.indexOf(nm) >= 0 || nm.indexOf(d.name) >= 0)[0];
+      if (hit) {
+        if (!wishHit.some(x => x.id === hit.id)) wishHit.push(hit);
+        if (!picked.some(p => p.id === hit.id)) picked.unshift(hit);
+      } else {
+        wishMiss.push(nm);
+      }
+    });
+
     // 缺料汇总（按份量放大）
     const missMap = {};
     picked.forEach(d => {
@@ -324,11 +350,14 @@
       people: people, portions: Math.round(portions * 10) / 10,
       men: men, women: women, kids: kids,
       cuisine: cuisine, dateLabel: opts.dateLabel || '',
+      taste: opts.taste || '',
+      wishHit: wishHit.map(d => d.name),
+      wishMiss: wishMiss,
       cuisineHit: cuisineHit,
       cuisineNote: cuisine && cuisineHit < 2
         ? ('「' + cuisine + '」现有 ' + cuisineHit + ' 道，其余按家常口味补齐')
         : '',
-      dishes: picked.slice(0, target), missing: missing
+      dishes: picked.slice(0, Math.max(target, wishHit.length)), missing: missing
     };
   }
 
@@ -386,7 +415,7 @@
     byName, findFood, foodMeta,
     pairList, topSuggestion, urgentList,
     ingredientState, cookable, nearMiss, dishScore, cook,
-    planWeek, partyPlan, todayMenu, search, summary,
+    planWeek, partyPlan, todayMenu, search, summary, parseTaste,
     videoEmbed, videoPage, videoSearch
   };
 })(window);

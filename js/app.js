@@ -6,15 +6,16 @@
   const D = w.DD_DATA, E = w.DD_ENGINE, S = w.DD_STORE, U = w.DD_UI;
 
   w.DD_VIEW = {
-    filter: 'all', recTab: 'fit', q: '', sugIdx: 0,
-    party: { dateKey: 'fri', men: 2, women: 2, kids: 1, cuisine: '家常' },
+    filter: 'all', recTab: 'fit', q: '', vq: '', sugIdx: 0,
+    party: { dateKey: 'fri', men: 2, women: 2, kids: 1, cuisine: '家常', wish: '', taste: '' },
+    login: { phone: '', code: '', sent: false },
     onb: null
   };
 
   function defaultOnb() {
     return {
       step: 1,
-      name: '',
+      name: '我',
       members: [
         { name: '我', role: '成人', gender: '女', age: 30 },
         { name: '孩子', role: '幼儿', gender: '男', age: 4 }
@@ -57,12 +58,6 @@
   }
 
   function renderAll(scrollTop) {
-    // 未注册：强制走引导
-    if (!S.state.family.registered && APP.view.name !== 'onboarding') {
-      if (!w.DD_VIEW.onb) w.DD_VIEW.onb = defaultOnb();
-      APP.stack = [];
-      APP.view = { name: 'onboarding' };
-    }
     const r = U.render(APP.view);
     pageEl.innerHTML = r.html;
     titleEl.innerHTML = r.title === '冰箱对对碰'
@@ -113,9 +108,21 @@
      点击分发
      ============================================================ */
   d.addEventListener('click', function (e) {
-    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play]');
+    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play],[data-ext],[data-count]');
     if (!t) return;
 
+    if (t.hasAttribute('data-ext')) {
+      openExternal(t.getAttribute('data-ext'));
+      return;
+    }
+    if (t.hasAttribute('data-count')) {
+      const n = Math.max(1, Math.min(8, parseInt(t.getAttribute('data-count'), 10) || 1));
+      const ob = w.DD_VIEW.onb;
+      while (ob.members.length < n) ob.members.push({ name: '', role: '成人', gender: '女', age: 30 });
+      while (ob.members.length > n) ob.members.pop();
+      renderAll(false);
+      return;
+    }
     if (t.hasAttribute('data-nav')) { tabTo(t.getAttribute('data-nav')); return; }
     if (t.hasAttribute('data-food')) { go({ name: 'food', id: t.getAttribute('data-food') }); return; }
     if (t.hasAttribute('data-dish')) { closeModal(); go({ name: 'dish', id: t.getAttribute('data-dish') }); return; }
@@ -211,9 +218,14 @@
       case 'genParty': {
         const P = w.DD_VIEW.party;
         const total = (P.men + P.women + P.kids) || 1;
+        const wp = d.getElementById('partyWish');
+        const tp = d.getElementById('partyTaste');
+        if (wp) P.wish = wp.value.trim();
+        if (tp) P.taste = tp.value.trim();
         S.state.party = E.partyPlan(S.state, {
           men: P.men, women: P.women, kids: P.kids,
-          cuisine: P.cuisine, dateLabel: U.partyDateLabel(P.dateKey)
+          cuisine: P.cuisine, dateLabel: U.partyDateLabel(P.dateKey),
+          wish: P.wish, taste: P.taste
         });
         S.save();
         renderAll(false);
@@ -248,6 +260,59 @@
         renderAll(true);
         break;
       }
+      case 'sendCode': {
+        const ph = (d.getElementById('loginPhone') || {}).value || '';
+        if (!/^1\d{10}$/.test(ph.trim())) { toast('先填 11 位手机号'); break; }
+        w.DD_VIEW.login.phone = ph.trim();
+        w.DD_VIEW.login.sent = true;
+        renderAll(false);
+        toast('验证码已发送：123456（演示）');
+        break;
+      }
+      case 'loginSubmit': {
+        const ph = ((d.getElementById('loginPhone') || {}).value || '').trim();
+        const code = ((d.getElementById('loginCode') || {}).value || '').trim();
+        if (!/^1\d{10}$/.test(ph)) { toast('请输入 11 位手机号'); break; }
+        if (!w.DD_VIEW.login.sent) { toast('请先点「获取验证码」'); break; }
+        if (code !== '123456') { toast('验证码不对，演示用 123456'); break; }
+        S.login(ph);
+        w.DD_VIEW.login.code = '';
+        if (!(S.state.family.members || []).length) {
+          if (!w.DD_VIEW.onb) w.DD_VIEW.onb = defaultOnb();
+          w.DD_VIEW.onb.name = S.state.family.name || '我';
+          APP.stack = [];
+          APP.view = { name: 'family' };
+          renderAll(true);
+          toast('登录成功，先录一下家里几口人');
+        } else {
+          APP.stack = [];
+          APP.view = { name: 'me' };
+          renderAll(true);
+          toast('登录成功');
+        }
+        break;
+      }
+      case 'loginDemo': {
+        S.demoFamily();
+        S.state.week = E.planWeek(S.state);
+        S.save();
+        APP.stack = [];
+        APP.view = { name: 'fridge' };
+        renderAll(true);
+        toast('已用示例家庭进入');
+        break;
+      }
+      case 'logout': {
+        S.logout();
+        APP.stack = [];
+        APP.view = { name: 'me' };
+        renderAll(true);
+        toast('已退出登录');
+        break;
+      }
+      case 'famDone':
+        finishOnboarding();
+        break;
       case 'onbBack':
         w.DD_VIEW.onb.step = 1;
         renderAll(true);
@@ -384,6 +449,18 @@
      输入
      ============================================================ */
   d.addEventListener('input', function (e) {
+    if (e.target.id === 'loginPhone') { w.DD_VIEW.login.phone = e.target.value; return; }
+    if (e.target.id === 'loginCode') { w.DD_VIEW.login.code = e.target.value; return; }
+    if (e.target.id === 'partyWish') { w.DD_VIEW.party.wish = e.target.value; return; }
+    if (e.target.id === 'partyTaste') { w.DD_VIEW.party.taste = e.target.value; return; }
+    if (e.target.id === 'videoSearch') {
+      w.DD_VIEW.vq = e.target.value;
+      const pos = e.target.selectionStart;
+      renderAll(false);
+      const vs = d.getElementById('videoSearch');
+      if (vs) { vs.focus(); try { vs.setSelectionRange(pos, pos); } catch (err) {} }
+      return;
+    }
     if (e.target.id === 'globalSearch') {
       w.DD_VIEW.q = e.target.value;
       const pos = e.target.selectionStart;
@@ -881,9 +958,9 @@
      ============================================================ */
   function finishOnboarding() {
     const ob = w.DD_VIEW.onb;
-    const members = ob.members.map(function (m) {
+    const members = ob.members.map(function (m, i) {
       return {
-        name: (m.name || m.role || '家人').trim() || '家人',
+        name: (m.name || '').trim() || ('家人' + (i + 1)),
         role: m.role || '成人',
         gender: m.gender || '女',
         age: Math.max(0, Math.min(110, m.age | 0))
@@ -905,8 +982,26 @@
     toast('已按 ' + members.length + ' 位家人排好今天的菜单');
   }
 
-  function openVideo(bvid, title) {
-    const src = E.videoEmbed(bvid);
+  /* 外部链接：能开就新标签打开，被拦就给可复制的链接 */
+  function openExternal(url) {
+    if (!url) return;
+    let win = null;
+    try { win = w.open(url, '_blank', 'noopener'); } catch (err) { win = null; }
+    if (win) return;
+    openModal(`
+      <div class="sheet-head"><div class="t">在新标签打开</div>
+        <button class="x" data-action="closeModal">✕</button></div>
+      <div class="panel" style="background:#fff;box-shadow:none">
+        <div class="p-body" style="margin-top:0">浏览器拦住了自动打开。点下面的按钮，或复制链接到地址栏。</div>
+        <div class="linkbox">${U.esc(url)}</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn ghost" data-action="closeModal">关闭</button>
+        <a class="btn primary" href="${U.esc(url)}" target="_blank" rel="noopener">打开链接</a>
+      </div>`);
+  }
+
+  function openVideo(bvid, title) {    const src = E.videoEmbed(bvid);
     openModal(`
       <div class="sheet-head"><div class="t">视频对照做菜</div>
         <button class="x" data-action="closeModal">✕</button></div>
@@ -932,7 +1027,7 @@
   S.load();
   tick();
   setInterval(tick, 20000);
-  APP.view = viewFromHash();
+  APP.view = S.state.family.loggedIn ? viewFromHash() : { name: 'login' };
   renderAll(true);
 
   w.DD_APP = { go: go, tabTo: tabTo, back: back, render: renderAll };

@@ -40,8 +40,10 @@
       createdAt: Date.now(),
       clockOffset: 0,
       family: {
+        loggedIn: false,
+        phone: '',
         registered: false,
-        name: '',
+        name: '我',
         members: [],
         taboos: ''
       },
@@ -70,6 +72,11 @@
       if (s.family.registered === undefined) {
         s.family.registered = !!(s.family.name && s.family.members && s.family.members.length);
       }
+      if (s.family.loggedIn === undefined) {
+        s.family.loggedIn = !!(s.family.registered && s.family.members && s.family.members.length);
+      }
+      if (!s.family.name) s.family.name = '我';
+      if (s.family.phone === undefined) s.family.phone = '';
       (s.family.members || []).forEach(m => { if (!m.gender) m.gender = '女'; });
       this.state = s;
       return s;
@@ -169,7 +176,11 @@
 
     /* ---------- 家庭 ---------- */
     saveFamily: function (fam) {
+      const cur = this.state.family || {};
       fam.registered = true;
+      // 保留登录态和手机号，别被覆盖掉
+      fam.loggedIn = cur.loggedIn === true;
+      if (!fam.phone) fam.phone = cur.phone || '';
       this.state.family = fam;
       this.save();
     },
@@ -177,6 +188,8 @@
     // 跳过注册：填一份示例家庭，保证后续菜单能生成
     demoFamily: function () {
       this.state.family = {
+        loggedIn: true,
+        phone: '13800000000',
         registered: true,
         name: '林妈妈',
         members: [
@@ -186,6 +199,19 @@
         ],
         taboos: ''
       };
+      this.save();
+      return this.state.family;
+    },
+
+    login: function (phone) {
+      this.state.family.phone = phone || '';
+      this.state.family.loggedIn = true;
+      this.save();
+      return this.state.family;
+    },
+
+    logout: function () {
+      this.state.family.loggedIn = false;
       this.save();
       return this.state.family;
     },
