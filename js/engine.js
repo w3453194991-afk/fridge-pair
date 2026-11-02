@@ -243,15 +243,30 @@
     return days;
   }
 
-  /* ---------- 聚餐规划 ---------- */
-  function partyPlan(state, people) {
+  /* ---------- 聚餐规划 ----------
+     opts: { men, women, kids, cuisine, dateLabel } 或直接传人数 */
+  function partyPlan(state, opts) {
+    if (typeof opts === 'number') opts = { people: opts };
+    opts = opts || {};
+
+    const men = opts.men | 0, women = opts.women | 0, kids = opts.kids | 0;
+    const people = Math.max(1, men + women + kids || opts.people || 4);
+    const portions = Math.max(1, men * 1.2 + women * 1.0 + kids * 0.6 || people);
+    const cuisine = opts.cuisine || '';
+    const target = Math.min(8, Math.max(3, Math.ceil(portions * 1.05)));
+
     const foods = state.foods;
-    const sorted = D.DISHES.slice().sort((a, b) => dishScore(b, foods) - dishScore(a, foods));
+    const sorted = D.DISHES.slice().sort(function (a, b) {
+      const ca = cuisine && a.cuisine.indexOf(cuisine) >= 0 ? 1 : 0;
+      const cb = cuisine && b.cuisine.indexOf(cuisine) >= 0 ? 1 : 0;
+      if (ca !== cb) return cb - ca;
+      return dishScore(b, foods) - dishScore(a, foods);
+    });
+    const cuisineHit = cuisine ? sorted.filter(d => d.cuisine.indexOf(cuisine) >= 0).length : 0;
     const picked = [];
     const wantMeat = ['牛里脊', '排骨', '鸡翅', '三文鱼'];
-    const has = byName(foods);
 
-    // 1 道肉菜 + 1 道素菜 + 1 道汤 + 1 道蛋/豆腐 + 1 道凉/水果
+    // 荤 2 / 素 1 / 汤 1 / 蛋豆 1 / 凉菜水果 1
     const buckets = [
       { test: d => d.ingredients.some(i => wantMeat.indexOf(i.name) >= 0), n: 2 },
       { test: d => d.ingredients.some(i => ['西兰花', '菠菜', '青椒', '土豆', '香菇'].indexOf(i.name) >= 0), n: 1 },
@@ -263,19 +278,19 @@
     buckets.forEach(b => {
       let got = 0;
       for (const d of sorted) {
-        if (got >= b.n) break;
+        if (got >= b.n || picked.length >= target) break;
         if (picked.some(p => p.id === d.id)) continue;
         if (!b.test(d)) continue;
         picked.push(d); got++;
       }
     });
-    // 不够 4 道就补
+    // 补齐到目标道数
     for (const d of sorted) {
-      if (picked.length >= Math.min(5, 3 + Math.ceil(people / 4))) break;
+      if (picked.length >= target) break;
       if (!picked.some(p => p.id === d.id)) picked.push(d);
     }
 
-    // 聚餐要有一道"硬菜"：如果全桌都现成，替换一道需要补购的菜，才看得出补货能力
+    // 聚餐要有一道"硬菜"：全桌都现成时，换一道需要补购的，才看得出补货能力
     const allReady = picked.every(d => ingredientState(d, foods).every(s => s.ok));
     if (allReady) {
       const hard = sorted.filter(d => !picked.some(p => p.id === d.id)).find(d => {
@@ -285,7 +300,7 @@
       if (hard) picked[picked.length - 1] = hard;
     }
 
-    // 缺料汇总
+    // 缺料汇总（按份量放大）
     const missMap = {};
     picked.forEach(d => {
       ingredientState(d, foods).forEach(s => {
@@ -298,14 +313,62 @@
         missMap[s.name].qty += need;
       });
     });
-    const scale = Math.max(1, people / 3);
+    const scale = Math.max(1, portions / 3);
     const missing = Object.values(missMap).map(m => {
       m.qty = Math.ceil(m.qty * scale * 10) / 10;
       m.cost = Math.round(m.qty * m.price * 10) / 10;
       return m;
     });
 
-    return { people: people, dishes: picked.slice(0, Math.min(picked.length, 6)), missing: missing };
+    return {
+      people: people, portions: Math.round(portions * 10) / 10,
+      men: men, women: women, kids: kids,
+      cuisine: cuisine, dateLabel: opts.dateLabel || '',
+      cuisineHit: cuisineHit,
+      cuisineNote: cuisine && cuisineHit < 2
+        ? ('「' + cuisine + '」现有 ' + cuisineHit + ' 道，其余按家常口味补齐')
+        : '',
+      dishes: picked.slice(0, target), missing: missing
+    };
+  }
+
+  /* ---------- 今天吃什么 ---------- */
+  function todayMenu(state) {
+    const week = state.week;
+    if (!week || !week.length) return null;
+    const day = week[0];
+    return ['早', '午', '晚'].map(function (slot) {
+      const m = day.meals[slot];
+      if (!m) return null;
+      const dish = D.DISHES.filter(d => d.id === m.id)[0];
+      if (!dish) return null;
+      return { slot: slot, dish: dish, missing: !!m.missing };
+    }).filter(Boolean);
+  }
+
+  /* ---------- 搜索 ---------- */
+  function search(q, foods) {
+    q = (q || '').trim();
+    if (!q) return { dishes: [], foods: [] };
+    const dishes = D.DISHES.filter(function (d) {
+      return d.name.indexOf(q) >= 0
+        || d.ingredients.some(i => i.name.indexOf(q) >= 0)
+        || d.cuisine.some(c => c.indexOf(q) >= 0)
+        || d.tags.some(t => t.indexOf(q) >= 0);
+    });
+    const hits = foods.filter(f => f.name.indexOf(q) >= 0 || (f.cat || '').indexOf(q) >= 0);
+    return { dishes: dishes, foods: hits };
+  }
+
+  /* ---------- 视频 ---------- */
+  function videoEmbed(bvid) {
+    return 'https://player.bilibili.com/player.html?bvid=' + bvid
+      + '&autoplay=0&danmaku=0&high_quality=1&muted=0';
+  }
+  function videoPage(bvid) { return 'https://www.bilibili.com/video/' + bvid; }
+  function videoSearch(platformKey, keyword) {
+    const p = D.PLATFORM_MAP[platformKey];
+    return p ? p.search(keyword + ' 做法') : '#';
   }
 
   /* ---------- 统计 ---------- */
@@ -323,6 +386,7 @@
     byName, findFood, foodMeta,
     pairList, topSuggestion, urgentList,
     ingredientState, cookable, nearMiss, dishScore, cook,
-    planWeek, partyPlan, summary
+    planWeek, partyPlan, todayMenu, search, summary,
+    videoEmbed, videoPage, videoSearch
   };
 })(window);

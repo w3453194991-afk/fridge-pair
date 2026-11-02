@@ -5,9 +5,26 @@
   'use strict';
   const D = w.DD_DATA, E = w.DD_ENGINE, S = w.DD_STORE, U = w.DD_UI;
 
-  w.DD_VIEW = { filter: 'all', recTab: 'fit', q: '', people: 4, sugIdx: 0 };
+  w.DD_VIEW = {
+    filter: 'all', recTab: 'fit', q: '', sugIdx: 0,
+    party: { dateKey: 'fri', men: 2, women: 2, kids: 1, cuisine: '家常' },
+    onb: null
+  };
+
+  function defaultOnb() {
+    return {
+      step: 1,
+      name: '',
+      members: [
+        { name: '我', role: '成人', gender: '女', age: 30 },
+        { name: '孩子', role: '幼儿', gender: '男', age: 4 }
+      ],
+      taboos: ''
+    };
+  }
 
   const APP = { view: { name: 'fridge' }, stack: [] };
+  const appEl = d.getElementById('app');
   const pageEl = d.getElementById('page');
   const titleEl = d.getElementById('navTitle');
   const backEl = d.getElementById('navBack');
@@ -40,12 +57,20 @@
   }
 
   function renderAll(scrollTop) {
+    // 未注册：强制走引导
+    if (!S.state.family.registered && APP.view.name !== 'onboarding') {
+      if (!w.DD_VIEW.onb) w.DD_VIEW.onb = defaultOnb();
+      APP.stack = [];
+      APP.view = { name: 'onboarding' };
+    }
     const r = U.render(APP.view);
     pageEl.innerHTML = r.html;
     titleEl.innerHTML = r.title === '冰箱对对碰'
       ? '<span class="nav-logo">🧊</span>冰箱对对碰'
       : U.esc(r.title);
     backEl.hidden = !r.back;
+    appEl.classList.toggle('hide-nav', r.hideNav === true);
+    appEl.classList.toggle('hide-tab', r.hideTab === true);
     Array.from(tabbar.querySelectorAll('.tab[data-nav]')).forEach(function (b) {
       b.classList.toggle('on', b.getAttribute('data-nav') === r.tab);
     });
@@ -88,13 +113,30 @@
      点击分发
      ============================================================ */
   d.addEventListener('click', function (e) {
-    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step]');
+    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play]');
     if (!t) return;
 
     if (t.hasAttribute('data-nav')) { tabTo(t.getAttribute('data-nav')); return; }
     if (t.hasAttribute('data-food')) { go({ name: 'food', id: t.getAttribute('data-food') }); return; }
     if (t.hasAttribute('data-dish')) { closeModal(); go({ name: 'dish', id: t.getAttribute('data-dish') }); return; }
     if (t.hasAttribute('data-week')) { go({ name: 'week' }); return; }
+    if (t.hasAttribute('data-play')) { openVideo(t.getAttribute('data-play'), t.getAttribute('data-title')); return; }
+
+    if (t.hasAttribute('data-party-date')) {
+      w.DD_VIEW.party.dateKey = t.getAttribute('data-party-date');
+      renderAll(false);
+      return;
+    }
+    if (t.hasAttribute('data-party-cuisine')) {
+      w.DD_VIEW.party.cuisine = t.getAttribute('data-party-cuisine');
+      renderAll(false);
+      return;
+    }
+    if (t.hasAttribute('data-hot')) {
+      w.DD_VIEW.q = t.getAttribute('data-hot');
+      renderAll(false);
+      return;
+    }
 
     if (t.hasAttribute('data-filter')) {
       w.DD_VIEW.filter = t.getAttribute('data-filter');
@@ -167,9 +209,93 @@
         break;
       }
       case 'genParty': {
-        S.state.party = E.partyPlan(S.state, w.DD_VIEW.people || 4);
+        const P = w.DD_VIEW.party;
+        const total = (P.men + P.women + P.kids) || 1;
+        S.state.party = E.partyPlan(S.state, {
+          men: P.men, women: P.women, kids: P.kids,
+          cuisine: P.cuisine, dateLabel: U.partyDateLabel(P.dateKey)
+        });
         S.save();
         renderAll(false);
+        toast('已按 ' + total + ' 人排好这桌菜');
+        break;
+      }
+      case 'partyStep': {
+        const k = t.getAttribute('data-k');
+        const dd = parseInt(t.getAttribute('data-d'), 10);
+        const P = w.DD_VIEW.party;
+        P[k] = Math.max(0, Math.min(12, (P[k] | 0) + dd));
+        if (P.men + P.women + P.kids === 0) P[k] = 1;
+        renderAll(false);
+        break;
+      }
+      case 'clearSearch':
+        w.DD_VIEW.q = '';
+        renderAll(false);
+        break;
+      case 'playFrame': {
+        const fr = d.getElementById('vframe');
+        if (fr && !fr.querySelector('iframe')) {
+          fr.innerHTML = '<iframe src="' + fr.getAttribute('data-src')
+            + '" allowfullscreen frameborder="0" scrolling="no"></iframe>';
+        }
+        break;
+      }
+      case 'onbNext': {
+        const nm = d.getElementById('onbName');
+        if (nm) w.DD_VIEW.onb.name = nm.value.trim();
+        w.DD_VIEW.onb.step = 2;
+        renderAll(true);
+        break;
+      }
+      case 'onbBack':
+        w.DD_VIEW.onb.step = 1;
+        renderAll(true);
+        break;
+      case 'onbAdd':
+        w.DD_VIEW.onb.members.push({ name: '', role: '成人', gender: '女', age: 30 });
+        renderAll(false);
+        break;
+      case 'onbPreset': {
+        const presets = {
+          two: [
+            { name: '我', role: '成人', gender: '女', age: 30 },
+            { name: '老公', role: '成人', gender: '男', age: 32 }
+          ],
+          three: [
+            { name: '我', role: '成人', gender: '女', age: 34 },
+            { name: '老公', role: '成人', gender: '男', age: 36 },
+            { name: '宝宝', role: '幼儿', gender: '男', age: 3 }
+          ],
+          four: [
+            { name: '我', role: '成人', gender: '女', age: 34 },
+            { name: '老公', role: '成人', gender: '男', age: 36 },
+            { name: '宝宝', role: '幼儿', gender: '男', age: 3 },
+            { name: '奶奶', role: '老人', gender: '女', age: 68 }
+          ]
+        };
+        const k = t.getAttribute('data-p');
+        if (presets[k]) w.DD_VIEW.onb.members = presets[k].slice();
+        renderAll(false);
+        break;
+      }
+      case 'onbDel': {
+        const i = parseInt(t.getAttribute('data-i'), 10);
+        if (w.DD_VIEW.onb.members.length > 1) w.DD_VIEW.onb.members.splice(i, 1);
+        renderAll(false);
+        break;
+      }
+      case 'onbDone':
+        finishOnboarding();
+        break;
+      case 'onbSkip': {
+        S.demoFamily();
+        S.state.week = E.planWeek(S.state);
+        S.save();
+        APP.stack = [];
+        APP.view = { name: 'fridge' };
+        renderAll(true);
+        toast('已用示例家庭进入，随时可在「我的」里改');
         break;
       }
       case 'cartAdd': {
@@ -246,10 +372,37 @@
 
   backEl.addEventListener('click', back);
 
+  const searchBtn = d.getElementById('navSearch');
+  if (searchBtn) {
+    searchBtn.addEventListener('click', function () {
+      w.DD_VIEW.q = '';
+      go({ name: 'search' });
+    });
+  }
+
   /* ============================================================
      输入
      ============================================================ */
   d.addEventListener('input', function (e) {
+    if (e.target.id === 'globalSearch') {
+      w.DD_VIEW.q = e.target.value;
+      const pos = e.target.selectionStart;
+      renderAll(false);
+      const g = d.getElementById('globalSearch');
+      if (g) { g.focus(); try { g.setSelectionRange(pos, pos); } catch (err) {} }
+      return;
+    }
+    if (e.target.hasAttribute('data-onb')) {
+      const f = e.target.getAttribute('data-onb');
+      const ob = w.DD_VIEW.onb;
+      const i = +e.target.getAttribute('data-i');
+      if (f === 'name') ob.name = e.target.value;
+      if (f === 'taboos') ob.taboos = e.target.value;
+      if (f === 'mname' && ob.members[i]) ob.members[i].name = e.target.value;
+      if (f === 'role' && ob.members[i]) ob.members[i].role = e.target.value;
+      if (f === 'gender' && ob.members[i]) ob.members[i].gender = e.target.value;
+      if (f === 'age' && ob.members[i]) ob.members[i].age = parseInt(e.target.value, 10) || 0;
+    }
     if (e.target.id === 'dishSearch') {
       w.DD_VIEW.q = e.target.value;
       const pos = e.target.selectionStart;
@@ -720,6 +873,56 @@
       <div class="btn-row">
         <button class="btn ghost" data-action="closeModal">取消</button>
         <button class="btn primary" data-action="resetYes">确认重置</button>
+      </div>`);
+  }
+
+  /* ============================================================
+     注册引导 / 视频
+     ============================================================ */
+  function finishOnboarding() {
+    const ob = w.DD_VIEW.onb;
+    const members = ob.members.map(function (m) {
+      return {
+        name: (m.name || m.role || '家人').trim() || '家人',
+        role: m.role || '成人',
+        gender: m.gender || '女',
+        age: Math.max(0, Math.min(110, m.age | 0))
+      };
+    });
+    if (!members.length) members.push({ name: '我', role: '成人', gender: '女', age: 30 });
+
+    S.saveFamily({
+      registered: true,
+      name: (ob.name || '家长').trim() || '家长',
+      members: members,
+      taboos: (ob.taboos || '').trim()
+    });
+    S.state.week = E.planWeek(S.state);
+    S.save();
+    APP.stack = [];
+    APP.view = { name: 'fridge' };
+    renderAll(true);
+    toast('已按 ' + members.length + ' 位家人排好今天的菜单');
+  }
+
+  function openVideo(bvid, title) {
+    const src = E.videoEmbed(bvid);
+    openModal(`
+      <div class="sheet-head"><div class="t">视频对照做菜</div>
+        <button class="x" data-action="closeModal">✕</button></div>
+      <div class="vframe" id="vframe" data-src="${src}">
+        <button class="vposter" data-action="playFrame">
+          <span class="vplay">▶</span>
+          <span class="vcap">${U.esc(title || '示范视频')}</span>
+          <span class="vsub">点一下加载哔哩哔哩播放器</span>
+        </button>
+      </div>
+      <div class="small muted" style="margin-top:10px;line-height:1.6">
+        视频来自哔哩哔哩官方播放器。如果这里加载不出来，点下面按钮到原页面看。
+      </div>
+      <div class="btn-row">
+        <a class="btn ghost" href="${E.videoPage(bvid)}" target="_blank" rel="noopener">在 B 站打开</a>
+        <button class="btn primary" data-action="closeModal">继续做菜</button>
       </div>`);
   }
 

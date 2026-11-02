@@ -40,12 +40,9 @@
       createdAt: Date.now(),
       clockOffset: 0,
       family: {
-        name: '林妈妈',
-        members: [
-          { role: '成人', age: 34 },
-          { role: '老人', age: 68 },
-          { role: '幼儿', age: 3 }
-        ],
+        registered: false,
+        name: '',
+        members: [],
         taboos: ''
       },
       foods: foods,
@@ -68,6 +65,12 @@
       if (!s || !s.foods || !Array.isArray(s.foods)) s = seedState();
       if (!s.stats) s.stats = { cooked: 0, saved: 0, added: 0, trashed: 0 };
       if (!Array.isArray(s.cart)) s.cart = [];
+      if (!s.family) s.family = seedState().family;
+      // 老数据迁移：填过家庭信息就视为已注册
+      if (s.family.registered === undefined) {
+        s.family.registered = !!(s.family.name && s.family.members && s.family.members.length);
+      }
+      (s.family.members || []).forEach(m => { if (!m.gender) m.gender = '女'; });
       this.state = s;
       return s;
     },
@@ -165,7 +168,27 @@
     },
 
     /* ---------- 家庭 ---------- */
-    saveFamily: function (fam) { this.state.family = fam; this.save(); },
+    saveFamily: function (fam) {
+      fam.registered = true;
+      this.state.family = fam;
+      this.save();
+    },
+
+    // 跳过注册：填一份示例家庭，保证后续菜单能生成
+    demoFamily: function () {
+      this.state.family = {
+        registered: true,
+        name: '林妈妈',
+        members: [
+          { name: '我', role: '成人', gender: '女', age: 34 },
+          { name: '奶奶', role: '老人', gender: '女', age: 68 },
+          { name: '宝宝', role: '幼儿', gender: '男', age: 3 }
+        ],
+        taboos: ''
+      };
+      this.save();
+      return this.state.family;
+    },
 
     /* ---------- 演示：时间旅行 ---------- */
     travel: function (days) {

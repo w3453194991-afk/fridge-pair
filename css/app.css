@@ -580,3 +580,128 @@ input[type="range"]::-webkit-slider-thumb{
 }
 .searchbar input{ flex:1; border:0; background:transparent; font-size:12px; outline:none; font-weight:600; }
 .searchbar input::placeholder{ color:#B7BBC4; font-weight:500; }
+
+/* ============================================================
+   v3 新增：注册引导 / 搜索 / 视频 / 聚餐表单
+   ============================================================ */
+.app.hide-tab .tabbar{ display:none; }
+.app.hide-nav .navbar{ display:none; }
+.nav-search{
+  position:absolute; right:104px; top:8px; width:32px; height:28px;
+  border-radius:10px; display:grid; place-items:center;
+}
+.nav-search:active{ background:rgba(0,0,0,.05); }
+
+/* ---- 注册引导 ---- */
+.onb{ min-height:100%; padding:20px 22px 30px; display:flex; flex-direction:column; animation:rise .4s both; }
+.onb-art{
+  width:78px; height:78px; border-radius:25px; display:grid; place-items:center; font-size:38px;
+  background:linear-gradient(145deg,#FFF1E6,#FFE1E9);
+  box-shadow:0 18px 34px -18px rgba(255,110,90,.8), inset 0 1px 0 #fff;
+  margin:16px 0 20px;
+}
+.onb h1{ font-size:26px; font-weight:800; letter-spacing:.3px; }
+.onb-sub{ font-size:12px; color:var(--muted); line-height:1.65; margin-top:9px; }
+.onb-step{ font-size:10px; font-weight:800; color:var(--brand); letter-spacing:.6px; margin-bottom:9px; }
+.onb-field{ margin-top:22px; }
+.onb-field label{ display:block; font-size:11px; font-weight:700; color:var(--ink-2); margin-bottom:8px; }
+.onb-field input{
+  width:100%; height:48px; border-radius:14px; border:1px solid var(--hair); background:#fff;
+  padding:0 14px; font-size:14px; font-weight:600; outline:none; box-shadow:var(--sh-1);
+}
+.onb-field input:focus{ border-color:#FFC7A8; box-shadow:0 0 0 3px rgba(255,140,90,.15); }
+.onb-skip{
+  margin-top:14px; padding:8px; text-align:center;
+  font-size:11px; font-weight:600; color:var(--muted);
+}
+.member-list{ margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+.mrow{ background:#fff; border:1px solid var(--hair); border-radius:16px; padding:10px 12px; box-shadow:var(--sh-1); }
+.mr-top{ display:flex; gap:8px; align-items:center; }
+.mr-top input{
+  flex:1; height:34px; border-radius:10px; border:1px solid var(--hair);
+  background:#FDFBF8; padding:0 10px; font-size:12.5px; font-weight:700; outline:none; min-width:0;
+}
+.mr-del{ width:28px; height:28px; border-radius:9px; background:#F4F0EA; color:#8A8F9C; font-size:12px; flex:none; }
+.mr-bot{ display:grid; grid-template-columns:1fr .8fr .9fr; gap:8px; margin-top:8px; }
+.mr-bot select, .mr-bot input{
+  height:34px; width:100%; border-radius:10px; border:1px solid var(--hair);
+  background:#fff; padding:0 8px; font-size:12px; font-weight:600; outline:none;
+}
+.onb-add{
+  margin-top:10px; height:40px; border-radius:12px; border:1px dashed #E2D6C6;
+  color:#8A6A4F; font-size:11.5px; font-weight:700; background:#FFFDFA;
+}
+
+/* ---- 搜索 ---- */
+.searchbar .sx{
+  width:24px; height:24px; border-radius:50%; background:#F1ECE4; color:#7A7168;
+  font-size:11px; display:grid; place-items:center; flex:none;
+}
+
+/* ---- 视频 ---- */
+.vrow{ width:100%; display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px dashed #F2EDE6; text-align:left; }
+.vrow:last-of-type{ border-bottom:0; }
+.vthumb{
+  width:56px; height:38px; border-radius:10px; flex:none; display:grid; place-items:center;
+  background:linear-gradient(140deg,#FB7299,#E0457B); color:#fff; font-size:13px;
+  box-shadow:0 8px 16px -10px rgba(224,69,123,.95);
+}
+.vt{ display:flex; flex-direction:column; gap:3px; min-width:0; }
+.vt b{ font-size:11.5px; font-weight:700; line-height:1.45;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.vt small{ font-size:9.5px; color:var(--muted); }
+.vplat{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.vchip{
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:9.5px; font-weight:700; color:#5B6270; background:#F7F3EE;
+  border:1px solid #EFE7DC; border-radius:8px; padding:5px 8px; text-decoration:none;
+}
+.vchip:active{ transform:scale(.97); }
+.vframe{ position:relative; width:100%; aspect-ratio:16/9; border-radius:16px; overflow:hidden; background:#000; }
+.vframe iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+
+/* ---- 聚餐人数步进器 ---- */
+.stepper{ display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px dashed #F2EDE6; }
+.stepper:last-of-type{ border-bottom:0; }
+.stepper .sl{ display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; }
+.stepper .sl small{ font-size:9px; font-weight:700; color:var(--muted); background:#F5F1EA; padding:2px 6px; border-radius:6px; }
+.stepper .st{ display:flex; align-items:center; border:1px solid var(--hair); border-radius:11px; overflow:hidden; background:#fff; }
+.stepper .st button{ width:32px; height:30px; font-size:15px; color:#6B7280; }
+.stepper .st b{ min-width:30px; text-align:center; font-size:13px; font-weight:800; }
+
+/* 引导页：按钮不要被 flex 拉伸；第 1 步补三条卖点 */
+.onb .btn{ flex:none; height:50px; border-radius:15px; font-size:14px; }
+.onb-feats{ margin-top:26px; display:flex; flex-direction:column; gap:12px; }
+.onb-feats div{
+  display:flex; align-items:center; gap:10px;
+  font-size:11.5px; font-weight:600; color:#6B6470;
+}
+.onb-feats span{
+  width:30px; height:30px; border-radius:10px; display:grid; place-items:center; font-size:14px;
+  background:#fff; box-shadow:var(--sh-1); flex:none;
+}
+
+.onb{ justify-content:center; }
+.onb.onb-wide{ justify-content:flex-start; padding-top:8px; }
+
+/* 引导页第 2 步：快速填入预设 */
+.onb-preset{ display:flex; align-items:center; gap:6px; margin-top:12px; flex-wrap:wrap; }
+.onb-preset span{ font-size:10px; color:var(--muted); font-weight:700; }
+.onb-preset button{
+  font-size:10px; font-weight:700; color:#8A6A4F; background:#FFF7EF;
+  border:1px solid #F3E3D2; border-radius:8px; padding:5px 9px;
+}
+
+/* 视频封面（点击后再加载播放器） */
+.vposter{
+  position:absolute; inset:0; width:100%; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:11px; padding:0 22px;
+  background:linear-gradient(140deg,#FB7299,#E0457B 58%,#BF2F66); color:#fff; border:0;
+}
+.vposter .vplay{
+  width:56px; height:56px; border-radius:50%; display:grid; place-items:center; font-size:19px;
+  background:rgba(255,255,255,.94); color:#E0457B; padding-left:4px;
+  box-shadow:0 14px 28px -12px rgba(60,0,25,.7);
+}
+.vposter .vcap{ font-size:12px; font-weight:700; line-height:1.45; text-align:center; max-width:86%; }
+.vposter .vsub{ font-size:9.5px; opacity:.86; }

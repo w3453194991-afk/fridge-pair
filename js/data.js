@@ -287,5 +287,55 @@
     { label: '剩菜盒 · 二次更新', items: [{ name: '牛里脊', qty: 120 }, { name: '西兰花', qty: 0.5 }] }
   ];
 
-  w.DD_DATA = { FOOD_DB, FOOD_MAP, DISHES, PAIRS, SEED, PHOTO_SCENES };
+  /* ---------- 6. 菜系 ---------- */
+  const CUISINES = ['家常', '川菜', '粤菜', '清淡', '西式'];
+  const DISH_CUISINE = {
+    'tomato-egg': ['家常'],
+    'beef-broccoli': ['家常', '粤菜'],
+    'milk-oats': ['西式'],
+    'tomato-noodle': ['家常'],
+    'spinach-tofu': ['家常', '清淡'],
+    'pepper-potato': ['川菜', '家常'],
+    'rib-carrot': ['粤菜', '清淡'],
+    'mushroom-tofu': ['清淡'],
+    'garlic-spinach': ['家常', '清淡'],
+    'steamed-egg': ['清淡'],
+    'apple-yogurt': ['西式'],
+    'pan-salmon': ['西式', '粤菜']
+  };
+
+  /* ---------- 7. 视频对照（B 站真实视频，已核实可访问） ---------- */
+  const VIDEOS = {
+    'tomato-egg': [
+      { bvid: 'BV1uY8vzkEmx', title: '番茄炒蛋 | 有锅就能做、黄金比例被我拿捏了' },
+      { bvid: 'BV12h3F63ELa', title: '番茄炒蛋 | 酸甜开胃、国民第一下饭菜' }
+    ],
+    'pepper-potato': [
+      { bvid: 'BV16o4y1F75W', title: '青椒土豆丝 | 零基础家常菜' }
+    ],
+    'steamed-egg': [
+      { bvid: 'BV1Pf4y1U7RH', title: '嫩滑水蒸蛋 | 一比一点五的水蛋比例' }
+    ]
+  };
+
+  // 把菜系和视频挂到菜谱上
+  DISHES.forEach(function (d) {
+    d.cuisine = DISH_CUISINE[d.id] || ['家常'];
+    d.videos = VIDEOS[d.id] || [];
+  });
+
+  /* ---------- 8. 视频平台（搜索深链，无需任何 API Key） ---------- */
+  const PLATFORMS = [
+    { key: 'bilibili', name: '哔哩哔哩', icon: '📺', color: '#FB7299',
+      search: k => 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(k) },
+    { key: 'douyin', name: '抖音', icon: '🎵', color: '#161823',
+      search: k => 'https://www.douyin.com/search/' + encodeURIComponent(k) },
+    { key: 'xhs', name: '小红书', icon: '📕', color: '#FF2442',
+      search: k => 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(k) }
+  ];
+
+  const PLATFORM_MAP = {};
+  PLATFORMS.forEach(p => { PLATFORM_MAP[p.key] = p; });
+
+  w.DD_DATA = { FOOD_DB, FOOD_MAP, DISHES, PAIRS, SEED, PHOTO_SCENES, CUISINES, VIDEOS, PLATFORMS, PLATFORM_MAP };
 })(window);

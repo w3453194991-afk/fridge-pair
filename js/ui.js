@@ -90,8 +90,22 @@
            <button class="go" data-action="shoot">拍照入库 ›</button>
          </div>` : '');
 
-    const aiHtml = sug ? `
-      <div class="ai">
+    const today = E.todayMenu(st);
+    const todayHtml = (today && today.length)
+      ? `<div class="panel" style="margin-top:9px;padding:6px 14px">
+          ${today.map(t => `<button class="meal" data-dish="${t.dish.id}">
+            <span class="slot">${t.slot}</span>
+            <span class="em">${t.dish.emoji}</span>
+            <span class="nm">${esc(t.dish.name)}</span>
+            ${t.missing ? '<span class="flag" style="background:#FEE2E2;color:#B91C1C">缺料</span>' : ''}
+          </button>`).join('')}
+        </div>`
+      : `<div class="panel" style="margin-top:9px">
+          <div class="p-body" style="margin-top:0">还没排今天的菜。按家庭档案生成一周菜单后，这里会显示早 / 午 / 晚。</div>
+          <div class="btn-row" style="margin-top:10px"><button class="btn primary sm" data-action="genWeek">生成今天的菜单</button></div>
+        </div>`;
+
+    const aiHtml = sug ? `      <div class="ai">
         <div class="ai-top">
           <div class="ai-chip">✨ AI 营养对对碰</div>
           <button class="ai-refresh" data-action="swap">换一组 ↻</button>
@@ -141,6 +155,10 @@
       </section>
 
       ${aiHtml}
+
+      <div class="section-head"><div class="t">今天的菜单<small>按家庭档案配好</small></div>
+        <button class="more" data-nav="plan">换一换 ›</button></div>
+      ${todayHtml}
 
       <div class="chips">
         ${catChips.map(k => {
@@ -292,6 +310,19 @@
       <div class="panel">
         <h3><span class="dot"></span>小贴士</h3>
         <div class="p-body">${d.tips.map(t => '💡 ' + esc(t)).join('<br>')}</div>
+      </div>
+
+      <div class="panel">
+        <h3><span class="dot"></span>视频对照</h3>
+        ${d.videos.length
+          ? d.videos.map(v => `<button class="vrow" data-play="${v.bvid}" data-title="${esc(v.title)}">
+              <span class="vthumb">▶</span>
+              <span class="vt"><b>${esc(v.title)}</b><small>哔哩哔哩 · 站内播放，可对着做</small></span>
+            </button>`).join('')
+          : `<div class="p-body" style="margin-top:2px">这道菜还没收录示范视频，可以直接去平台搜同款做法。</div>`}
+        <div class="vplat">
+          ${D.PLATFORMS.map(p => `<a class="vchip" href="${E.videoSearch(p.key, d.name)}" target="_blank" rel="noopener">${p.icon} 在${p.name}搜「${esc(d.name)}」</a>`).join('')}
+        </div>
       </div>
 
       <div class="panel" style="background:linear-gradient(120deg,#F7F2FF,#FDF4FF);box-shadow:none;border:1px solid #EBDFFE">
@@ -510,31 +541,85 @@
   }
 
   /* ---------------- 聚餐 ---------------- */
+  function partyDateLabel(key) {
+    const d = new Date(E.now());
+    const md = x => (x.getMonth() + 1) + '月' + x.getDate() + '日';
+    if (key === 'today') return '今天 ' + md(d);
+    if (key === 'tomorrow') return '明天 ' + md(new Date(d.getTime() + 86400000));
+    const target = key === 'sat' ? 6 : 5;
+    const diff = (target - d.getDay() + 7) % 7;
+    const t = new Date(d.getTime() + diff * 86400000);
+    return (key === 'sat' ? '周六 ' : '周五 ') + md(t);
+  }
+
+  function viewPartyForm() {
+    const P = w.DD_VIEW.party;
+    const dates = [
+      { k: 'today', t: '今天' }, { k: 'tomorrow', t: '明天' },
+      { k: 'fri', t: '本周五' }, { k: 'sat', t: '本周六' }
+    ];
+    const total = P.men + P.women + P.kids;
+    return {
+      title: '聚餐规划', tab: 'plan', back: true,
+      html: `
+      <div class="panel">
+        <h3><span class="dot"></span>📅 什么时候吃</h3>
+        <div class="chips" style="padding:10px 0 2px">
+          ${dates.map(d => `<button class="chip ${P.dateKey === d.k ? 'on' : ''}" data-party-date="${d.k}">${d.t}</button>`).join('')}
+        </div>
+        <div class="tiny muted" style="margin-top:8px">当前选择：${partyDateLabel(P.dateKey)}</div>
+      </div>
+
+      <div class="panel">
+        <h3><span class="dot"></span>👥 来几个人</h3>
+        <div class="small muted" style="margin-top:6px">男 / 女 / 小孩按不同食量折算，菜量和采购量跟着变</div>
+        ${[['men', '👨 男士', 1.2], ['women', '👩 女士', 1.0], ['kids', '🧒 小孩', 0.6]].map(it => `
+          <div class="stepper">
+            <span class="sl">${it[1]}<small>×${it[2]} 食量</small></span>
+            <div class="st">
+              <button data-action="partyStep" data-k="${it[0]}" data-d="-1">−</button>
+              <b>${P[it[0]]}</b>
+              <button data-action="partyStep" data-k="${it[0]}" data-d="1">+</button>
+            </div>
+          </div>`).join('')}
+        <div class="row between" style="margin-top:10px">
+          <span class="small muted">合计</span>
+          <span class="small bold">${total} 人</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3><span class="dot"></span>🍽 吃什么菜系</h3>
+        <div class="chips" style="padding:10px 0 2px">
+          ${D.CUISINES.map(c => `<button class="chip ${P.cuisine === c ? 'on' : ''}" data-party-cuisine="${c}">${c}</button>`).join('')}
+        </div>
+      </div>
+
+      <button class="btn primary full" style="margin-top:14px" data-action="genParty">按这些条件排一桌 ›</button>
+      <div class="tiny muted" style="text-align:center;margin-top:10px;line-height:1.6">
+        会先盘点冰箱现有食材，只把真正缺的放进采购清单
+      </div>
+      `
+    };
+  }
+
   function viewParty() {
     const st = S.state;
     const p = st.party;
-    if (!p) {
-      return {
-        title: '家庭聚餐', tab: 'plan', back: true,
-        html: `
-        <div class="panel">
-          <h3><span class="dot"></span>几个人吃？</h3>
-          <div class="p-body">人数会影响菜量和采购量，AI 会按人均 1.2 道菜搭配。</div>
-          <div class="chips" style="padding:10px 0 0">
-            ${[2, 3, 4, 5, 6, 8, 10].map(n => `<button class="chip ${(w.DD_VIEW.people || 4) === n ? 'on' : ''}" data-people="${n}">${n} 人</button>`).join('')}
-          </div>
-          <div class="btn-row"><button class="btn primary" data-action="genParty">开始规划这桌菜</button></div>
-        </div>`
-      };
-    }
+    if (!p) return viewPartyForm();
 
     const totalCost = p.missing.reduce((s, m) => s + (m.cost || 0), 0);
     return {
       title: '聚餐方案', tab: 'plan', back: true,
       html: `
       <div class="panel" style="background:linear-gradient(120deg,#FFF7F0,#FFFDFB);border:1px solid #FBEADF;box-shadow:none">
-        <h3><span class="dot"></span>${p.people} 人 · ${p.dishes.length} 道菜</h3>
-        <div class="p-body">已盘点冰箱全部食材，这桌菜主要靠现有库存，只有 <b>${p.missing.length}</b> 样需要补购。</div>
+        <h3><span class="dot"></span>${esc(p.dateLabel || '')} · ${p.people} 人 · ${p.dishes.length} 道菜</h3>
+        <div class="p-body">
+          ${p.men ? '男 ' + p.men + ' ' : ''}${p.women ? '女 ' + p.women + ' ' : ''}${p.kids ? '小孩 ' + p.kids : ''}
+          ${p.cuisine ? ' · ' + esc(p.cuisine) : ''} · 约 ${p.portions} 人份<br>
+          已盘点冰箱全部食材，只有 <b>${p.missing.length}</b> 样需要补购。
+          ${p.cuisineNote ? '<br><span style="color:#B45309">' + esc(p.cuisineNote) + '</span>' : ''}
+        </div>
       </div>
 
       <div class="section-head"><div class="t">菜单<small>点开看教程</small></div></div>
@@ -553,9 +638,146 @@
         </div>`
         : `<div class="p-body" style="margin-top:0">🎉 冰箱里样样都有，不用买任何东西。</div>`}
       </div>
-      <div class="btn-row"><button class="btn ghost" data-action="openParty">换个规模重排</button></div>
+      <div class="btn-row">
+        <button class="btn ghost" data-action="openParty">改条件重排</button>
+        <button class="btn primary" data-action="genParty">换一桌</button>
+      </div>
       <div style="height:8px"></div>
       `
+    };
+  }
+
+  /* ---------------- 注册引导 ---------------- */
+  function viewOnboarding() {
+    const ob = w.DD_VIEW.onb;
+    if (ob.step === 1) {
+      return {
+        title: '', hideNav: true, hideTab: true,
+        html: `
+        <div class="onb">
+          <div class="onb-art">🧊</div>
+          <h1>冰箱对对碰</h1>
+          <div class="onb-sub">让冰箱里的每一份食物，都被看见、被吃掉</div>
+          <div class="onb-step">第 1 / 2 步 · 认识一下</div>
+          <div class="onb-field">
+            <label>怎么称呼你</label>
+            <input id="onbName" data-onb="name" value="${esc(ob.name)}" placeholder="如：林妈妈" maxlength="8">
+          </div>
+          <button class="btn primary full" style="margin-top:14px" data-action="onbNext">下一步 ›</button>
+
+          <div class="onb-feats">
+            <div><span>📷</span>拍一张照，AI 自动认食材、填保质期</div>
+            <div><span>🟢</span>绿黄紫黑四色，一眼看出谁要坏了</div>
+            <div><span>🍽</span>按家人年龄，自动排每天吃什么</div>
+          </div>
+
+          <button class="onb-skip" data-action="onbSkip">先随便看看（用示例家庭）</button>
+        </div>`
+      };
+    }
+    return {
+      title: '', hideNav: true, hideTab: true,
+      html: `
+      <div class="onb onb-wide">
+        <div class="onb-step">第 2 / 2 步 · 家里都有谁</div>
+        <h1>家里都有谁？</h1>
+        <div class="onb-sub">年龄和性别决定菜的软硬与营养配比，之后随时能改</div>
+
+        <div class="member-list">
+          ${ob.members.map((m, i) => `
+            <div class="mrow">
+              <div class="mr-top">
+                <input data-onb="mname" data-i="${i}" value="${esc(m.name || '')}" placeholder="称呼，如：奶奶" maxlength="6">
+                <button class="mr-del" data-action="onbDel" data-i="${i}">✕</button>
+              </div>
+              <div class="mr-bot">
+                <select data-onb="role" data-i="${i}">
+                  ${['成人', '老人', '幼儿'].map(r => `<option value="${r}" ${m.role === r ? 'selected' : ''}>${r}</option>`).join('')}
+                </select>
+                <select data-onb="gender" data-i="${i}">
+                  ${['女', '男'].map(g => `<option value="${g}" ${m.gender === g ? 'selected' : ''}>${g}</option>`).join('')}
+                </select>
+                <input type="number" data-onb="age" data-i="${i}" value="${m.age}" min="0" max="110" placeholder="年龄">
+              </div>
+            </div>`).join('')}
+        </div>
+
+        <button class="onb-add" data-action="onbAdd">+ 添加成员</button>
+        <div class="onb-preset">
+          <span>快速填入</span>
+          <button data-action="onbPreset" data-p="two">两口之家</button>
+          <button data-action="onbPreset" data-p="three">三口之家</button>
+          <button data-action="onbPreset" data-p="four">三代同堂</button>
+        </div>
+
+        <div class="onb-field">
+          <label>忌口 / 不吃（可留空）</label>
+          <input data-onb="taboos" value="${esc(ob.taboos)}" placeholder="如：香菜、辣、海鲜" maxlength="20">
+        </div>
+
+        <button class="btn primary full" style="margin-top:16px" data-action="onbDone">生成我家的菜单 ›</button>
+        <button class="onb-skip" data-action="onbBack">‹ 上一步</button>
+      </div>`
+    };
+  }
+
+  /* ---------------- 全局搜索 ---------------- */
+  function viewSearch() {
+    const q = (w.DD_VIEW.q || '').trim();
+    const st = S.state;
+    const res = E.search(q, st.foods);
+    const hot = ['番茄炒蛋', '西兰花炒牛肉', '土豆', '川菜', '排骨', '清淡'];
+
+    let body = '';
+    if (!q) {
+      body = `
+        <div class="section-head"><div class="t">热门搜索</div></div>
+        <div class="chips" style="padding-top:8px">
+          ${hot.map(h => `<button class="chip" data-hot="${h}">${h}</button>`).join('')}
+        </div>
+        <div class="section-head"><div class="t">去平台看视频</div></div>
+        <div class="panel" style="margin-top:9px">
+          <div class="vplat">
+            ${D.PLATFORMS.map(p => `<a class="vchip" href="${p.search('家常菜 做法')}" target="_blank" rel="noopener">${p.icon} ${p.name} · 家常菜</a>`).join('')}
+          </div>
+        </div>
+        <div class="tiny muted" style="text-align:center;margin-top:14px;line-height:1.6">
+          可以搜菜名、食材、菜系，也可以只搜「清淡」这类口味
+        </div>`;
+    } else {
+      body = `
+        ${res.dishes.length ? `<div class="section-head"><div class="t">菜谱<small>${res.dishes.length} 道</small></div></div>
+          ${res.dishes.map(d => dishRow(d, E.ingredientState(d, st.foods).every(s => s.ok))).join('')}` : ''}
+
+        ${res.foods.length ? `<div class="section-head"><div class="t">冰箱里的食材<small>${res.foods.length} 件</small></div></div>
+          <div class="panel" style="margin-top:9px;padding:6px 14px">
+            ${res.foods.map(f => `<button class="ing" style="width:100%" data-food="${f.id}">
+              <div class="l">${f.emoji} ${esc(f.name)} <span class="q">${E.fmtQty(f.qty)} ${esc(f.unit)}</span></div>
+              <div class="q">${E.dayText(f)}</div>
+            </button>`).join('')}
+          </div>` : ''}
+
+        <div class="section-head"><div class="t">视频<small>去平台找同款做法</small></div></div>
+        <div class="panel" style="margin-top:9px">
+          <div class="vplat">
+            ${D.PLATFORMS.map(p => `<a class="vchip" href="${E.videoSearch(p.key, q)}" target="_blank" rel="noopener">${p.icon} 在${p.name}搜「${esc(q)}」</a>`).join('')}
+          </div>
+        </div>
+
+        ${!res.dishes.length && !res.foods.length
+          ? `<div class="empty"><div class="e">🔍</div><div class="t">没搜到「${esc(q)}」</div>
+             <div class="d">换个词试试，比如「番茄」「排骨」「清淡」</div></div>` : ''}`;
+    }
+
+    return {
+      title: '搜索', back: true, hideTab: true,
+      html: `
+      <div class="searchbar">
+        <span style="font-size:13px">🔍</span>
+        <input id="globalSearch" placeholder="搜菜名、食材、菜系…" value="${esc(q)}">
+        ${q ? '<button class="sx" data-action="clearSearch">✕</button>' : ''}
+      </div>
+      ${body}`
     };
   }
 
@@ -578,6 +800,17 @@
         <div class="s"><div class="v">${sum.cooked}</div><div class="l">已做菜（顿）</div></div>
         <div class="s"><div class="v" style="color:#16A34A">¥${sum.saved.toFixed(0)}</div><div class="l">挽回浪费</div></div>
         <div class="s"><div class="v">${st.stats.trashed || 0}</div><div class="l">清理过期</div></div>
+      </div>
+
+      <div class="section-head"><div class="t">家庭档案</div>
+        <button class="more" data-action="editFamily">编辑 ›</button></div>
+      <div class="panel" style="margin-top:9px;padding:7px 14px">
+        ${(st.family.members || []).length ? st.family.members.map(m => `<div class="ing">
+          <div class="l">${m.role === '幼儿' ? '👶' : m.role === '老人' ? '👵' : (m.gender === '男' ? '👨' : '👩')}
+            ${esc(m.name || m.role)} · ${esc(m.role)}</div>
+          <div class="q">${m.age} 岁${m.gender ? ' · ' + m.gender : ''}</div>
+        </div>`).join('') : '<div class="p-body" style="margin-top:0">还没填家庭成员</div>'}
+        ${st.family.taboos ? `<div class="tiny muted" style="padding:8px 0 4px">忌口：${esc(st.family.taboos)}</div>` : ''}
       </div>
 
       <div class="section-head"><div class="t">四色保质期规则</div></div>
@@ -633,9 +866,11 @@
       case 'food': return viewFood(view.id);
       case 'week': return viewWeek();
       case 'party': return viewParty();
+      case 'onboarding': return viewOnboarding();
+      case 'search': return viewSearch();
       default: return viewFridge();
     }
   }
 
-  w.DD_UI = { render, esc, foodCard, dishRow };
+  w.DD_UI = { render, esc, foodCard, dishRow, partyDateLabel };
 })(window);
