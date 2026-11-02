@@ -927,3 +927,34 @@ input[type="range"]::-webkit-slider-thumb{
 :root[data-theme="dark"] .nav-back svg path{ stroke:#EDEFF3; }
 :root[data-theme="dark"] .capsule{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.1); }
 :root[data-theme="dark"] .capsule i{ color:#C7CBD6; }
+
+/* ---------- 置顶 ---------- */
+.pin{
+  flex:none; width:30px; height:30px; border-radius:10px; align-self:center;
+  display:grid; place-items:center; font-size:13px; line-height:1;
+  background:rgba(0,0,0,.035); opacity:.55; filter:grayscale(1);
+  transition:all .16s ease;
+}
+.pin:active{ transform:scale(.9); }
+.pin.on{
+  opacity:1; filter:none; background:linear-gradient(135deg,#FFE7CE,#FFD9E4);
+  box-shadow:0 4px 10px -4px rgba(255,110,90,.55);
+}
+.pin.big{ width:36px; height:36px; border-radius:12px; font-size:15px; margin-left:auto; }
+.dish.pinned{ border-color:#FFD9C4; box-shadow:0 10px 22px -14px rgba(255,120,80,.7); }
+.dish .hot.pinmark{ background:#F3EBFF; color:#6D28D9; box-shadow:inset 0 0 0 1px #E2D3FF; }
+
+/* ---------- 附近超市 ---------- */
+.shop{ display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px dashed #F2EDE6; }
+.shop:last-child{ border-bottom:0; }
+.shop-ic{ width:34px; height:34px; border-radius:11px; display:grid; place-items:center; font-size:16px; background:#F0FBF4; flex:none; }
+.shop-in{ flex:1; min-width:0; }
+.shop-nm{ font-size:12.5px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.shop-meta{ font-size:9.5px; color:var(--muted); margin-top:2px; }
+.shop-btns{ display:flex; gap:5px; flex:none; }
+.warn-text{ color:#B45309; font-weight:700; }
+.mapbox{
+  margin-top:10px; border-radius:16px; overflow:hidden; border:1px solid var(--hair);
+  height:220px; background:#F2EEE8;
+}
+.mapbox iframe{ width:100%; height:100%; border:0; display:block; }

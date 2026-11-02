@@ -18,6 +18,14 @@
     return m + ':' + String(r).padStart(2, '0');
   }
 
+  /* 菜系分区（按主菜系归类，每道菜只出现一次） */
+  const GROUP_ORDER = ['家常', '川菜', '粤菜', '江浙', '鲁菜', '湘菜', '东北', '西北', '西餐', '日韩', '东南亚', '清淡'];
+  const GROUP_LABEL = {
+    家常: '家常菜', 川菜: '川菜 · 麻辣', 粤菜: '粤菜 · 清鲜', 江浙: '江浙 · 甜鲜',
+    鲁菜: '鲁菜 · 咸鲜', 湘菜: '湘菜 · 香辣', 东北: '东北菜', 西北: '西北菜',
+    西餐: '西餐 · 意法英美', 日韩: '日韩料理', 东南亚: '东南亚 · 咖喱', 清淡: '清淡 · 汤羹'
+  };
+
   /* ---------------- 食材卡片 ---------------- */
   function foodCard(f) {
     const t = E.tier(f);
@@ -98,7 +106,7 @@
 
     // 筛选（分类 + 冰箱分区）
     const filter = w.DD_VIEW.filter || 'all';
-    const catChips = ['all', 'p', 'b', '蔬菜', '肉类', '蛋奶', '水果', '主食', '豆制品', 'z:冷藏', 'z:冷冻', 'z:常温'];
+    const catChips = ['all', 'p', 'b', '蔬菜', '肉类', '水产', '蛋奶', '豆制品', '水果', '主食', '调味', '零食', 'z:冷藏', 'z:冷冻', 'z:常温'];
     let list = foods.slice();
     if (filter === 'p') list = list.filter(f => E.tier(f) === 'p');
     else if (filter === 'b') list = list.filter(f => E.tier(f) === 'b');
@@ -241,10 +249,20 @@
     </div>`;
 
     let body = '';
+    const pinnedIds = S.state.pinned || [];
+    const pinnedDishes = pinnedIds.map(id => D.DISHES.filter(d => d.id === id)[0]).filter(Boolean);
+    const showPinned = (tab === 'fit' || tab === 'all') && pinnedDishes.length;
+    const pinnedHtml = showPinned ? `
+      <div class="section-head"><div class="t">我的置顶<small>${pinnedDishes.length} 道</small></div>
+        <button class="more" data-action="clearPins">全部取消</button></div>
+      ${pinnedDishes.map(d => dishRow(d, E.ingredientState(d, foods).every(s => s.ok))).join('')}` : '';
 
     if (tab === 'fit') {
-      const can = E.cookable(foods).sort((a, b) => E.dishScore(b, foods) - E.dishScore(a, foods));
-      const near = E.nearMiss(foods).slice(0, 3);
+      const can = E.cookable(foods)
+        .filter(d => pinnedIds.indexOf(d.id) < 0)
+        .sort((a, b) => E.dishScore(b, foods) - E.dishScore(a, foods));
+      const near = E.nearMiss(foods).filter(n => pinnedIds.indexOf(n.dish.id) < 0).slice(0, 3);
+      body += pinnedHtml;
       body += `<div class="section-head"><div class="t">现在就能做<small>${can.length} 道</small></div></div>`;
       body += can.length ? can.map(d => dishRow(d, true)).join('') : `<div class="empty"><div class="e">🥲</div>
         <div class="t">暂时凑不齐一道菜</div><div class="d">去冰箱看看还差什么，或点上方"全部菜谱"</div></div>`;
@@ -255,11 +273,25 @@
     } else if (tab === 'all') {
       let list = D.DISHES.slice();
       if (q) list = list.filter(d => d.name.indexOf(q) >= 0 || d.ingredients.some(i => i.name.indexOf(q) >= 0));
+      list = list.filter(d => pinnedIds.indexOf(d.id) < 0);
+      body += pinnedHtml;
       body += `<div class="searchbar">
         <span style="font-size:13px">🔍</span>
         <input id="dishSearch" placeholder="搜菜名或食材，如：番茄" value="${esc(q)}">
       </div>`;
-      body += list.length ? list.map(d => dishRow(d, false)).join('')
+      body += list.length ? (function () {
+        const buckets = {};
+        list.forEach(function (d) {
+          const k = (d.cuisine && d.cuisine[0]) || '家常';
+          (buckets[k] = buckets[k] || []).push(d);
+        });
+        const keys = GROUP_ORDER.filter(k => buckets[k] && buckets[k].length)
+          .concat(Object.keys(buckets).filter(k => GROUP_ORDER.indexOf(k) < 0));
+        return keys.map(function (k) {
+          return `<div class="section-head"><div class="t">${GROUP_LABEL[k] || k}<small>${buckets[k].length} 道</small></div></div>` +
+            buckets[k].map(d => dishRow(d, false)).join('');
+        }).join('');
+      })()
         : `<div class="empty"><div class="e">🔍</div><div class="t">没找到相关菜谱</div></div>`;
     } else if (tab === 'video') {
       body = videoLibBody();
@@ -278,15 +310,25 @@
   }
 
   function dishRow(d, hot, missing) {
-    return `<button class="dish" data-dish="${d.id}">
+    const pinned = (S.state.pinned || []).indexOf(d.id) >= 0;
+    return `<div class="dish${pinned ? ' pinned' : ''}" data-dish="${d.id}" role="button" tabindex="0">
       <div class="em">${d.emoji}</div>
       <div class="bd">
-        <div class="nm">${esc(d.name)}${hot ? '<span class="hot">可做</span>' : ''}</div>
+        <div class="nm">${esc(d.name)}${hot ? '<span class="hot">可做</span>' : ''}${pinned ? '<span class="hot pinmark">已置顶</span>' : ''}</div>
         <div class="ds">${d.ingredients.map(i => esc(i.name)).join(' + ')}${missing ? ' · <b style="color:#C2410C">' + esc(missing) + '</b>' : ''}</div>
         <div class="mt"><span>⏱ ${d.minutes} 分钟</span><span>${d.level}</span><span>${d.tags[0]}</span></div>
       </div>
+      <button class="pin${pinned ? ' on' : ''}" data-pin="${d.id}" aria-label="置顶这道菜">📌</button>
       <div class="go">›</div>
-    </button>`;
+    </div>`;
+  }
+
+  /* 置顶的排在前面 */
+  function pinFirst(list) {
+    const pins = S.state.pinned || [];
+    return list.slice().sort(function (a, b) {
+      return (pins.indexOf(b.id) >= 0 ? 1 : 0) - (pins.indexOf(a.id) >= 0 ? 1 : 0);
+    });
   }
 
   function pairCard(p) {
@@ -316,14 +358,16 @@
       ? `<div class="alert bad"><span class="ic">⚠️</span><div class="txt">含 <b>${conflict.join('、')}</b>，家里有人过敏，建议换一道</div></div>`
       : '';
     const nut = E.dishNutritionPerServing(d);
+    const pinned = (S.state.pinned || []).indexOf(d.id) >= 0;
 
     return {
       title: d.name, back: true, tab: 'recipe',
       html: `
       <div class="subhead">
         <div class="em">${d.emoji}</div>
-        <div><h2>${esc(d.name)}</h2>
+        <div style="flex:1;min-width:0"><h2>${esc(d.name)}</h2>
           <div class="meta">⏱ ${d.minutes} 分钟 · ${d.level} · ${d.tags.join(' / ')}</div></div>
+        <button class="pin big${pinned ? ' on' : ''}" data-pin="${d.id}" aria-label="置顶这道菜">📌</button>
       </div>
 
       <div class="panel">
@@ -625,7 +669,7 @@
       </div>
 
       <div class="section-head"><div class="t">采购清单<small>${cart.length} 项</small></div>
-        ${cart.length ? '<button class="more" data-action="cartClear">清空</button>' : ''}</div>
+        <button class="more" data-action="openNearby">附近超市 ›</button></div>
       <div class="panel" style="margin-top:8px">
         ${cart.length ? cart.map(c => `<div class="cart-item">
           <span class="em">${c.emoji}</span>
@@ -1085,6 +1129,100 @@
     };
   }
 
+  /* ---------------- 附近超市 ---------------- */
+  function viewNearby() {
+    const st = S.state;
+    const N = w.DD_VIEW.nearby || {};
+    const cart = st.cart || [];
+    const hasGeo = !!(N.lat && N.lng);
+    const kw = '超市';
+    const amap = `https://uri.amap.com/search?keyword=${encodeURIComponent(kw)}&center=${N.lng},${N.lat}&city=${encodeURIComponent(N.city || '')}&callnative=0`;
+    const baidu = `https://map.baidu.com/search/${encodeURIComponent(kw)}/@${N.lng},${N.lat},14z`;
+    const qqmap = `https://apis.map.qq.com/uri/v1/search?keyword=${encodeURIComponent(kw)}&center=${N.lat},${N.lng}&referer=fridge`;
+    const bbox = hasGeo ? [N.lng - 0.018, N.lat - 0.011, N.lng + 0.018, N.lat + 0.011].map(v => v.toFixed(4)).join(',') : '';
+    const osm = hasGeo
+      ? `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${N.lat},${N.lng}`
+      : '';
+
+    const statusText = {
+      idle: '点「找附近超市」开始搜索',
+      locating: '正在获取定位…',
+      loading: '正在搜索附近超市…',
+      ok: `找到 ${(N.shops || []).length} 家`,
+      fail: '地图数据源连不上，已切换成地图 App 搜索（下面可以直接点）',
+      denied: '没有拿到定位权限，已用默认城市'
+    }[N.status || 'idle'];
+
+    return {
+      title: '附近超市', back: true, tab: 'plan',
+      html: `
+      <div class="panel" style="background:linear-gradient(135deg,#F0FBF4,#FFFFFF 72%);border:1px solid #D8F3E2;box-shadow:none">
+        <h3><span class="dot" style="background:#16A34A"></span>现在的位置</h3>
+        <div class="p-body">
+          <b>${esc(N.city || '未设置')}</b>
+          <span class="tiny muted" style="margin-left:6px">${hasGeo ? N.lat.toFixed(4) + ', ' + N.lng.toFixed(4) : ''}</span>
+          <br><span class="tiny muted">定位来源：${esc(N.src || '默认城市')}</span>
+        </div>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn ghost sm" data-action="locate">📍 重新定位</button>
+          <button class="btn primary sm" data-action="findShops">🔍 找附近超市</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3><span class="dot"></span>${N.status === 'ok' ? '最近的几家' : '搜索'}</h3>
+        <div class="p-body" style="margin-top:2px">
+          <span class="${N.status === 'fail' ? 'warn-text' : 'muted'}">${esc(statusText)}</span>
+        </div>
+        ${(N.shops && N.shops.length) ? N.shops.map(s => `
+          <div class="shop">
+            <div class="shop-ic">🛒</div>
+            <div class="shop-in">
+              <div class="shop-nm">${esc(s.name)}</div>
+              <div class="shop-meta">${s.dist} m · ${esc(s.kind || '超市')}</div>
+            </div>
+            <div class="shop-btns">
+              <button class="pchip" data-ext="https://uri.amap.com/search?keyword=${encodeURIComponent(s.name)}&center=${N.lng},${N.lat}&city=${encodeURIComponent(N.city || '')}&callnative=0">高德</button>
+              <button class="pchip" data-ext="https://map.baidu.com/search/${encodeURIComponent(s.name)}/@${N.lng},${N.lat},16z">百度</button>
+            </div>
+          </div>`).join('') : ''}
+      </div>
+
+      <div class="section-head"><div class="t">在地图里找<small>不用装 App 也能看</small></div></div>
+      <div class="panel" style="margin-top:9px">
+        <div class="vplat" style="margin-top:2px">
+          <button class="vchip" data-ext="${amap}">🗺 高德地图 · 搜超市</button>
+          <button class="vchip" data-ext="${baidu}">🗺 百度地图 · 搜超市</button>
+          <button class="vchip" data-ext="${qqmap}">🗺 腾讯地图 · 搜超市</button>
+        </div>
+        ${osm ? `<button class="vchip" style="margin-top:10px" data-action="toggleMap">${w.DD_VIEW.showMap ? '收起地图' : '展开地图预览'}</button>
+          ${w.DD_VIEW.showMap ? `<div class="mapbox"><iframe src="${osm}" loading="lazy" referrerpolicy="no-referrer"></iframe></div>` : ''}`
+          : `<div class="tiny muted" style="margin-top:10px">先定位才能显示地图预览</div>`}
+      </div>
+
+      <div class="section-head"><div class="t">带着清单去买<small>${cart.length} 项</small></div></div>
+      <div class="panel" style="margin-top:9px">
+        ${cart.length ? cart.map(c => `<div class="cart-item">
+          <span class="em">${c.emoji}</span>
+          <span class="nm">${esc(c.name)}</span>
+          <span class="q">${E.fmtQty(c.qty)} ${esc(c.unit)}</span>
+        </div>`).join('') + `<div class="btn-row"><button class="btn ghost sm" data-action="copyCart">复制清单</button></div>`
+        : `<div class="p-body" style="margin-top:0">采购清单是空的，先去聚餐规划或菜谱里加几样。</div>`}
+      </div>
+
+      ${(N.cities) ? '' : ''}
+      <div class="section-head"><div class="t">换个城市</div></div>
+      <div class="chips" style="padding-top:9px">
+        ${['杭州', '北京', '上海', '深圳', '广州', '成都', '武汉', '西安'].map(c =>
+          `<button class="chip ${N.city === c ? 'on' : ''}" data-city="${c}">${c}</button>`).join('')}
+      </div>
+      <div class="tiny muted" style="text-align:center;margin-top:14px;line-height:1.7">
+        店铺数据来自 OpenStreetMap 公开接口；连不上时会退到地图 App 搜索，<br>它们会直接告诉你最近的门店和路线。
+      </div>
+      <div style="height:8px"></div>`
+    };
+  }
+
   /* ---------------- 我的 ---------------- */
   function viewMe() {
     const st = S.state;
@@ -1193,6 +1331,7 @@
       </div>
 
       <div class="btn-row" style="margin-top:12px">
+        <button class="btn ghost" data-action="openNearby">🗺 附近超市</button>
         <button class="btn ghost" data-action="logout">退出登录</button>
       </div>
       <div style="height:10px"></div>
@@ -1215,6 +1354,7 @@
       case 'login': return viewLogin();
       case 'family': return viewFamilySetup();
       case 'search': return viewSearch();
+      case 'nearby': return viewNearby();
       case 'report': return viewReport();
       default: return viewFridge();
     }

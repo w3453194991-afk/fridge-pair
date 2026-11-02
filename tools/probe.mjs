@@ -119,8 +119,32 @@ const errors = [];
   report.zoneCards = await run(`document.querySelectorAll('.food').length`);
   await click('[data-filter="all"]');
 
-  /* 菜谱 → 计时器 / 朗读 */
+  /* 菜谱 → 置顶 / 计时器 / 朗读 */
   await click('[data-nav="recipe"]');
+  await sleep(350);
+  const beforeFirst = await run(`document.querySelector('.dish .nm') ? document.querySelector('.dish .nm').textContent.trim() : ''`);
+  const dishCount = await run(`document.querySelectorAll('.dish[data-dish]').length`);
+  // 点倒数第二道（一定能做的）置顶，验证是否出现在顶部「我的置顶」块
+  const lastName = await run(`(() => { const all = document.querySelectorAll('.dish[data-dish]');
+    if (all.length < 2) return '';
+    const el = all[all.length - 2]; const nm = el.querySelector('.nm').textContent.trim();
+    el.querySelector('.pin').click(); return nm; })()`);
+  await sleep(340);
+  const afterFirst = await run(`(() => { const d = document.querySelector('.dish');
+    return { name: d.querySelector('.nm').textContent.trim(), pinned: d.classList.contains('pinned'), on: !!d.querySelector('.pin.on') }; })()`);
+  report.pin = { before: beforeFirst, lastClicked: lastName, after: afterFirst, count: dishCount };
+  await shot('02-recipe-pinned');
+  report.pinnedPersist = await run(`(DD_STORE.state.pinned || []).length`);
+
+  /* 全部菜谱：按菜系分区 */
+  await click('[data-tabrec="all"]');
+  await sleep(400);
+  await shot('03-recipe-grouped');
+  report.groups = await run(`Array.from(document.querySelectorAll('.section-head .t')).map(e => e.textContent.trim()).slice(0, 16)`);
+  report.groupCount = await run(`document.querySelectorAll('.section-head .t').length`);
+  await click('[data-tabrec="fit"]');
+  await sleep(250);
+
   await run(`(() => { const b = Array.from(document.querySelectorAll('.dish[data-dish]')).find(x=>x.textContent.indexOf('番茄炒蛋')>=0); if(b) b.click(); return !!b; })()`);
   await sleep(350);
   report.timers = await run(`document.querySelectorAll('[data-timer]').length`);
@@ -161,6 +185,13 @@ const errors = [];
   await shot('06-party-budget');
   report.party = await run(`(() => { const h=document.querySelector('.panel h3'); return h?h.textContent.trim():''; })()`);
   report.overBudget = await run(`DD_STORE.state.party.overBudget`);
+
+  /* 附近超市 */
+  await click('[data-nav="plan"]');
+  await click('[data-action="openNearby"]');
+  await sleep(1500);
+  await shot('07-nearby');
+  report.nearby = await run(`(() => { const n = DD_VIEW.nearby; return { status: n.status, city: n.city, src: n.src, shops: (n.shops || []).length }; })()`);
 
   /* 我的 → 深色 */
   await click('[data-nav="me"]');

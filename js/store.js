@@ -49,6 +49,7 @@
       },
       foods: foods,
       cart: [],
+      pinned: [],
       week: null,
       party: null,
       stats: { cooked: 0, saved: 0, added: 0, trashed: 0 }
@@ -67,6 +68,7 @@
       if (!s || !s.foods || !Array.isArray(s.foods)) s = seedState();
       if (!s.stats) s.stats = { cooked: 0, saved: 0, added: 0, trashed: 0 };
       if (!Array.isArray(s.cart)) s.cart = [];
+      if (!Array.isArray(s.pinned)) s.pinned = [];
       if (!s.family) s.family = seedState().family;
       // 老数据迁移：填过家庭信息就视为已注册
       if (s.family.registered === undefined) {
@@ -148,6 +150,19 @@
       if (!f) return;
       f.expireAt = Date.now() + Math.round(days * DAY);
       this.save();
+    },
+
+    /* ---------- 置顶 ---------- */
+    isPinned: function (id) {
+      return (this.state.pinned || []).indexOf(id) >= 0;
+    },
+    togglePin: function (id) {
+      if (!Array.isArray(this.state.pinned)) this.state.pinned = [];
+      const i = this.state.pinned.indexOf(id);
+      if (i >= 0) this.state.pinned.splice(i, 1);
+      else this.state.pinned.push(id);
+      this.save();
+      return this.isPinned(id);
     },
 
     /* ---------- 购物车 ---------- */

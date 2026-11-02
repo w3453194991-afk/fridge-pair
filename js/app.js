@@ -9,6 +9,8 @@
     filter: 'all', recTab: 'fit', q: '', vq: '', sugIdx: 0,
     party: { dateKey: 'fri', men: 2, women: 2, kids: 1, cuisine: '家常', wish: '', taste: '', budget: 0 },
     login: { phone: '', code: '', sent: false },
+    nearby: { city: '杭州', lat: 30.2741, lng: 120.1551, src: '默认城市', status: 'idle', shops: [] },
+    showMap: false,
     onb: null
   };
 
@@ -108,8 +110,16 @@
      点击分发
      ============================================================ */
   d.addEventListener('click', function (e) {
-    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play],[data-ext],[data-count],[data-report],[data-timer],[data-speak],[data-speakall],[data-chip]');
+    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play],[data-ext],[data-count],[data-report],[data-timer],[data-speak],[data-speakall],[data-chip],[data-pin]');
     if (!t) return;
+
+    if (t.hasAttribute('data-pin')) {
+      const id = t.getAttribute('data-pin');
+      const on = S.togglePin(id);
+      renderAll(false);
+      toast(on ? '已置顶，排在最前面了' : '已取消置顶');
+      return;
+    }
 
     if (t.hasAttribute('data-ext')) {
       openExternal(t.getAttribute('data-ext'));
@@ -133,6 +143,15 @@
       return;
     }
     if (t.hasAttribute('data-nav')) { tabTo(t.getAttribute('data-nav')); return; }
+    if (t.hasAttribute('data-city')) {
+      const c = t.getAttribute('data-city');
+      const preset = CITY_COORDS[c];
+      const N = w.DD_VIEW.nearby;
+      N.city = c;
+      if (preset) { N.lat = preset[0]; N.lng = preset[1]; N.src = '手动选择城市'; N.status = 'idle'; N.shops = []; }
+      renderAll(false);
+      return;
+    }
     if (t.hasAttribute('data-food')) { go({ name: 'food', id: t.getAttribute('data-food') }); return; }
     if (t.hasAttribute('data-dish')) { closeModal(); go({ name: 'dish', id: t.getAttribute('data-dish') }); return; }
     if (t.hasAttribute('data-week')) { go({ name: 'week' }); return; }
@@ -253,11 +272,39 @@
         renderAll(false);
         break;
       }
+      case 'clearPins':
+        S.state.pinned = [];
+        S.save();
+        renderAll(false);
+        toast('已取消全部置顶');
+        break;
       case 'clearSearch':
         w.DD_VIEW.q = '';
         renderAll(false);
         break;
       case 'openChat': openChat(); break;
+      case 'openNearby':
+        go({ name: 'nearby' });
+        if (w.DD_VIEW.nearby && w.DD_VIEW.nearby.src === '默认城市') autoLocate();
+        break;
+      case 'locate': autoLocate(); break;
+      case 'findShops': findShops(); break;
+      case 'toggleMap':
+        w.DD_VIEW.showMap = !w.DD_VIEW.showMap;
+        renderAll(false);
+        break;
+      case 'copyCart': {
+        const list = (S.state.cart || []).map(c => c.name + ' ' + E.fmtQty(c.qty) + c.unit).join('\n');
+        if (!list) { toast('采购清单是空的'); break; }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText('采购清单：\n' + list)
+            .then(() => toast('清单已复制，可直接粘到备忘录'))
+            .catch(() => toast('复制失败，请手动选择'));
+        } else {
+          toast('当前浏览器不支持复制');
+        }
+        break;
+      }
       case 'chatSend': chatSend(); break;
       case 'back': back(); break;
       case 'toggleDark': {
@@ -1215,6 +1262,88 @@
     } else if (c.action === 'genMenu') openUrgentMenu();
     else if (c.action === 'cleanExpired') openCleanup();
     else if (c.action === 'shoot') openCamera('add');
+  }
+
+  /* ============================================================
+     附近超市（定位 + OpenStreetMap 真实点位）
+     ============================================================ */
+  const CITY_COORDS = {
+    杭州: [30.2741, 120.1551], 北京: [39.9042, 116.4074], 上海: [31.2304, 121.4737],
+    深圳: [22.5431, 114.0579], 广州: [23.1291, 113.2644], 成都: [30.5728, 104.0668],
+    武汉: [30.5928, 114.3055], 西安: [34.3416, 108.9398]
+  };
+
+  function distanceM(lat1, lng1, lat2, lng2) {
+    const R = 6371000, rad = Math.PI / 180;
+    const dLat = (lat2 - lat1) * rad, dLng = (lng2 - lng1) * rad;
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+      + Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+
+  function autoLocate() {
+    const N = w.DD_VIEW.nearby;
+    if (!navigator.geolocation) {
+      N.status = 'denied';
+      renderAll(false);
+      return;
+    }
+    N.status = 'locating';
+    renderAll(false);
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      N.lat = pos.coords.latitude;
+      N.lng = pos.coords.longitude;
+      N.src = '浏览器定位';
+      N.status = 'idle';
+      N.shops = [];
+      renderAll(false);
+      toast('已定位，正在找附近超市');
+      findShops();
+    }, function () {
+      N.status = 'denied';
+      N.src = '默认城市';
+      renderAll(false);
+      toast('没拿到定位权限，已用默认城市');
+    }, { timeout: 8000, maximumAge: 60000 });
+  }
+
+  function findShops() {
+    const N = w.DD_VIEW.nearby;
+    if (!N.lat) { autoLocate(); return; }
+    N.status = 'loading';
+    N.shops = [];
+    renderAll(false);
+    const q = '[out:json][timeout:12];('
+      + 'node["shop"="supermarket"](around:2500,' + N.lat + ',' + N.lng + ');'
+      + 'node["shop"="convenience"](around:1200,' + N.lat + ',' + N.lng + ');'
+      + ');out center 20;';
+    const url = 'https://overpass-api.de/api/interpreter?data=' + encodeURIComponent(q);
+    const ctrl = new AbortController();
+    const timer = setTimeout(function () { try { ctrl.abort(); } catch (e) {} }, 9000);
+    fetch(url, { signal: ctrl.signal })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        clearTimeout(timer);
+        const list = (j.elements || []).map(function (e) {
+          const lat = e.lat, lng = e.lon;
+          if (!lat || !lng) return null;
+          return {
+            name: (e.tags && e.tags.name) || '未命名超市',
+            kind: (e.tags && e.tags.shop) === 'convenience' ? '便利店' : '超市',
+            dist: Math.round(distanceM(N.lat, N.lng, lat, lng)),
+            lat: lat, lng: lng
+          };
+        }).filter(Boolean).sort(function (a, b) { return a.dist - b.dist; }).slice(0, 6);
+        N.shops = list;
+        N.status = list.length ? 'ok' : 'fail';
+        renderAll(false);
+      })
+      .catch(function () {
+        clearTimeout(timer);
+        N.status = 'fail';
+        N.shops = [];
+        renderAll(false);
+      });
   }
 
   /* ============================================================
