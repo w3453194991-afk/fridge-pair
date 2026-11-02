@@ -337,5 +337,381 @@
   const PLATFORM_MAP = {};
   PLATFORMS.forEach(p => { PLATFORM_MAP[p.key] = p; });
 
-  w.DD_DATA = { FOOD_DB, FOOD_MAP, DISHES, PAIRS, SEED, PHOTO_SCENES, CUISINES, VIDEOS, PLATFORMS, PLATFORM_MAP };
+  /* ============================================================
+     9. 食材扩充包（22 → 64 种）
+     ============================================================ */
+  const MORE_FOODS = [
+    { name: '油菜',   emoji: '🥬', cat: '蔬菜', unit: '把', shelf: 4,  price: 2.5, storage: '冷藏' },
+    { name: '生菜',   emoji: '🥗', cat: '蔬菜', unit: '颗', shelf: 4,  price: 3,   storage: '冷藏' },
+    { name: '卷心菜', emoji: '🥬', cat: '蔬菜', unit: '颗', shelf: 12, price: 3.5, storage: '冷藏' },
+    { name: '芹菜',   emoji: '🌿', cat: '蔬菜', unit: '把', shelf: 5,  price: 2.5, storage: '冷藏' },
+    { name: '韭菜',   emoji: '🌱', cat: '蔬菜', unit: '把', shelf: 3,  price: 2,   storage: '冷藏' },
+    { name: '黄瓜',   emoji: '🥒', cat: '蔬菜', unit: '根', shelf: 6,  price: 1.5, storage: '冷藏' },
+    { name: '冬瓜',   emoji: '🫑', cat: '蔬菜', unit: 'g',  shelf: 10, price: 0.01,storage: '冷藏' },
+    { name: '南瓜',   emoji: '🎃', cat: '蔬菜', unit: 'g',  shelf: 20, price: 0.01,storage: '阴凉' },
+    { name: '茄子',   emoji: '🍆', cat: '蔬菜', unit: '个', shelf: 5,  price: 2,   storage: '冷藏' },
+    { name: '西葫芦', emoji: '🥒', cat: '蔬菜', unit: '个', shelf: 7,  price: 2,   storage: '冷藏' },
+    { name: '豆角',   emoji: '🫘', cat: '蔬菜', unit: 'g',  shelf: 5,  price: 0.012, storage: '冷藏' },
+    { name: '莲藕',   emoji: '🪷', cat: '蔬菜', unit: '节', shelf: 10, price: 4,   storage: '冷藏' },
+    { name: '玉米',   emoji: '🌽', cat: '蔬菜', unit: '根', shelf: 7,  price: 2,   storage: '冷藏' },
+    { name: '洋葱',   emoji: '🧅', cat: '蔬菜', unit: '个', shelf: 25, price: 1.5, storage: '阴凉' },
+    { name: '生姜',   emoji: '🫚', cat: '蔬菜', unit: '块', shelf: 30, price: 1,   storage: '阴凉' },
+    { name: '小米椒', emoji: '🌶️', cat: '蔬菜', unit: '个', shelf: 10, price: 0.5, storage: '冷藏' },
+    { name: '山药',   emoji: '🥔', cat: '蔬菜', unit: '根', shelf: 15, price: 5,   storage: '阴凉' },
+    { name: '芋头',   emoji: '🍠', cat: '蔬菜', unit: '个', shelf: 15, price: 2.5, storage: '阴凉' },
+    { name: '鸡胸肉', emoji: '🍗', cat: '肉类', unit: 'g',  shelf: 3,  price: 0.09,storage: '冷藏' },
+    { name: '五花肉', emoji: '🥓', cat: '肉类', unit: 'g',  shelf: 3,  price: 0.07,storage: '冷藏' },
+    { name: '牛腩',   emoji: '🥩', cat: '肉类', unit: 'g',  shelf: 3,  price: 0.11,storage: '冷藏' },
+    { name: '猪肉馅', emoji: '🥟', cat: '肉类', unit: 'g',  shelf: 2,  price: 0.06,storage: '冷藏' },
+    { name: '鸡腿',   emoji: '🍗', cat: '肉类', unit: '个', shelf: 3,  price: 5,   storage: '冷藏' },
+    { name: '虾仁',   emoji: '🦐', cat: '肉类', unit: 'g',  shelf: 2,  price: 0.16,storage: '冷冻' },
+    { name: '带鱼',   emoji: '🐟', cat: '肉类', unit: 'g',  shelf: 2,  price: 0.07,storage: '冷冻' },
+    { name: '培根',   emoji: '🥓', cat: '肉类', unit: '片', shelf: 20, price: 1.6, storage: '冷藏' },
+    { name: '奶酪',   emoji: '🧀', cat: '蛋奶', unit: '片', shelf: 30, price: 2.5, storage: '冷藏' },
+    { name: '淡奶油', emoji: '🥛', cat: '蛋奶', unit: 'ml', shelf: 7,  price: 0.03,storage: '冷藏' },
+    { name: '橙子',   emoji: '🍊', cat: '水果', unit: '个', shelf: 14, price: 2.5, storage: '冷藏' },
+    { name: '葡萄',   emoji: '🍇', cat: '水果', unit: '串', shelf: 6,  price: 12,  storage: '冷藏' },
+    { name: '草莓',   emoji: '🍓', cat: '水果', unit: '盒', shelf: 3,  price: 18,  storage: '冷藏' },
+    { name: '梨',     emoji: '🍐', cat: '水果', unit: '个', shelf: 20, price: 2.5, storage: '冷藏' },
+    { name: '蓝莓',   emoji: '🫐', cat: '水果', unit: '盒', shelf: 5,  price: 15,  storage: '冷藏' },
+    { name: '西瓜',   emoji: '🍉', cat: '水果', unit: '块', shelf: 3,  price: 3,   storage: '冷藏' },
+    { name: '面粉',   emoji: '🌾', cat: '主食', unit: 'g',  shelf: 180,price: 0.008,storage: '常温' },
+    { name: '馒头',   emoji: '🍞', cat: '主食', unit: '个', shelf: 5,  price: 1.5, storage: '冷冻' },
+    { name: '面包',   emoji: '🍞', cat: '主食', unit: '片', shelf: 5,  price: 1,   storage: '常温' },
+    { name: '意面',   emoji: '🍝', cat: '主食', unit: 'g',  shelf: 180,price: 0.02,storage: '常温' },
+    { name: '粉丝',   emoji: '🍜', cat: '主食', unit: '把', shelf: 200,price: 3,   storage: '常温' },
+    { name: '饺子皮', emoji: '🥟', cat: '主食', unit: '张', shelf: 7,  price: 0.1, storage: '冷藏' },
+    { name: '豆浆',   emoji: '🥛', cat: '豆制品', unit: '杯', shelf: 2, price: 3,   storage: '冷藏' },
+    { name: '腐竹',   emoji: '🫓', cat: '豆制品', unit: 'g',  shelf: 120,price: 0.05,storage: '常温' }
+  ];
+  MORE_FOODS.forEach(function (f) { FOOD_DB.push(f); FOOD_MAP[f.name] = f; });
+
+  /* ---------- 10. 营养素（每 1 个单位的近似值：[kcal, 蛋白g, 钙mg, 铁mg, 维C mg]） ---------- */
+  const NUT = {
+    番茄: [27, 1.3, 15, 0.5, 21], 西兰花: [100, 9, 150, 2, 150], 菠菜: [46, 5.8, 132, 5.8, 64],
+    土豆: [160, 4, 16, 1.6, 40], 青椒: [20, 0.8, 12, 0.6, 60], 胡萝卜: [47, 1.1, 40, 0.8, 6],
+    大蒜: [60, 2.4, 15, 0.7, 3], 香菇: [4, 0.3, 2, 0.05, 0.2], 豆腐: [240, 24, 420, 3, 0],
+    牛里脊: [1.1, 0.21, 0.06, 0.03, 0], 排骨: [2.8, 0.17, 0.1, 0.01, 0], 鸡翅: [2, 0.17, 0.08, 0.01, 0],
+    三文鱼: [1.4, 0.2, 0.09, 0.002, 0], 鸡蛋: [72, 6.3, 25, 0.9, 0], 牛奶: [160, 8, 260, 0.1, 2],
+    酸奶: [110, 5, 180, 0.1, 2], 苹果: [95, 0.5, 7, 0.2, 8], 香蕉: [105, 1.4, 7, 0.3, 10],
+    柠檬: [26, 1, 58, 0.05, 48], 挂面: [350, 11, 15, 2, 0], 大米: [3450, 75, 120, 20, 0],
+    燕麦: [3.8, 0.13, 0.5, 0.04, 0],
+    油菜: [30, 3.6, 216, 2.4, 72], 生菜: [28, 2.6, 70, 1.8, 20], 卷心菜: [120, 7.5, 245, 3, 200],
+    芹菜: [30, 2.4, 160, 1.6, 16], 韭菜: [52, 4.6, 84, 3.2, 48], 黄瓜: [22, 1.2, 36, 0.8, 13],
+    冬瓜: [0.12, 0.004, 0.19, 0.002, 0.18], 南瓜: [0.26, 0.007, 0.16, 0.005, 0.08],
+    茄子: [46, 2.2, 48, 0.9, 10], 西葫芦: [45, 2, 40, 0.8, 30], 豆角: [0.32, 0.02, 0.42, 0.005, 0.16],
+    莲藕: [146, 3.8, 78, 2.8, 88], 玉米: [172, 8, 2, 1.2, 10], 洋葱: [60, 1.8, 36, 0.3, 12],
+    生姜: [16, 0.3, 5, 0.3, 1], 小米椒: [2, 0.1, 0.4, 0.04, 7], 山药: [171, 5.7, 48, 0.9, 15],
+    芋头: [158, 4.4, 72, 1, 12], 鸡胸肉: [1.33, 0.24, 0.03, 0.007, 0], 五花肉: [5.2, 0.14, 0.06, 0.01, 0],
+    牛腩: [3.3, 0.18, 0.08, 0.02, 0], 猪肉馅: [3.9, 0.17, 0.06, 0.01, 0], 鸡腿: [216, 21, 10, 1, 0],
+    虾仁: [0.93, 0.18, 0.6, 0.01, 0], 带鱼: [1.3, 0.18, 0.3, 0.01, 0], 培根: [60, 3.5, 1, 0.1, 0],
+    奶酪: [70, 4.5, 120, 0.1, 0], 淡奶油: [3.4, 0.02, 0.7, 0, 0], 橙子: [85, 1.6, 70, 0.2, 90],
+    葡萄: [200, 1.5, 30, 1.2, 12], 草莓: [80, 2.5, 45, 1, 145], 梨: [100, 0.8, 20, 0.4, 12],
+    蓝莓: [70, 0.9, 10, 0.2, 12], 西瓜: [90, 1.8, 20, 0.6, 20], 面粉: [3.6, 0.1, 0.15, 0.01, 0],
+    馒头: [230, 7, 20, 1.5, 0], 面包: [80, 2.5, 20, 0.5, 0], 意面: [3.5, 0.12, 0.2, 0.01, 0],
+    粉丝: [340, 0.8, 30, 5, 0], 饺子皮: [28, 0.9, 3, 0.1, 0], 豆浆: [80, 7, 25, 0.5, 0],
+    腐竹: [4.6, 0.45, 0.8, 0.16, 0]
+  };
+  FOOD_DB.forEach(function (f) {
+    const n = NUT[f.name] || [40, 2, 20, 0.5, 10];
+    f.nut = { kcal: n[0], p: n[1], ca: n[2], fe: n[3], vc: n[4] };
+  });
+
+  /* ---------- 11. 过敏原 ---------- */
+  const ALLERGENS = ['乳', '蛋', '豆', '海鲜', '麸质', '坚果'];
+  const ALLERGEN_OF = {
+    牛奶: '乳', 酸奶: '乳', 奶酪: '乳', 淡奶油: '乳',
+    鸡蛋: '蛋',
+    豆腐: '豆', 豆浆: '豆', 腐竹: '豆',
+    虾仁: '海鲜', 带鱼: '海鲜', 三文鱼: '海鲜',
+    面粉: '麸质', 面包: '麸质', 挂面: '麸质', 意面: '麸质', 饺子皮: '麸质', 馒头: '麸质'
+  };
+  FOOD_DB.forEach(function (f) { f.allergen = ALLERGEN_OF[f.name] || ''; });
+
+  /* ---------- 12. 食材替换表 ---------- */
+  const SUBSTITUTES = {
+    牛里脊: ['鸡胸肉', '五花肉'], 鸡胸肉: ['牛里脊'], 排骨: ['牛腩', '鸡腿'],
+    五花肉: ['猪肉馅'], 牛腩: ['排骨'], 三文鱼: ['带鱼'], 带鱼: ['三文鱼'],
+    菠菜: ['油菜', '生菜'], 油菜: ['菠菜', '生菜'], 生菜: ['油菜'], 西兰花: ['油菜', '卷心菜'],
+    卷心菜: ['生菜'], 牛奶: ['豆浆', '酸奶'], 豆浆: ['牛奶'], 豆腐: ['腐竹'], 腐竹: ['豆腐'],
+    青椒: ['小米椒'], 小米椒: ['青椒'], 意面: ['挂面'], 挂面: ['意面'], 面包: ['馒头'], 馒头: ['面包'],
+    淡奶油: ['牛奶'], 香菇: ['口蘑'], 土豆: ['山药'], 山药: ['土豆']
+  };
+
+  /* ============================================================
+     13. 菜谱扩充包（12 → 30 道）
+     ============================================================ */
+  Object.assign(DISH_CUISINE, {
+    'garlic-chicken': ['西式', '家常'], 'onion-egg': ['家常'], 'tomato-beef': ['家常', '川菜'],
+    'wintermelon-rib': ['粤菜', '清淡'], 'stir-youcai': ['家常', '清淡'], 'cucumber-salad': ['家常', '清淡'],
+    'lotus-rib': ['粤菜'], 'corn-carrot-soup': ['清淡', '粤菜'], 'chive-egg': ['家常'],
+    'eggplant-beans': ['家常', '川菜'], 'shrimp-egg': ['粤菜'], 'pan-hairtail': ['家常'],
+    'pumpkin-soup': ['西式'], 'bolognese': ['西式'], 'bacon-sandwich': ['西式'],
+    'hand-cabbage': ['川菜', '家常'], 'yam-rib': ['粤菜', '清淡'], 'noodle-bolognese': ['家常']
+  });
+
+  const MORE_DISHES = [
+    {
+      id: 'garlic-chicken', name: '蒜香鸡胸', emoji: '🍗', minutes: 18, level: '新手',
+      meals: ['午', '晚'], tags: ['高蛋白', '低脂', '健身'],
+      ingredients: [{ name: '鸡胸肉', qty: 300 }],
+      seasonings: ['盐 2 g', '黑胡椒 少许', '蒜末 3 瓣', '橄榄油 10 ml', '柠檬汁 5 ml'],
+      prep: ['鸡胸片成 1.5 cm 厚片，用刀背轻拍松。', '加盐、黑胡椒、蒜末、柠檬汁腌 10 分钟。'],
+      steps: [
+        { heat: '中火', text: '平底锅烧热倒油，鸡胸下锅煎 3 分钟，别翻动。' },
+        { heat: '中火', text: '翻面再煎 2 分钟，两面金黄即可。' },
+        { heat: '关火', text: '出锅静置 2 分钟再切，肉汁不流失。' }
+      ],
+      tips: ['拍松能让厚薄一致，不会外焦里生。', '静置再切是嫩的关键。'],
+      nutrition: '每 100 g 约 24 g 蛋白质、脂肪低，健身餐首选。', pair: '优质蛋白 → 增肌减脂'
+    },
+    {
+      id: 'onion-egg', name: '洋葱炒蛋', emoji: '🧅', minutes: 12, level: '新手',
+      meals: ['早', '午', '晚'], tags: ['快手', '家常'],
+      ingredients: [{ name: '洋葱', qty: 1 }, { name: '鸡蛋', qty: 3 }],
+      seasonings: ['盐 2 g', '生抽 5 ml', '食用油 15 ml'],
+      prep: ['洋葱切丝，鸡蛋打散。'],
+      steps: [
+        { heat: '大火', text: '鸡蛋炒散盛出，别炒老。' },
+        { heat: '大火', text: '下洋葱丝炒 2 分钟到透明、边缘微焦。' },
+        { heat: '大火', text: '倒回鸡蛋，加盐和生抽，翻 15 秒出锅。' }
+      ],
+      tips: ['洋葱炒到微焦才甜。', '鸡蛋先盛出，回锅才嫩。'],
+      nutrition: '洋葱含硫化物，鸡蛋补蛋白，简单但很下饭。', pair: '硫化物 + 优质蛋白'
+    },
+    {
+      id: 'tomato-beef', name: '番茄牛腩', emoji: '🍲', minutes: 90, level: '进阶',
+      meals: ['午', '晚'], tags: ['煲', '补铁', '周末'],
+      ingredients: [{ name: '牛腩', qty: 500 }, { name: '番茄', qty: 2 }],
+      seasonings: ['番茄酱 20 g', '姜 3 片', '料酒 10 ml', '盐 3 g', '冰糖 5 g'],
+      prep: ['牛腩冷水下锅焯水，撇沫后冲净切块。', '番茄一半切块一半切碎。'],
+      steps: [
+        { heat: '大火', text: '下油炒香姜片，放牛腩煸 3 分钟。' },
+        { heat: '中小火', text: '加番茄碎和番茄酱炒出红油，加水没过，炖 60 分钟。' },
+        { heat: '中小火', text: '下番茄块再炖 15 分钟，加盐和冰糖收汁。' }
+      ],
+      tips: ['番茄分两次下，一次出味一次留形。', '炖的过程保持小泡，别大滚。'],
+      nutrition: '牛肉铁 + 番茄维 C，补铁效率高，适合经期和老人。', pair: '铁 + 维C → 补铁加倍'
+    },
+    {
+      id: 'wintermelon-rib', name: '冬瓜排骨汤', emoji: '🍲', minutes: 55, level: '新手',
+      meals: ['午', '晚'], tags: ['清淡', '消肿', '少油'],
+      ingredients: [{ name: '冬瓜', qty: 400 }, { name: '排骨', qty: 300 }],
+      seasonings: ['姜 3 片', '盐 3 g', '料酒 10 ml', '白胡椒 少许'],
+      prep: ['排骨冷水下锅焯水。', '冬瓜去皮切厚片。'],
+      steps: [
+        { heat: '大火', text: '排骨加姜片和 1.2 L 水，烧开转小火炖 35 分钟。' },
+        { heat: '中火', text: '下冬瓜煮 12 分钟到透明。' },
+        { heat: '关火', text: '加盐和白胡椒，撒葱花。' }
+      ],
+      tips: ['冬瓜后放，久煮会化。', '这道汤几乎不用油。'],
+      nutrition: '冬瓜含水量高、热量低，配排骨汤清爽又补水。', pair: '低热量 + 优质蛋白'
+    },
+    {
+      id: 'stir-youcai', name: '清炒油菜', emoji: '🥬', minutes: 8, level: '新手',
+      meals: ['午', '晚'], tags: ['3 分钟上桌', '补钙'],
+      ingredients: [{ name: '油菜', qty: 1 }],
+      seasonings: ['蒜末 2 瓣', '盐 2 g', '食用油 8 ml'],
+      prep: ['油菜洗净对半切。'],
+      steps: [
+        { heat: '中火', text: '蒜末小火爆香。' },
+        { heat: '大火', text: '下油菜大火快炒 60 秒，加盐翻匀。' },
+        { heat: '关火', text: '立刻出锅，保持翠绿。' }
+      ],
+      tips: ['大火快炒是保色的关键。', '油菜钙含量不低，别煮太久。'],
+      nutrition: '油菜钙含量在绿叶菜里偏高，比牛奶更好吸收的搭配是少油快炒。', pair: '钙 + 维K → 骨骼友好'
+    },
+    {
+      id: 'cucumber-salad', name: '凉拌黄瓜', emoji: '🥒', minutes: 6, level: '新手',
+      meals: ['午', '晚'], tags: ['凉菜', '解腻', '零火'],
+      ingredients: [{ name: '黄瓜', qty: 2 }],
+      seasonings: ['蒜末 2 瓣', '生抽 10 ml', '香醋 8 ml', '香油 3 ml', '小米椒 1 个'],
+      prep: ['黄瓜拍裂切段，撒 2 g 盐腌 5 分钟挤掉水。'],
+      steps: [
+        { heat: '无火', text: '蒜末、生抽、香醋、香油、小米椒调成料汁。' },
+        { heat: '无火', text: '浇在黄瓜上拌匀，冰 5 分钟更爽。' }
+      ],
+      tips: ['拍裂比切片更入味。', '腌出水再拌，不会稀。'],
+      nutrition: '几乎零热量，聚餐解腻必备。', pair: '水分 + 钾 → 解腻消肿'
+    },
+    {
+      id: 'lotus-rib', name: '莲藕排骨汤', emoji: '🍲', minutes: 60, level: '新手',
+      meals: ['午', '晚'], tags: ['煲汤', '润燥', '粤式'],
+      ingredients: [{ name: '莲藕', qty: 1 }, { name: '排骨', qty: 300 }],
+      seasonings: ['姜 3 片', '盐 3 g', '料酒 10 ml'],
+      prep: ['排骨焯水冲净。', '莲藕去皮切滚刀块。'],
+      steps: [
+        { heat: '大火', text: '全部材料下锅，加水烧开。' },
+        { heat: '小火', text: '转小火炖 45 分钟。' },
+        { heat: '关火', text: '加盐调味即可。' }
+      ],
+      tips: ['选粉藕（七孔）更糯。', '盐最后放。'],
+      nutrition: '莲藕含膳食纤维和维 C，配排骨汤温润。', pair: '膳食纤维 + 钙'
+    },
+    {
+      id: 'corn-carrot-soup', name: '玉米胡萝卜汤', emoji: '🌽', minutes: 40, level: '新手',
+      meals: ['午', '晚'], tags: ['清甜', '孩子爱吃'],
+      ingredients: [{ name: '玉米', qty: 1 }, { name: '胡萝卜', qty: 1 }],
+      seasonings: ['盐 2 g', '姜 2 片'],
+      prep: ['玉米切段，胡萝卜切块。'],
+      steps: [
+        { heat: '大火', text: '加水 1 L 烧开，下所有材料。' },
+        { heat: '小火', text: '转小火煮 25 分钟。' },
+        { heat: '关火', text: '加盐调味。' }
+      ],
+      tips: ['玉米须留着一起煮，更清甜。', '不用放糖。'],
+      nutrition: '玉米和胡萝卜的天然甜味，孩子不抗拒，几乎不用调味。', pair: '胡萝卜素 + 膳食纤维'
+    },
+    {
+      id: 'chive-egg', name: '韭菜炒蛋', emoji: '🌱', minutes: 10, level: '新手',
+      meals: ['早', '午', '晚'], tags: ['快手', '家常'],
+      ingredients: [{ name: '韭菜', qty: 1 }, { name: '鸡蛋', qty: 3 }],
+      seasonings: ['盐 2 g', '食用油 15 ml'],
+      prep: ['韭菜切 3 cm 段。', '鸡蛋打散加一小撮盐。'],
+      steps: [
+        { heat: '大火', text: '蛋液炒成块盛出。' },
+        { heat: '大火', text: '下韭菜快炒 40 秒。' },
+        { heat: '大火', text: '倒回鸡蛋，加盐翻匀出锅。' }
+      ],
+      tips: ['韭菜下锅别超过 1 分钟。', '鸡蛋先炒后回锅。'],
+      nutrition: '韭菜纤维多、鸡蛋补蛋白，早餐很合适。', pair: '膳食纤维 + 蛋白'
+    },
+    {
+      id: 'eggplant-beans', name: '茄子豆角', emoji: '🍆', minutes: 20, level: '新手',
+      meals: ['午', '晚'], tags: ['下饭', '家常'],
+      ingredients: [{ name: '茄子', qty: 2 }, { name: '豆角', qty: 300 }],
+      seasonings: ['蒜末 3 瓣', '生抽 10 ml', '蚝油 8 g', '盐 2 g', '油 20 ml'],
+      prep: ['茄子切条撒盐腌 10 分钟挤水（省油）。', '豆角掰段。'],
+      steps: [
+        { heat: '大火', text: '豆角干煸 3 分钟到起皱盛出。' },
+        { heat: '大火', text: '下茄子炒软，加蒜末、生抽、蚝油。' },
+        { heat: '大火', text: '倒回豆角翻 1 分钟，加盐出锅。' }
+      ],
+      tips: ['茄子先腌出水，能省一半油。', '豆角一定炒熟，生的有毒。'],
+      nutrition: '茄子皮含花青素，别削太干净；豆角要彻底加热。', pair: '花青素 + 植物蛋白'
+    },
+    {
+      id: 'shrimp-egg', name: '虾仁滑蛋', emoji: '🦐', minutes: 12, level: '新手',
+      meals: ['午', '晚'], tags: ['高蛋白', '孩子爱吃', '粤式'],
+      ingredients: [{ name: '虾仁', qty: 200 }, { name: '鸡蛋', qty: 3 }],
+      seasonings: ['盐 2 g', '料酒 5 ml', '淀粉 3 g', '油 15 ml'],
+      prep: ['虾仁加料酒、盐、淀粉抓匀腌 5 分钟。', '鸡蛋打散加 2 勺水。'],
+      steps: [
+        { heat: '中火', text: '虾仁滑炒 40 秒变色盛出。' },
+        { heat: '中小火', text: '倒蛋液，用铲子慢慢推，半凝固时放回虾仁。' },
+        { heat: '关火', text: '还带点湿润就盛出，余温会继续熟。' }
+      ],
+      tips: ['全程中小火，蛋才滑。', '虾仁过熟会硬。'],
+      nutrition: '虾仁高蛋白低脂，鸡蛋嫩滑好消化，幼儿也能吃。', pair: '优质蛋白 ×2'
+    },
+    {
+      id: 'pan-hairtail', name: '香煎带鱼', emoji: '🐟', minutes: 20, level: '进阶',
+      meals: ['午', '晚'], tags: ['下饭', '补钙'],
+      ingredients: [{ name: '带鱼', qty: 400 }],
+      seasonings: ['盐 3 g', '料酒 10 ml', '面粉 20 g', '姜 3 片', '油 20 ml'],
+      prep: ['带鱼洗净剪段，加盐、料酒、姜腌 10 分钟。', '擦干后薄薄拍一层面粉。'],
+      steps: [
+        { heat: '中火', text: '油热后下带鱼，别急着翻。' },
+        { heat: '中火', text: '一面煎 3 分钟定型再翻面，再煎 2 分钟。' },
+        { heat: '关火', text: '出锅撒椒盐。' }
+      ],
+      tips: ['拍面粉防粘、更脆。', '定型前别翻，会碎。'],
+      nutrition: '带鱼含钙和不饱和脂肪酸，煎着吃比油炸健康。', pair: '钙 + 不饱和脂肪'
+    },
+    {
+      id: 'pumpkin-soup', name: '南瓜浓汤', emoji: '🎃', minutes: 25, level: '新手',
+      meals: ['早', '午'], tags: ['西式', '孩子爱吃', '暖'],
+      ingredients: [{ name: '南瓜', qty: 300 }, { name: '牛奶', qty: 1 }],
+      seasonings: ['盐 1 g', '黑胡椒 少许', '黄油 5 g'],
+      prep: ['南瓜去皮切块蒸 12 分钟。'],
+      steps: [
+        { heat: '中小火', text: '黄油化开，下南瓜压成泥炒 1 分钟。' },
+        { heat: '中小火', text: '分次倒入牛奶搅匀，煮 3 分钟。' },
+        { heat: '关火', text: '加盐和黑胡椒，搅拌机打细更顺滑。' }
+      ],
+      tips: ['牛奶分次加，不容易结块。', '打一遍再回锅，口感差很多。'],
+      nutrition: '南瓜胡萝卜素 + 牛奶钙，早餐喝一碗很顶。', pair: '胡萝卜素 + 钙'
+    },
+    {
+      id: 'bolognese', name: '意面番茄肉酱', emoji: '🍝', minutes: 30, level: '进阶',
+      meals: ['午', '晚'], tags: ['西式', '孩子爱吃', '一锅出'],
+      ingredients: [{ name: '意面', qty: 200 }, { name: '猪肉馅', qty: 200 }, { name: '番茄', qty: 2 }],
+      seasonings: ['洋葱 半个', '番茄酱 30 g', '盐 3 g', '黑胡椒 少许', '橄榄油 15 ml'],
+      prep: ['番茄切碎，洋葱切末。'],
+      steps: [
+        { heat: '大火', text: '意面煮 8 分钟（按包装），留一碗面汤。' },
+        { heat: '中火', text: '炒香洋葱，下肉馅炒散，加番茄碎和番茄酱熬 10 分钟。' },
+        { heat: '中火', text: '拌入意面，加两勺面汤收汁，撒黑胡椒。' }
+      ],
+      tips: ['面汤有淀粉，是让酱挂住面的关键。', '肉馅先炒干再放番茄。'],
+      nutrition: '碳水 + 蛋白 + 番茄红素，孩子最容易接受的一餐。', pair: '番茄红素 + 蛋白'
+    },
+    {
+      id: 'bacon-sandwich', name: '培根鸡蛋三明治', emoji: '🥪', minutes: 10, level: '新手',
+      meals: ['早'], tags: ['早餐', '快手', '西式'],
+      ingredients: [{ name: '面包', qty: 4 }, { name: '培根', qty: 4 }, { name: '鸡蛋', qty: 2 }],
+      seasonings: ['生菜 2 片', '奶酪 1 片', '黑胡椒 少许'],
+      prep: ['面包烤 1 分钟到微脆。'],
+      steps: [
+        { heat: '中火', text: '培根煎 2 分钟到出油变脆。' },
+        { heat: '中火', text: '用培根的油煎一个溏心蛋。' },
+        { heat: '无火', text: '面包 + 生菜 + 培根 + 蛋 + 奶酪叠起来，对角切。' }
+      ],
+      tips: ['培根自己出油，不用另加油。', '生菜垫在最下层，面包不湿。'],
+      nutrition: '一份约 450 kcal，蛋白质够，适合赶时间的早上。', pair: '蛋白 + 碳水 → 顶饱'
+    },
+    {
+      id: 'hand-cabbage', name: '手撕包菜', emoji: '🥬', minutes: 12, level: '新手',
+      meals: ['午', '晚'], tags: ['下饭', '川味', '快手'],
+      ingredients: [{ name: '卷心菜', qty: 1 }, { name: '小米椒', qty: 2 }],
+      seasonings: ['蒜末 3 瓣', '生抽 10 ml', '香醋 8 ml', '盐 2 g', '油 20 ml'],
+      prep: ['包菜手撕成大片（别用刀切）。'],
+      steps: [
+        { heat: '大火', text: '油烧到冒烟，下蒜末和小米椒爆香。' },
+        { heat: '大火', text: '下包菜大火爆炒 90 秒，边缘微焦。' },
+        { heat: '大火', text: '沿锅边淋醋和生抽，加盐翻匀出锅。' }
+      ],
+      tips: ['手撕的断面更挂味。', '锅要够热，才有锅气。'],
+      nutrition: '包菜维 C 含量高，大火快炒流失少。', pair: '维C + 膳食纤维'
+    },
+    {
+      id: 'yam-rib', name: '山药排骨汤', emoji: '🍲', minutes: 60, level: '新手',
+      meals: ['午', '晚'], tags: ['煲汤', '养胃', '老人友好'],
+      ingredients: [{ name: '山药', qty: 1 }, { name: '排骨', qty: 300 }],
+      seasonings: ['姜 3 片', '盐 3 g', '枸杞 一小把'],
+      prep: ['排骨焯水。', '山药去皮切段（戴手套防痒）。'],
+      steps: [
+        { heat: '大火', text: '排骨加水烧开，转小火 30 分钟。' },
+        { heat: '小火', text: '下山药再煮 15 分钟。' },
+        { heat: '关火', text: '加盐、撒枸杞焖 3 分钟。' }
+      ],
+      tips: ['山药黏液会让手痒，一定戴手套。', '山药别久煮，会散。'],
+      nutrition: '山药好消化、养胃，老人和幼儿都适合。', pair: '黏液蛋白 + 钙'
+    },
+    {
+      id: 'noodle-bolognese', name: '番茄肉酱拌面', emoji: '🍜', minutes: 18, level: '新手',
+      meals: ['午', '晚'], tags: ['一锅出', '快手'],
+      ingredients: [{ name: '挂面', qty: 1 }, { name: '猪肉馅', qty: 150 }, { name: '番茄', qty: 2 }],
+      seasonings: ['生抽 10 ml', '番茄酱 15 g', '盐 2 g', '蒜末 2 瓣'],
+      prep: ['番茄切小丁。'],
+      steps: [
+        { heat: '中火', text: '炒香蒜末，下肉馅炒散出油。' },
+        { heat: '中火', text: '下番茄丁炒出汁，加番茄酱和生抽，煮 5 分钟。' },
+        { heat: '大火', text: '面条另锅煮 3 分钟，捞出拌酱。' }
+      ],
+      tips: ['面煮好直接拌，别过冷水。', '酱要稠一点才挂面。'],
+      nutrition: '一碗搞定碳水、蛋白和蔬菜，上班族晚餐首选。', pair: '番茄红素 + 肉蛋白'
+    }
+  ];
+  MORE_DISHES.forEach(function (d) {
+    d.cuisine = DISH_CUISINE[d.id] || ['家常'];
+    d.videos = VIDEOS[d.id] || [];
+    DISHES.push(d);
+  });
+
+  w.DD_DATA = {
+    FOOD_DB, FOOD_MAP, DISHES, PAIRS, SEED, PHOTO_SCENES,
+    CUISINES, VIDEOS, PLATFORMS, PLATFORM_MAP,
+    ALLERGENS, SUBSTITUTES, NUT
+  };
 })(window);

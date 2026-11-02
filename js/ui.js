@@ -13,6 +13,10 @@
   function em(name) { return E.foodMeta(name).emoji; }
   function unit(name) { return E.foodMeta(name).unit; }
   function qtyTxt(n, name) { return E.fmtQty(n) + ' ' + unit(name); }
+  function fmtSec(s) {
+    const m = Math.floor(s / 60), r = s % 60;
+    return m + ':' + String(r).padStart(2, '0');
+  }
 
   /* ---------------- 食材卡片 ---------------- */
   function foodCard(f) {
@@ -50,6 +54,35 @@
       <circle cx="50" cy="50" r="${R}" fill="none" stroke="#F0EBE4" stroke-width="10"/>${arcs}</svg>`;
   }
 
+  /* ---------------- 营养雷达图 ---------------- */
+  function radarSvg(bars) {
+    const cx = 62, cy = 62, R = 46, n = bars.length;
+    const pt = function (i, ratio) {
+      const a = -Math.PI / 2 + i * 2 * Math.PI / n;
+      return [cx + Math.cos(a) * R * ratio, cy + Math.sin(a) * R * ratio];
+    };
+    const grid = [0.25, 0.5, 0.75, 1].map(function (k) {
+      const pts = bars.map(function (_, i) { return pt(i, k).map(v => v.toFixed(1)).join(','); }).join(' ');
+      return `<polygon points="${pts}" fill="none" stroke="#EFE7DA" stroke-width="1"/>`;
+    }).join('');
+    const spokes = bars.map(function (_, i) {
+      const p = pt(i, 1);
+      return `<line x1="${cx}" y1="${cy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="#EFE7DA" stroke-width="1"/>`;
+    }).join('');
+    const shape = bars.map(function (b, i) {
+      return pt(i, Math.min(100, Math.max(4, b.pct)) / 100).map(v => v.toFixed(1)).join(',');
+    }).join(' ');
+    const labels = bars.map(function (b, i) {
+      const p = pt(i, 1.28);
+      return `<text x="${p[0].toFixed(1)}" y="${(p[1] + 3).toFixed(1)}" font-size="7.5"
+        fill="${b.pct >= 90 ? '#127A45' : '#8B909C'}" text-anchor="middle" font-weight="700">${b.short || b.label}</text>`;
+    }).join('');
+    return `<svg viewBox="0 0 124 124" class="radar">
+      ${grid}${spokes}
+      <polygon points="${shape}" fill="rgba(255,107,61,.18)" stroke="#FF6B3D" stroke-width="2" stroke-linejoin="round"/>
+      ${labels}</svg>`;
+  }
+
   /* ---------------- 冰箱首页 ---------------- */
   function viewFridge() {
     const st = S.state;
@@ -63,12 +96,16 @@
     const hour = new Date(E.now()).getHours();
     const greet = hour < 11 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
 
-    // 筛选
+    // 筛选（分类 + 冰箱分区）
     const filter = w.DD_VIEW.filter || 'all';
-    const catChips = ['all', 'p', 'b', '蔬菜', '肉类', '蛋奶', '水果', '主食', '豆制品'];
+    const catChips = ['all', 'p', 'b', '蔬菜', '肉类', '蛋奶', '水果', '主食', '豆制品', 'z:冷藏', 'z:冷冻', 'z:常温'];
     let list = foods.slice();
     if (filter === 'p') list = list.filter(f => E.tier(f) === 'p');
     else if (filter === 'b') list = list.filter(f => E.tier(f) === 'b');
+    else if (filter.indexOf('z:') === 0) {
+      const z = filter.slice(2);
+      list = list.filter(f => (f.storage || '冷藏') === z);
+    }
     else if (filter !== 'all') list = list.filter(f => f.cat === filter);
     const order = { p: 0, y: 1, g: 2, b: 3 };
     list.sort((a, b) => (order[E.tier(a)] - order[E.tier(b)]) || (E.daysLeft(a) - E.daysLeft(b)));
@@ -162,8 +199,13 @@
 
       <div class="chips">
         ${catChips.map(k => {
-          const lab = k === 'all' ? '全部' : k === 'p' ? '🟣 临期' : k === 'b' ? '⚫ 过期' : k;
-          const n = k === 'all' ? foods.length : k === 'p' ? c.p : k === 'b' ? c.b : foods.filter(f => f.cat === k).length;
+          let lab, n;
+          if (k === 'all') { lab = '全部'; n = foods.length; }
+          else if (k === 'p') { lab = '🟣 临期'; n = c.p; }
+          else if (k === 'b') { lab = '⚫ 过期'; n = c.b; }
+          else if (k.indexOf('z:') === 0) {
+            const z = k.slice(2); lab = z; n = foods.filter(f => (f.storage || '冷藏') === z).length;
+          } else { lab = k; n = foods.filter(f => f.cat === k).length; }
           return `<button class="chip ${filter === k ? 'on' : ''}" data-filter="${k}">${lab}${n ? ' ' + n : ''}</button>`;
         }).join('')}
       </div>
@@ -267,6 +309,13 @@
     const st = S.state;
     const states = E.ingredientState(d, st.foods);
     const canCook = states.every(s => s.ok);
+    const allergens = E.allergensOf(d);
+    const avoid = (st.family && st.family.avoid) || [];
+    const conflict = allergens.filter(a => avoid.indexOf(a) >= 0);
+    const allergenHtml = conflict.length
+      ? `<div class="alert bad"><span class="ic">⚠️</span><div class="txt">含 <b>${conflict.join('、')}</b>，家里有人过敏，建议换一道</div></div>`
+      : '';
+    const nut = E.dishNutritionPerServing(d);
 
     return {
       title: d.name, back: true, tab: 'recipe',
@@ -280,12 +329,15 @@
       <div class="panel">
         <h3><span class="dot"></span>食材用量（2~3 人份）</h3>
         <div class="p-body" style="padding:0">
-          ${states.map(s => `<div class="ing">
-            <div class="l">${s.emoji} ${esc(s.name)}</div>
-            <div class="q">${E.fmtQty(s.qty)} ${esc(s.unit)}
-              <span class="${s.ok ? 'ok' : 'no'}">${s.ok ? '库存够' : (s.expired ? '已过期' : s.have ? '不够了' : '未入库')}</span>
-            </div>
-          </div>`).join('')}
+          ${states.map(function (s) {
+            const subs = s.ok ? [] : E.substitutesFor(s.name);
+            return `<div class="ing">
+              <div class="l">${s.emoji} ${esc(s.name)}${subs.length ? `<em class="subhint">缺了可用 ${subs.join(' / ')}</em>` : ''}</div>
+              <div class="q">${E.fmtQty(s.qty)} ${esc(s.unit)}
+                <span class="${s.ok ? 'ok' : 'no'}">${s.ok ? '库存够' : (s.expired ? '已过期' : s.have ? '不够了' : '未入库')}</span>
+              </div>
+            </div>`;
+          }).join('')}
         </div>
         <div class="taglist">${d.seasonings.map(s => `<span class="tg">${esc(s)}</span>`).join('')}</div>
       </div>
@@ -300,15 +352,31 @@
       </div>
 
       <div class="panel">
-        <h3><span class="dot"></span>分步做法</h3>
+        <div class="row between">
+          <h3><span class="dot"></span>分步做法</h3>
+          <button class="tool" data-speakall="${d.id}">🔊 朗读全部</button>
+        </div>
         <div class="p-body" style="padding:0">
-          ${d.steps.map((s, i) => `<div class="stepline">
-            <div class="no">${i + 1}</div>
-            <div class="body">${s.heat !== '无火' && s.heat !== '关火' ? `<span class="heat">${s.heat}</span>` : ''}
-              <p>${esc(s.text)}</p></div>
-          </div>`).join('')}
+          ${d.steps.map(function (s, i) {
+            const mm = s.text.match(/(\d+(?:\.\d+)?)\s*分钟/);
+            const ss = s.text.match(/(\d+)\s*秒/);
+            const secs = mm ? Math.round(parseFloat(mm[1]) * 60) : (ss ? parseInt(ss[1], 10) : 0);
+            return `<div class="stepline">
+              <div class="no">${i + 1}</div>
+              <div class="body">
+                ${s.heat !== '无火' && s.heat !== '关火' ? `<span class="heat">${s.heat}</span>` : ''}
+                <p>${esc(s.text)}</p>
+                <div class="step-tools">
+                  ${secs ? `<button class="tool" data-timer="${secs}">⏱ ${fmtSec(secs)}</button>` : ''}
+                  <button class="tool" data-speak="${esc(s.text)}">🔊 朗读</button>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
         </div>
       </div>
+
+      ${allergenHtml}
 
       <div class="panel">
         <h3><span class="dot"></span>小贴士</h3>
@@ -331,11 +399,16 @@
       <div class="panel" style="background:linear-gradient(120deg,#F7F2FF,#FDF4FF);box-shadow:none;border:1px solid #EBDFFE">
         <h3><span class="dot" style="background:#8B5CF6"></span>营养说明</h3>
         <div class="p-body">${esc(d.nutrition)}<br><b style="color:#6D28D9">${esc(d.pair)}</b></div>
+        <div class="nutline">
+          每份约 ${nut.kcal} kcal · 蛋白 ${nut.p} g · 钙 ${nut.ca} mg · 铁 ${nut.fe} mg · 维C ${nut.vc} mg
+        </div>
       </div>
 
       <div class="btn-row">
         <button class="btn ghost" data-action="shoot">📷 补拍食材</button>
-        <button class="btn primary" data-cook="${d.id}">${canCook ? '开始做菜 · 更新库存' : '缺料，先去补购'}</button>
+        ${canCook
+          ? `<button class="btn primary" data-cook="${d.id}">开始做菜 · 更新库存</button>`
+          : `<button class="btn primary" data-action="cartAddDish" data-id="${d.id}">缺的加入采购清单</button>`}
       </div>
       <div style="height:6px"></div>
       `
@@ -416,6 +489,31 @@
     }));
     const total = Object.keys(used).length;
 
+    const todayDishes = ['早', '午', '晚'].map(function (s) {
+      const m = week[0].meals[s];
+      return m ? D.DISHES.filter(d => d.id === m.id)[0] : null;
+    }).filter(Boolean);
+    const lunch = todayDishes[1] || todayDishes[0];
+    const nutTotals = lunch ? E.mealNutrition(lunch) : { kcal: 0, p: 0, ca: 0, fe: 0, vc: 0 };
+    const nutTarget = E.perMealTarget(st.family);
+    const nutBars = E.nutritionBars(nutTotals, nutTarget);
+    const nutriHtml = `
+      <div class="panel">
+        <h3><span class="dot"></span>这一餐的营养<small style="font-weight:600;color:#8B909C;margin-left:6px">${lunch ? lunch.name + ' + 1 碗饭' : '未排菜'}</small></h3>
+        <div class="nutri">
+          ${radarSvg(nutBars)}
+          <div class="nutri-bars">
+            ${nutBars.map(b => `<div class="nb">
+              <div class="nb-top"><span>${b.label}</span><b>${b.got}<small> / ${b.need}${b.unit}</small></b></div>
+              <div class="nb-bar"><i style="width:${Math.min(100, b.pct)}%;background:${b.pct >= 90 ? 'linear-gradient(90deg,#4ADE80,#22C55E)' : b.pct >= 60 ? 'linear-gradient(90deg,#FFC86B,#F0A020)' : 'linear-gradient(90deg,#FF9A8B,#FF5C7A)'}"></i></div>
+            </div>`).join('')}
+          </div>
+        </div>
+        <div class="tiny muted" style="margin-top:10px;line-height:1.6">
+          按每人份一道菜 + 一碗饭估算，对照${(st.family.members || []).length} 位家人的每餐目标；数值为近似参考，不是医学建议。
+        </div>
+      </div>`;
+
     return {
       title: '一周配餐', tab: 'plan', back: true,
       html: `
@@ -431,6 +529,8 @@
           <div class="s"><div class="v">7</div><div class="l">天全覆盖</div></div>
         </div>
       </div>
+
+      ${nutriHtml}
 
       ${week.map(day => `
         <div class="weekday">
@@ -609,6 +709,10 @@
           <label>口味偏好（可不填）</label>
           <input id="partyTaste" value="${esc(P.taste || '')}" placeholder="如：微辣、清淡点、川菜、少放油" maxlength="30">
         </div>
+        <div class="onb-field" style="margin-top:10px">
+          <label>这桌预算上限（可不填）</label>
+          <input id="partyBudget" inputmode="numeric" value="${P.budget || ''}" placeholder="如 300（超了会自动换掉最贵的菜）" maxlength="6">
+        </div>
         <div class="tiny muted" style="margin-top:9px;line-height:1.6">
           菜谱库有的直接排进这桌；没有的会列出来，并给出到平台搜做法的入口
         </div>
@@ -636,8 +740,10 @@
         <div class="p-body">
           ${p.men ? '男 ' + p.men + ' ' : ''}${p.women ? '女 ' + p.women + ' ' : ''}${p.kids ? '小孩 ' + p.kids : ''}
           ${p.cuisine ? ' · ' + esc(p.cuisine) : ''} · 约 ${p.portions} 人份<br>
-          已盘点冰箱全部食材，只有 <b>${p.missing.length}</b> 样需要补购。
+          已盘点冰箱全部食材，只有 <b>${p.missing.length}</b> 样需要补购${p.budget ? '，预估 ¥' + p.totalCost + '（预算 ¥' + p.budget + '）' : '，预估 ¥' + p.totalCost}。
           ${p.cuisineNote ? '<br><span style="color:#B45309">' + esc(p.cuisineNote) + '</span>' : ''}
+          ${p.overBudget ? '<br><span style="color:#B91C1C">超出预算 ¥' + (p.totalCost - p.budget).toFixed(1) + '，建议减掉一两道或者提高预算</span>' : ''}
+          ${p.dropped && p.dropped.length ? '<br><span style="color:#B45309">为控制预算已去掉：' + esc(p.dropped.join('、')) + '</span>' : ''}
         </div>
       </div>
 
@@ -936,6 +1042,49 @@
     </div>`;
   }
 
+  /* ---------------- 周报 ---------------- */
+  function viewReport() {
+    const st = S.state;
+    const r = E.weeklyReport(st);
+    const total = r.counts.g + r.counts.y + r.counts.p + r.counts.b;
+    return {
+      title: '本周报告', back: true, tab: 'me',
+      html: `
+      <div class="panel" style="background:linear-gradient(135deg,#FFF6EE,#FFFFFF 72%);border:1px solid rgba(255,150,100,.16);box-shadow:none">
+        <h3><span class="dot"></span>这周的冰箱体检</h3>
+        <div class="p-body">
+          冰箱共 <b>${total}</b> 件，其中临期 <b>${r.counts.p}</b> 件、过期 <b>${r.counts.b}</b> 件。
+          做菜 <b>${r.cooked}</b> 顿，挽回浪费约 <b>¥${r.saved.toFixed(1)}</b>。
+        </div>
+      </div>
+
+      <div class="statmini">
+        <div class="s"><div class="v">${r.cooked}</div><div class="l">做菜（顿）</div></div>
+        <div class="s"><div class="v" style="color:#16A34A">¥${r.saved.toFixed(0)}</div><div class="l">挽回浪费</div></div>
+        <div class="s"><div class="v">${r.trashed}</div><div class="l">清理过期</div></div>
+      </div>
+
+      <div class="panel">
+        <h3><span class="dot"></span>浪费率</h3>
+        <div class="p-body">清理 / （做菜 + 清理）= <b>${r.wasteRate}%</b></div>
+        <div class="nb-bar" style="height:8px;margin-top:8px"><i style="width:${Math.min(100, r.wasteRate)}%;background:linear-gradient(90deg,#4ADE80,#F0A020,#FF5C7A)"></i></div>
+        <div class="tiny muted" style="margin-top:6px">越低越好；一般家庭在 10% 以内算不错</div>
+      </div>
+
+      <div class="panel">
+        <h3><span class="dot"></span>下周建议</h3>
+        <div class="p-body">${r.tips.map(t => '· ' + esc(t)).join('<br>')}</div>
+      </div>
+
+      ${r.urgent.length ? `<div class="section-head"><div class="t">还在临期<small>${r.urgent.length} 件</small></div></div>
+        <div class="panel" style="margin-top:9px"><div class="p-body" style="margin-top:0">${esc(r.urgent.join('、'))}</div>
+        <div class="btn-row"><button class="btn primary sm" data-action="genMenu">排临期菜单</button></div></div>` : ''}
+
+      <div class="btn-row"><button class="btn ghost" data-action="back">返回</button></div>
+      <div style="height:8px"></div>`
+    };
+  }
+
   /* ---------------- 我的 ---------------- */
   function viewMe() {
     const st = S.state;
@@ -1013,6 +1162,30 @@
           : `<div class="p-body" style="margin-top:0">清单是空的。</div>`}
       </div>
 
+      <div class="section-head"><div class="t">本周报告</div>
+        <button class="more" data-report="1">看详情 ›</button></div>
+      <div class="panel" style="margin-top:9px;padding:7px 14px">
+        <div class="ing"><div class="l">🍳 本周做菜</div><div class="q">${st.stats.cooked || 0} 顿</div></div>
+        <div class="ing"><div class="l">💰 挽回浪费</div><div class="q">¥${((st.stats.saved || 0)).toFixed(1)}</div></div>
+        <div class="ing"><div class="l">🗑 清理过期</div><div class="q">${st.stats.trashed || 0} 件</div></div>
+      </div>
+
+      <div class="section-head"><div class="t">设置</div></div>
+      <div class="panel" style="margin-top:9px;padding:7px 14px">
+        <div class="field">
+          <div class="lab">深色模式<small>晚上看更护眼</small></div>
+          <button class="chip" data-action="toggleDark">${(w.document.documentElement.dataset.theme === 'dark') ? '已开启' : '已关闭'}</button>
+        </div>
+        <div class="field">
+          <div class="lab">数据导出<small>导成 JSON 备份</small></div>
+          <button class="chip" data-action="exportData">导出</button>
+        </div>
+        <div class="field">
+          <div class="lab">问问冰箱<small>对话式找菜</small></div>
+          <button class="chip" data-action="openChat">打开</button>
+        </div>
+      </div>
+
       <div class="section-head"><div class="t">数据</div></div>
       <div class="panel" style="margin-top:8px">
         <div class="p-body" style="margin-top:0">所有数据存在本机浏览器（localStorage），不会上传。刷新或关闭后仍在。</div>
@@ -1042,6 +1215,7 @@
       case 'login': return viewLogin();
       case 'family': return viewFamilySetup();
       case 'search': return viewSearch();
+      case 'report': return viewReport();
       default: return viewFridge();
     }
   }

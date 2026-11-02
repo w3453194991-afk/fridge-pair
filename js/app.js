@@ -7,7 +7,7 @@
 
   w.DD_VIEW = {
     filter: 'all', recTab: 'fit', q: '', vq: '', sugIdx: 0,
-    party: { dateKey: 'fri', men: 2, women: 2, kids: 1, cuisine: '家常', wish: '', taste: '' },
+    party: { dateKey: 'fri', men: 2, women: 2, kids: 1, cuisine: '家常', wish: '', taste: '', budget: 0 },
     login: { phone: '', code: '', sent: false },
     onb: null
   };
@@ -108,13 +108,22 @@
      点击分发
      ============================================================ */
   d.addEventListener('click', function (e) {
-    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play],[data-ext],[data-count]');
+    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play],[data-ext],[data-count],[data-report],[data-timer],[data-speak],[data-speakall],[data-chip]');
     if (!t) return;
 
     if (t.hasAttribute('data-ext')) {
       openExternal(t.getAttribute('data-ext'));
       return;
     }
+    if (t.hasAttribute('data-report')) { go({ name: 'report' }); return; }
+    if (t.hasAttribute('data-timer')) { startTimer(t); return; }
+    if (t.hasAttribute('data-speak')) { speak(t.getAttribute('data-speak')); return; }
+    if (t.hasAttribute('data-speakall')) {
+      const dd = D.DISHES.filter(x => x.id === t.getAttribute('data-speakall'))[0];
+      if (dd) speak(dd.name + '。' + dd.steps.map((s, i) => '第' + (i + 1) + '步，' + s.text).join(' '));
+      return;
+    }
+    if (t.hasAttribute('data-chip')) { runChip(parseInt(t.getAttribute('data-chip'), 10)); return; }
     if (t.hasAttribute('data-count')) {
       const n = Math.max(1, Math.min(8, parseInt(t.getAttribute('data-count'), 10) || 1));
       const ob = w.DD_VIEW.onb;
@@ -220,12 +229,15 @@
         const total = (P.men + P.women + P.kids) || 1;
         const wp = d.getElementById('partyWish');
         const tp = d.getElementById('partyTaste');
+        const bp = d.getElementById('partyBudget');
         if (wp) P.wish = wp.value.trim();
         if (tp) P.taste = tp.value.trim();
+        if (bp) P.budget = parseInt(bp.value, 10) || 0;
         S.state.party = E.partyPlan(S.state, {
           men: P.men, women: P.women, kids: P.kids,
           cuisine: P.cuisine, dateLabel: U.partyDateLabel(P.dateKey),
-          wish: P.wish, taste: P.taste
+          wish: P.wish, taste: P.taste, budget: P.budget,
+          avoid: (S.state.family && S.state.family.avoid) || []
         });
         S.save();
         renderAll(false);
@@ -245,6 +257,32 @@
         w.DD_VIEW.q = '';
         renderAll(false);
         break;
+      case 'openChat': openChat(); break;
+      case 'chatSend': chatSend(); break;
+      case 'back': back(); break;
+      case 'toggleDark': {
+        const cur = d.documentElement.dataset.theme === 'dark';
+        d.documentElement.dataset.theme = cur ? 'light' : 'dark';
+        try { localStorage.setItem('ddm.theme', d.documentElement.dataset.theme); } catch (e) {}
+        renderAll(false);
+        toast(cur ? '已切回浅色' : '已开启深色模式');
+        break;
+      }
+      case 'exportData': {
+        try {
+          const blob = new Blob([JSON.stringify(S.state, null, 2)], { type: 'application/json' });
+          const a = d.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'fridge-data-' + new Date().toISOString().slice(0, 10) + '.json';
+          d.body.appendChild(a); a.click(); d.body.removeChild(a);
+          toast('已导出 JSON');
+        } catch (e) { toast('导出失败：' + e.message); }
+        break;
+      }
+      case 'cartAddDish': {
+        addDishMissingToCart(t.getAttribute('data-id'));
+        break;
+      }
       case 'playFrame': {
         const fr = d.getElementById('vframe');
         if (fr && !fr.querySelector('iframe')) {
@@ -510,9 +548,15 @@
     }
   });
 
+  d.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target.id === 'chatInput') {
+      e.preventDefault();
+      chatSend();
+    }
+  });
+
   d.addEventListener('change', function (e) {
-    if (e.target.id === 'camFile') {
-      const file = e.target.files && e.target.files[0];
+    if (e.target.id === 'camFile') {      const file = e.target.files && e.target.files[0];
       if (!file) return;
       const rd = new FileReader();
       rd.onload = function (ev) {
@@ -1022,13 +1066,177 @@
   }
 
   /* ============================================================
+     计时器 / 语音 / 对话助手
+     ============================================================ */
+  function fmtSec(s) {
+    const m = Math.floor(s / 60), r = s % 60;
+    return m + ':' + String(r).padStart(2, '0');
+  }
+
+  function beep() {
+    try {
+      const AC = w.AudioContext || w.webkitAudioContext;
+      if (!AC) return;
+      const ctx = new AC();
+      [0, 0.55, 1.1].forEach(function (t, i) {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = 880 - i * 70;
+        g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.32);
+        o.connect(g); g.connect(ctx.destination);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.4);
+      });
+      setTimeout(function () { try { ctx.close(); } catch (e) {} }, 2200);
+    } catch (e) { /* 静默失败 */ }
+  }
+
+  function startTimer(btn) {
+    const orig = parseInt(btn.getAttribute('data-timer'), 10) || 60;
+    if (btn._tid) {
+      clearInterval(btn._tid); btn._tid = null;
+      btn.classList.remove('on');
+      btn.textContent = '⏱ ' + fmtSec(orig);
+      return;
+    }
+    let left = orig;
+    btn.classList.add('on');
+    btn.textContent = '⏱ ' + fmtSec(left);
+    btn._tid = setInterval(function () {
+      left--;
+      if (left <= 0) {
+        clearInterval(btn._tid); btn._tid = null;
+        btn.classList.remove('on');
+        btn.textContent = '⏱ 时间到';
+        beep();
+        toast('⏰ 计时结束，看看锅里');
+        setTimeout(function () { btn.textContent = '⏱ ' + fmtSec(orig); }, 2600);
+        return;
+      }
+      btn.textContent = '⏱ ' + fmtSec(left);
+    }, 1000);
+  }
+
+  function speak(text) {
+    if (!('speechSynthesis' in w)) { toast('当前浏览器不支持语音朗读'); return; }
+    try {
+      w.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'zh-CN';
+      u.rate = 0.95;
+      w.speechSynthesis.speak(u);
+    } catch (e) { toast('朗读失败'); }
+  }
+
+  function openChat() {
+    if (!w.DD_VIEW.chat) {
+      w.DD_VIEW.chat = [{
+        role: 'bot',
+        text: '我是冰箱管家 🧊 可以问我：今晚吃什么、什么快坏了、冰箱还有啥、该买什么，或者「怎么做番茄炒蛋」。'
+      }];
+    }
+    drawChat();
+  }
+
+  function drawChat() {
+    const msgs = w.DD_VIEW.chat;
+    const last = msgs[msgs.length - 1];
+    const chips = (last && last.role === 'bot' && last.chips) ? last.chips : [];
+    openModal(`
+      <div class="sheet-head"><div class="t">🤖 问问冰箱</div>
+        <button class="x" data-action="closeModal">✕</button></div>
+      <div class="chat" id="chatBox">
+        ${msgs.map(function (m) { return `<div class="msg ${m.role}">${U.esc(m.text)}</div>`; }).join('')}
+      </div>
+      ${chips.length ? `<div class="chat-chips">${chips.map((c, i) => `<button class="chip" data-chip="${i}">${U.esc(c.label)}</button>`).join('')}</div>` : ''}
+      <div class="chat-input">
+        <input id="chatInput" placeholder="比如：今晚吃什么" maxlength="30">
+        <button class="chat-send" data-action="chatSend">发送</button>
+      </div>
+      <div class="chat-tips">也可以直接说：「土豆能做什么」「清淡点的菜」「这周浪费了多少」</div>`);
+    setTimeout(function () {
+      const box = d.getElementById('chatBox');
+      if (box) box.scrollTop = box.scrollHeight;
+      const inp = d.getElementById('chatInput');
+      if (inp) inp.focus();
+    }, 40);
+  }
+
+  function chatAsk(q) {
+    if (!q || !String(q).trim()) return;
+    w.DD_VIEW.chat.push({ role: 'me', text: String(q).trim() });
+    const res = E.assistant(q, S.state);
+    w.DD_VIEW.chat.push({ role: 'bot', text: res.reply, chips: res.chips });
+    drawChat();
+  }
+
+  function chatSend() {
+    const inp = d.getElementById('chatInput');
+    chatAsk(inp ? inp.value : '');
+  }
+
+  function addDishMissingToCart(id) {
+    const dd = D.DISHES.filter(x => x.id === id)[0];
+    if (!dd) return;
+    const miss = E.ingredientState(dd, S.state.foods).filter(s => !s.ok);
+    if (!miss.length) { toast('食材都够，不用买'); return; }
+    S.addCart(miss.map(m => ({
+      name: m.name, emoji: m.emoji, unit: m.unit,
+      qty: Math.max(0.1, Math.round((m.qty - m.haveQty) * 10) / 10),
+      price: E.foodMeta(m.name).price || 0
+    })));
+    toast('已加入采购清单 ' + miss.length + ' 样');
+    tabTo('plan');
+  }
+
+  function runChip(i) {
+    const msgs = w.DD_VIEW.chat || [];
+    const last = msgs[msgs.length - 1];
+    if (!last || !last.chips) return;
+    const c = last.chips[i];
+    if (!c) return;
+    if (c.ask) { chatAsk(c.ask); return; }
+    closeModal();
+    if (c.dish) { go({ name: 'dish', id: c.dish }); return; }
+    if (c.view) {
+      if (c.view === 'week') {
+        if (!S.state.week) { S.state.week = E.planWeek(S.state); S.save(); }
+        go({ name: 'week' });
+      } else if (c.view === 'fridge') tabTo('fridge');
+      else if (c.view === 'plan') tabTo('plan');
+      else go({ name: c.view });
+      return;
+    }
+    if (c.addCart) { addDishMissingToCart(c.addCart); return; }
+    if (c.action === 'genWeek') {
+      S.state.week = E.planWeek(S.state); S.save();
+      go({ name: 'week' });
+    } else if (c.action === 'genMenu') openUrgentMenu();
+    else if (c.action === 'cleanExpired') openCleanup();
+    else if (c.action === 'shoot') openCamera('add');
+  }
+
+  /* ============================================================
      启动
      ============================================================ */
   S.load();
   tick();
   setInterval(tick, 20000);
+
+  // 主题：优先用上次选择的
+  try {
+    const th = localStorage.getItem('ddm.theme');
+    if (th) d.documentElement.dataset.theme = th;
+  } catch (e) {}
+
   APP.view = S.state.family.loggedIn ? viewFromHash() : { name: 'login' };
   renderAll(true);
+
+  // PWA：注册 service worker（file:// 下会失败，忽略即可）
+  if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  }
 
   w.DD_APP = { go: go, tabTo: tabTo, back: back, render: renderAll };
 })(window, document);
