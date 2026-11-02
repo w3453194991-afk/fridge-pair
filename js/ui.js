@@ -916,7 +916,7 @@
   function viewSearch() {
     const q = (w.DD_VIEW.q || '').trim();
     const st = S.state;
-    const res = E.search(q, st.foods);
+    const res = E.smartSearch(q, st.foods);
     const hot = ['番茄炒蛋', '西兰花炒牛肉', '土豆', '川菜', '排骨', '清淡'];
 
     let body = '';
@@ -937,8 +937,30 @@
         </div>`;
     } else {
       body = `
+        ${res.changed ? `<div class="tiny muted" style="padding:8px 2px 0">已按「${esc(res.norm)}」搜索</div>` : ''}
         ${res.dishes.length ? `<div class="section-head"><div class="t">菜谱<small>${res.dishes.length} 道</small></div></div>
           ${res.dishes.map(d => dishRow(d, E.ingredientState(d, st.foods).every(s => s.ok))).join('')}` : ''}
+
+        ${(!res.dishes.length && res.suggestion.length) ? `
+          <div class="panel" style="margin-top:10px;background:linear-gradient(135deg,#FFF7EE,#FFFFFF 72%);border:1px solid #FBE3CF;box-shadow:none">
+            <h3><span class="dot"></span>没收录「${esc(res.raw)}」</h3>
+            <div class="p-body">
+              菜谱库里还没有这道菜的做法。${res.guessed.length
+                ? '不过你提到的是 <b>' + esc(res.guessed.join('、')) + '</b>，下面这几道用得上：'
+                : '但下面这些可能接近你想要的做法：'}
+            </div>
+          </div>
+          ${res.suggestion.map(d => dishRow(d, E.ingredientState(d, st.foods).every(s => s.ok))).join('')}
+        ` : ''}
+
+        ${(!res.dishes.length && !res.suggestion.length && res.guessed.length) ? `
+          <div class="panel" style="margin-top:10px;background:linear-gradient(135deg,#FFF7EE,#FFFFFF 72%);border:1px solid #FBE3CF;box-shadow:none">
+            <h3><span class="dot"></span>没收录「${esc(res.raw)}」</h3>
+            <div class="p-body">
+              菜谱库里还没有用 <b>${esc(res.guessed.join('、'))}</b> 做的菜。
+              可以先去平台看做法，做好后拍照入库，下次就能直接排进菜单。
+            </div>
+          </div>` : ''}
 
         ${res.foods.length ? `<div class="section-head"><div class="t">冰箱里的食材<small>${res.foods.length} 件</small></div></div>
           <div class="panel" style="margin-top:9px;padding:6px 14px">
@@ -955,7 +977,7 @@
           </div>
         </div>
 
-        ${!res.dishes.length && !res.foods.length
+        ${!res.dishes.length && !res.foods.length && !res.suggestion.length
           ? `<div class="empty"><div class="e">🔍</div><div class="t">没搜到「${esc(q)}」</div>
              <div class="d">换个词试试，比如「番茄」「排骨」「清淡」</div></div>` : ''}`;
     }

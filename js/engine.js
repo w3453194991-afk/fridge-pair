@@ -703,6 +703,52 @@
     };
   }
 
+  /* ---------- 智能搜索：别名归一 + 菜名里抽食材 ---------- */
+  function normalizeQuery(q) {
+    let s = String(q || '').trim();
+    Object.keys(D.FOOD_ALIAS).forEach(function (k) {
+      if (k.length >= 2 && s.indexOf(k) >= 0) s = s.split(k).join(D.FOOD_ALIAS[k]);
+    });
+    return s;
+  }
+
+  function guessFoods(q) {
+    const s = normalizeQuery(q);
+    let stripped = s;
+    D.COOK_WORDS.forEach(function (w) { stripped = stripped.split(w).join(' '); });
+    const hits = [];
+    D.FOOD_DB.map(f => f.name).sort((a, b) => b.length - a.length).forEach(function (n) {
+      if ((s.indexOf(n) >= 0 || stripped.indexOf(n) >= 0) && hits.indexOf(n) < 0) hits.push(n);
+    });
+    return hits;
+  }
+
+  function smartSearch(q, foods) {
+    const raw = String(q || '').trim();
+    const norm = normalizeQuery(raw);
+    const direct = search(norm, foods);
+    const guessed = guessFoods(raw);
+    let suggestion = [];
+
+    if (!direct.dishes.length && guessed.length) {
+      suggestion = D.DISHES.filter(function (d) {
+        return d.ingredients.some(function (i) { return guessed.indexOf(i.name) >= 0; });
+      }).sort(function (a, b) {
+        const ca = ingredientState(a, foods).every(s => s.ok) ? 1 : 0;
+        const cb = ingredientState(b, foods).every(s => s.ok) ? 1 : 0;
+        if (ca !== cb) return cb - ca;
+        const ha = a.ingredients.filter(i => guessed.indexOf(i.name) >= 0).length;
+        const hb = b.ingredients.filter(i => guessed.indexOf(i.name) >= 0).length;
+        return hb - ha;
+      }).slice(0, 6);
+    }
+
+    return {
+      raw: raw, norm: norm, dishes: direct.dishes, foods: direct.foods,
+      guessed: guessed, suggestion: suggestion, changed: norm !== raw
+    };
+  }
+
   /* ---------- 疾病史 ---------- */
   function conditionPenalty(dish, conds) {
     if (!conds || !conds.length) return 0;
@@ -734,7 +780,7 @@
     byName, findFood, foodMeta,
     pairList, topSuggestion, urgentList,
     ingredientState, cookable, nearMiss, dishScore, cook,
-    planWeek, partyPlan, todayMenu, search, summary, parseTaste,
+    planWeek, partyPlan, todayMenu, search, smartSearch, normalizeQuery, guessFoods, summary, parseTaste,
     videoEmbed, videoPage, videoSearch,
     NUT_KEYS, dishNutrition, dishNutritionPerServing, dailyTarget, dayNutrition, nutritionBars,
     mealNutrition, perMealTarget,

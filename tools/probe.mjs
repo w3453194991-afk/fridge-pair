@@ -189,6 +189,27 @@ const errors = [];
   report.chatMsgs = await run(`document.querySelectorAll('.msg').length`);
   await click('[data-action="closeModal"]');
 
+  /* 全局搜索：别名命中 / 菜名兜底 / 完全搜不到 */
+  await click('#navSearch');
+  await type('#globalSearch', '西红柿炒蛋');
+  await sleep(320);
+  await shot('08-search-alias');
+  report.searchAlias = await run(`document.querySelectorAll('.dish[data-dish]').length`);
+  report.aliasHint = await run(`(() => { const e = document.querySelector('.tiny.muted'); return e ? e.textContent.trim().slice(0, 20) : ''; })()`);
+
+  await type('#globalSearch', '鱼香茄子');
+  await sleep(350);
+  await shot('08b-search-fallback');
+  report.fallbackTitle = await run(`(() => { const h = document.querySelector('.panel h3'); return h ? h.textContent.trim() : ''; })()`);
+  report.fallbackDishes = await run(`Array.from(document.querySelectorAll('.dish[data-dish] .nm')).map(e => e.textContent.trim()).slice(0, 4)`);
+
+  await type('#globalSearch', '可乐鸡翅');
+  await sleep(350);
+  await shot('08c-search-miss');
+  report.missTitle = await run(`(() => { const h = document.querySelector('.panel h3'); return h ? h.textContent.trim() : ''; })()`);
+  await click('.nav-back');
+  await sleep(250);
+
   /* 聚餐：带预算 */
   await click('[data-nav="plan"]');
   await click('[data-action="openParty"]');

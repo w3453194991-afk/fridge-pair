@@ -1392,11 +1392,181 @@
   const CONDITION_MAP = {};
   CONDITIONS.forEach(function (c) { CONDITION_MAP[c.key] = c; });
 
+  /* ============================================================
+     18. 大众菜补录（搜得到的高频菜名）
+     ============================================================ */
+  const COMMON_DISHES = [
+    {
+      id: 'braised-eggplant', name: '红烧茄子', emoji: '🍆', minutes: 20, level: '新手', cuisine: ['家常'],
+      meals: ['午', '晚'], tags: ['下饭', '家常', '素菜'],
+      ingredients: [{ name: '茄子', qty: 2 }, { name: '青椒', qty: 1 }],
+      seasonings: ['生抽 15 ml', '蚝油 8 g', '白糖 5 g', '蒜末 3 瓣', '淀粉水 少许'],
+      prep: ['茄子切滚刀块，撒盐腌 10 分钟挤干水。'],
+      steps: [
+        { heat: '中火', text: '茄子少油煎到金黄软塌，盛出。' },
+        { heat: '大火', text: '蒜末爆香，下青椒炒 1 分钟。' },
+        { heat: '大火', text: '倒回茄子，加生抽、蚝油、糖和半碗水，收汁出锅。' }
+      ],
+      tips: ['茄子先腌出水，能少吸一半油。', '收汁到发亮再关火。'],
+      nutrition: '茄子皮含花青素，别削太狠；红烧口味注意盐。', pair: '花青素 + 膳食纤维'
+    },
+    {
+      id: 'sweet-sour-ribs', name: '糖醋排骨', emoji: '🍖', minutes: 45, level: '进阶', cuisine: ['江浙'],
+      meals: ['午', '晚'], tags: ['宴客', '酸甜', '硬菜'],
+      ingredients: [{ name: '排骨', qty: 500 }],
+      seasonings: ['冰糖 30 g', '醋 40 ml', '生抽 20 ml', '料酒 20 ml', '姜 4 片'],
+      prep: ['排骨冷水下锅焯水，冲净沥干。'],
+      steps: [
+        { heat: '中火', text: '炒糖色到琥珀色，下排骨裹匀。' },
+        { heat: '中火', text: '加料酒、生抽、醋（一半）、热水没过，炖 25 分钟。' },
+        { heat: '大火', text: '加剩下的醋，大火收汁到浓稠挂壁。' }
+      ],
+      tips: ['醋分两次放：一次去腥，一次提香。', '收汁时要不停翻，容易糊。'],
+      nutrition: '糖醋口热量高，配清炒蔬菜平衡。', pair: '酸甜开胃'
+    },
+    {
+      id: 'egg-fried-rice', name: '蛋炒饭', emoji: '🍚', minutes: 10, level: '新手', cuisine: ['家常'],
+      meals: ['早', '午', '晚'], tags: ['快手', '剩饭救星', '孩子爱吃'],
+      ingredients: [{ name: '大米', qty: 0.2 }, { name: '鸡蛋', qty: 2 }, { name: '小葱', qty: 0.3 }],
+      seasonings: ['盐 2 g', '生抽 5 ml', '油 15 ml'],
+      prep: ['用隔夜冷饭，提前打散。'],
+      steps: [
+        { heat: '大火', text: '鸡蛋炒散盛出。' },
+        { heat: '大火', text: '下冷饭炒到粒粒分明，加盐。' },
+        { heat: '大火', text: '倒回鸡蛋，淋生抽，撒葱花翻匀。' }
+      ],
+      tips: ['冷饭才不粘。', '锅要够热，饭下锅后别急着翻。'],
+      nutrition: '碳水 + 蛋白，配一碗汤就是完整一餐。', pair: '快速供能'
+    },
+    {
+      id: 'jingjiang-pork', name: '京酱肉丝', emoji: '🥢', minutes: 25, level: '进阶', cuisine: ['鲁菜'],
+      meals: ['午', '晚'], tags: ['下饭', '豆香', '经典'],
+      ingredients: [{ name: '猪里脊', qty: 300 }, { name: '大葱', qty: 1 }, { name: '甜面酱', qty: 40 }],
+      seasonings: ['生抽 10 ml', '白糖 8 g', '料酒 10 ml', '淀粉 5 g'],
+      prep: ['里脊切丝上浆腌 10 分钟，大葱切细丝铺盘底。'],
+      steps: [
+        { heat: '大火', text: '肉丝滑油变色盛出。' },
+        { heat: '中小火', text: '甜面酱加糖和少许水炒香（要冒泡）。' },
+        { heat: '大火', text: '倒回肉丝快速裹匀，浇在葱丝上。' }
+      ],
+      tips: ['甜面酱一定要炒过才不齁。', '葱丝垫底，肉丝盖上去葱香就出来了。'],
+      nutrition: '蛋白充足，酱料咸甜，主食配薄饼或米饭。', pair: '蛋白 + 发酵酱香'
+    },
+    {
+      id: 'dry-fried-beans', name: '干煸豆角', emoji: '🫘', minutes: 20, level: '新手', cuisine: ['川菜'],
+      meals: ['午', '晚'], tags: ['下饭', '香辣', '素菜'],
+      ingredients: [{ name: '豆角', qty: 400 }, { name: '干辣椒', qty: 5 }],
+      seasonings: ['蒜末 3 瓣', '芽菜 10 g', '生抽 10 ml', '盐 2 g', '油 25 ml'],
+      prep: ['豆角掰段，洗净彻底沥干。'],
+      steps: [
+        { heat: '中火', text: '豆角下锅干煸到起皱、表皮发白（约 4 分钟）。' },
+        { heat: '大火', text: '下蒜末、干辣椒、芽菜炒香。' },
+        { heat: '大火', text: '加生抽和盐翻匀出锅。' }
+      ],
+      tips: ['豆角必须彻底熟透，生的有毒。', '一定要沥干再下锅，不然溅油。'],
+      nutrition: '豆角纤维高，干煸用油偏多。', pair: '膳食纤维 + 蛋白'
+    },
+    {
+      id: 'hot-sour-potato', name: '酸辣土豆丝', emoji: '🥔', minutes: 12, level: '新手', cuisine: ['川菜', '家常'],
+      meals: ['午', '晚'], tags: ['快手', '下饭', '酸辣'],
+      ingredients: [{ name: '土豆', qty: 2 }, { name: '干辣椒', qty: 4 }],
+      seasonings: ['醋 15 ml', '盐 2 g', '蒜末 2 瓣', '油 15 ml'],
+      prep: ['土豆切细丝，泡水洗掉淀粉，沥干。'],
+      steps: [
+        { heat: '大火', text: '干辣椒和蒜末爆香。' },
+        { heat: '大火', text: '下土豆丝快炒 90 秒，沿锅边淋醋。' },
+        { heat: '大火', text: '加盐翻炒 20 秒出锅。' }
+      ],
+      tips: ['洗掉淀粉才脆不粘。', '醋分两次沿锅边淋，酸香更足。'],
+      nutrition: '土豆钾含量高，快炒保留维 C。', pair: '钾 + 维C'
+    },
+    {
+      id: 'mushroom-chicken', name: '香菇滑鸡', emoji: '🍄', minutes: 30, level: '新手', cuisine: ['粤菜'],
+      meals: ['午', '晚'], tags: ['蒸菜', '嫩滑', '零油烟'],
+      ingredients: [{ name: '香菇', qty: 6 }, { name: '鸡腿', qty: 2 }],
+      seasonings: ['生抽 15 ml', '蚝油 10 g', '淀粉 8 g', '姜丝 少许', '香油 5 ml'],
+      prep: ['鸡腿去骨切块，加生抽、蚝油、淀粉、姜丝腌 15 分钟。'],
+      steps: [
+        { heat: '大火', text: '香菇切块铺盘底，鸡块盖在上面。' },
+        { heat: '大火', text: '水开后大火蒸 12 分钟。' },
+        { heat: '关火', text: '淋香油，撒葱花。' }
+      ],
+      tips: ['淀粉腌是滑的关键。', '蒸出来的汁拌饭很香。'],
+      nutrition: '蒸制少油，鸡肉嫩滑适合老人小孩。', pair: '优质蛋白 + 香菇多糖'
+    },
+    {
+      id: 'steamed-scallop', name: '蒜蓉粉丝蒸扇贝', emoji: '🦪', minutes: 20, level: '新手', cuisine: ['粤菜'],
+      meals: ['午', '晚'], tags: ['宴客', '鲜', '蒸菜'],
+      ingredients: [{ name: '扇贝', qty: 6 }, { name: '粉丝', qty: 0.5 }, { name: '大蒜', qty: 1 }],
+      seasonings: ['蒸鱼豉油 15 ml', '油 20 ml', '小葱 1 根', '小米椒 1 个'],
+      prep: ['粉丝温水泡软，扇贝刷净取肉。'],
+      steps: [
+        { heat: '中火', text: '蒜末一半炸金黄，与生蒜末拌成金银蒜。' },
+        { heat: '大火', text: '粉丝垫底放扇贝，铺蒜蓉，水开后蒸 6 分钟。' },
+        { heat: '关火', text: '淋蒸鱼豉油，浇热油，撒葱花。' }
+      ],
+      tips: ['蒸 6 分钟就够，久了肉老。', '金银蒜比全炸的更香。'],
+      nutrition: '扇贝高蛋白低脂，含锌和硒。', pair: '海鲜蛋白 + 锌'
+    },
+    {
+      id: 'tomato-egg-soup', name: '番茄鸡蛋汤', emoji: '🍲', minutes: 12, level: '新手', cuisine: ['家常', '清淡'],
+      meals: ['午', '晚'], tags: ['快手', '汤羹', '开胃'],
+      ingredients: [{ name: '番茄', qty: 1 }, { name: '鸡蛋', qty: 2 }],
+      seasonings: ['盐 2 g', '香油 3 ml', '小葱 1 根', '淀粉水 少许'],
+      prep: ['番茄切小块，鸡蛋打散。'],
+      steps: [
+        { heat: '大火', text: '番茄炒出汁，加 600 ml 水烧开。' },
+        { heat: '中火', text: '淋少许淀粉水，汤更浓。' },
+        { heat: '关火', text: '关火后淋蛋液搅出蛋花，加盐、香油、葱花。' }
+      ],
+      tips: ['蛋液关火后淋，蛋花才嫩。', '番茄先炒再煮，汤色红亮。'],
+      nutrition: '低热量、好消化，配主食是一餐。', pair: '番茄红素 + 蛋白'
+    },
+    {
+      id: 'century-egg-congee', name: '皮蛋瘦肉粥', emoji: '🥣', minutes: 45, level: '新手', cuisine: ['粤菜'],
+      meals: ['早', '晚'], tags: ['养胃', '老人友好', '粤式'],
+      ingredients: [{ name: '皮蛋', qty: 1 }, { name: '大米', qty: 0.15 }, { name: '猪里脊', qty: 100 }],
+      seasonings: ['姜丝 少许', '盐 2 g', '白胡椒 少许', '小葱 1 根'],
+      prep: ['大米洗净冷冻 30 分钟更易开花；里脊切丝腌 10 分钟。'],
+      steps: [
+        { heat: '大火', text: '米加 8 倍水烧开，转小火熬 30 分钟。' },
+        { heat: '小火', text: '下皮蛋丁和姜丝再熬 5 分钟。' },
+        { heat: '中火', text: '下肉丝划散煮 2 分钟，加盐和白胡椒。' }
+      ],
+      tips: ['米冷冻过更容易稠。', '肉丝最后下，久了会柴。'],
+      nutrition: '软烂好消化，适合早餐和肠胃不好的人。', pair: '易消化 + 蛋白'
+    }
+  ];
+  COMMON_DISHES.forEach(function (d) {
+    d.videos = VIDEOS[d.id] || [];
+    DISHES.push(d);
+  });
+
+  /* ============================================================
+     19. 食材别名（搜"西红柿"也能找到番茄）
+     ============================================================ */
+  const FOOD_ALIAS = {
+    西红柿: '番茄', 洋柿子: '番茄', 马铃薯: '土豆', 洋芋: '土豆', 土豆片: '土豆',
+    花生米: '花生', 圆白菜: '卷心菜', 包菜: '卷心菜', 卷心菜: '卷心菜',
+    香葱: '小葱', 葱: '大葱', 里脊: '猪里脊', 猪里脊肉: '猪里脊', 牛里脊肉: '牛里脊',
+    鸡胸: '鸡胸肉', 鸡胸脯: '鸡胸肉', 三层肉: '五花肉', 猪蹄膀: '猪蹄',
+    基围虾: '虾', 明虾: '虾', 虾子: '虾', 冬菇: '香菇', 蘑菇: '香菇',
+    白菜: '大白菜', 莴苣: '莴笋', 粉条: '粉丝', 面条: '挂面', 米饭: '大米', 米: '大米',
+    蛋: '鸡蛋', 西红柿鸡蛋: '番茄', 青红椒: '青椒', 尖椒: '青椒',
+    豆角: '豆角', 豇豆: '豆角', 四季豆: '四季豆', 荷兰豆: '荷兰豆'
+  };
+  // 烹饪词，抽食材时要先剥掉
+  const COOK_WORDS = ['红烧', '清蒸', '干煸', '爆炒', '凉拌', '小炒', '家常', '香煎', '糖醋',
+    '蒜蓉', '麻辣', '酸辣', '水煮', '回锅', '干锅', '红烧肉', '炖', '焖', '烤', '煎', '炸',
+    '炒', '蒸', '拌', '汤', '羹', '粥', '丝', '片', '块', '丁', '条', '球', '的做法', '做法',
+    '怎么做', '如何', '菜谱', '教程'];
+
   w.DD_DATA = {
     FOOD_DB, FOOD_MAP, DISHES, PAIRS, SEED, PHOTO_SCENES,
     CUISINES: CUISINE_ALL, CUISINE_ALL, VIDEOS, PLATFORMS, PLATFORM_MAP,
     ALLERGENS, SUBSTITUTES, NUT, MEAL_SYSTEMS, SYSTEM_MAP,
     PRICE_BOOK, PRICE_SOURCE, RETAIL_FACTOR,
-    CONDITIONS, CONDITION_MAP
+    CONDITIONS, CONDITION_MAP,
+    FOOD_ALIAS, COOK_WORDS
   };
 })(window);
