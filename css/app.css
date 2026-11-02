@@ -958,3 +958,9 @@ input[type="range"]::-webkit-slider-thumb{
   height:220px; background:#F2EEE8;
 }
 .mapbox iframe{ width:100%; height:100%; border:0; display:block; }
+
+/* ---------- 一餐多菜（餐饮体系）---------- */
+.meal-dishes{ flex:1; display:flex; flex-wrap:wrap; align-items:center; gap:4px; min-width:0; }
+.meal .mname{ font-size:11.5px; font-weight:700; color:var(--ink); line-height:1.5; }
+.meal .mname:active{ color:#FF5C7A; }
+.meal .sep{ font-size:10px; color:var(--faint); }

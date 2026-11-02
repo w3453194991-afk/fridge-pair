@@ -162,6 +162,20 @@ const errors = [];
   await shot('04-week-nutrition');
   report.radar = await run(`!!document.querySelector('.radar polygon')`);
   report.nutBars = await run(`document.querySelectorAll('.nb').length`);
+  report.system = await run(`DD_STORE.state.family.system`);
+  report.day0meals = await run(`(() => { const d = document.querySelector('.weekday');
+    return Array.from(d.querySelectorAll('.meal')).map(m => m.querySelectorAll('.mname').length); })()`);
+
+  /* 切到西式餐饮体系 */
+  await click('[data-nav="plan"]');
+  await click('[data-system="west"]');
+  await sleep(300);
+  await click('[data-action="genWeek"]');
+  await sleep(700);
+  await shot('04b-week-west');
+  report.westSystem = await run(`DD_STORE.state.family.system`);
+  report.westDay0 = await run(`(() => { const d = document.querySelector('.weekday');
+    return Array.from(d.querySelectorAll('.meal')).map(m => m.querySelectorAll('.mname').length); })()`);
 
   /* 对话助手 */
   await click('[data-nav="fridge"]');

@@ -532,6 +532,7 @@
       used[id] = (used[id] || 0) + 1;
     }));
     const total = Object.keys(used).length;
+    const sys = D.SYSTEM_MAP[(week[0] && week[0].system) || 'cn'] || D.MEAL_SYSTEMS[0];
 
     const todayDishes = ['早', '午', '晚'].map(function (s) {
       const m = week[0].meals[s];
@@ -564,8 +565,10 @@
       <div class="panel" style="background:linear-gradient(120deg,#FFF7F0,#FFFDFB);border:1px solid #FBEADF;box-shadow:none">
         <h3><span class="dot"></span>为你家生成的 7 天菜单</h3>
         <div class="p-body">
-          兼顾 ${st.family.members.map(m => m.role).join(' / ')} 的饮食需求，
-          <b>临期食材排在周一、周二优先消耗</b>；同一道菜一周内尽量不重复。
+          <b>${sys.emoji} ${sys.name}</b>：${esc(sys.desc)}<br>
+          <span class="tiny muted">${esc(sys.structure)}</span><br>
+          兼顾 ${st.family.members.map(m => m.role).join(' / ')} 的饮食需求；
+          <b>临期食材排在今天、明天优先消耗</b>。
         </div>
         <div class="statmini" style="grid-template-columns:repeat(3,1fr)">
           <div class="s"><div class="v">${total}</div><div class="l">道菜不重样</div></div>
@@ -581,16 +584,17 @@
           <div class="wh"><div class="d">${esc(day.label)}<small>${esc(day.date)}</small></div>
             ${day.notes.length ? `<div class="n">${day.notes.map(n => '· ' + n).join(' ')}</div>` : ''}
           </div>
-          ${['早', '午', '晚'].map(slot => {
+          ${['早', '午', '晚'].map(function (slot) {
             const m = day.meals[slot];
-            if (!m) return '';
-            const dd = D.DISHES.filter(x => x.id === m.id)[0];
-            return `<button class="meal" data-dish="${dd.id}">
+            if (!m || !(m.ids || []).length) return '';
+            const items = (m.ids || [m.id]).map(id => D.DISHES.filter(x => x.id === id)[0]).filter(Boolean);
+            return `<div class="meal">
               <span class="slot">${slot}</span>
-              <span class="em">${dd.emoji}</span>
-              <span class="nm">${esc(dd.name)}${m.missing ? ' <small style="color:#C2410C">(需补料)</small>' : ''}</span>
-              ${!m.missing && dd.ingredients.some(i => { const f = E.findFood(st.foods, i.name); return f && E.tier(f) === 'p'; }) ? '<span class="flag">临期</span>' : ''}
-            </button>`;
+              <div class="meal-dishes">
+                ${items.map(dd => `<span class="mname" data-dish="${dd.id}">${dd.emoji} ${esc(dd.name)}</span>`).join('<span class="sep">·</span>')}
+              </div>
+              ${m.missing ? '<span class="flag" style="background:#FEE2E2;color:#B91C1C">补料</span>' : ''}
+            </div>`;
           }).join('')}
         </div>`).join('')}
 
@@ -609,6 +613,8 @@
     const fam = st.family;
     const cart = st.cart || [];
     const cartSum = cart.reduce((s, c) => s + c.qty * (c.price || 0), 0);
+    const curSys = (fam && fam.system) || 'cn';
+    const cur = D.SYSTEM_MAP[curSys] || D.MEAL_SYSTEMS[0];
 
     return {
       title: '配餐', tab: 'plan',
@@ -629,6 +635,18 @@
           } ${esc(m.role)} ${m.age} 岁</span>`).join('')}
         </div>
         ${fam.taboos ? `<div class="tiny muted" style="margin-top:8px">忌口：${esc(fam.taboos)}</div>` : ''}
+      </div>
+
+      <div class="section-head"><div class="t">餐饮体系<small>决定一餐的结构</small></div></div>
+      <div class="chips" style="padding-top:9px">
+        ${D.MEAL_SYSTEMS.map(s => `<button class="chip ${curSys === s.key ? 'on' : ''}" data-system="${s.key}">${s.emoji} ${s.name}</button>`).join('')}
+      </div>
+      <div class="panel" style="margin-top:9px;padding:11px 14px">
+        <div class="p-body" style="margin-top:0;font-size:11px">
+          <b>${cur.emoji} ${cur.name}</b> · ${esc(cur.desc)}<br>
+          <span class="tiny muted">${esc(cur.structure)}</span><br>
+          <span class="tiny muted">早：${cur.slots['早'].join(' + ')}　午：${cur.slots['午'].join(' + ')}　晚：${cur.slots['晚'].join(' + ')}</span>
+        </div>
       </div>
 
       <div class="ai" style="background:linear-gradient(125deg,#7C5CE0,#5B8DEF 60%,#33C3C0)">

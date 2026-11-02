@@ -173,69 +173,79 @@
   const WD = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
   function planWeek(state) {
+    const sysKey = (state.family && state.family.system) || 'cn';
+    const sys = D.SYSTEM_MAP[sysKey] || D.MEAL_SYSTEMS[0];
+    const avoid = (state.family && state.family.avoid) || [];
     const foods = state.foods.slice();
     const virt = {};
     foods.forEach(f => { virt[f.name] = { qty: f.qty, tier: tier(f) }; });
-
     const usedAt = {};
     const days = [];
 
-    function virtualCheck(dish) {
-      let sum = 0, okAll = true;
-      dish.ingredients.forEach(i => {
-        const v = virt[i.name];
-        if (!v || v.qty < i.qty - 1e-6) { okAll = false; return; }
-        sum += TIER_WEIGHT[v.tier] || 1;
+    function scoreDish(d) {
+      let s = 0;
+      d.ingredients.forEach(function (ing) {
+        const v = virt[ing.name];
+        if (!v) { s -= 6; return; }
+        s += TIER_WEIGHT[v.tier] || 1;
+        if (v.qty < ing.qty) s -= 8;
       });
-      return { okAll: okAll, score: sum };
+      if (sys.bias && sys.bias.length) {
+        if (d.cuisine.some(c => sys.bias.indexOf(c) >= 0)) s += 10;
+        else s -= 4;
+      }
+      if (usedAt[d.id] !== undefined) s -= 9; else s += 2;
+      return s + Math.random() * 2;
     }
 
     for (let i = 0; i < 7; i++) {
-      const date = now() + i * DAY;
-      const dt = new Date(date);
+      const dt = new Date(now() + i * DAY);
       const day = {
         idx: i,
         label: i === 0 ? '今天' : (i === 1 ? '明天' : WD[dt.getDay()]),
         date: (dt.getMonth() + 1) + '/' + dt.getDate(),
-        meals: {},
-        notes: []
+        meals: {}, notes: [], system: sys.key
       };
 
-      ['早', '午', '晚'].forEach(slot => {
-        const cands = D.DISHES.filter(d => d.meals.indexOf(slot) >= 0 && dishAllowed(d, state.family && state.family.avoid));
-        let best = null, bestScore = -1e9, bestOk = false;
+      ['早', '午', '晚'].forEach(function (slot) {
+        const roles = sys.slots[slot] || ['荤菜'];
+        const usedThisMeal = {};
+        const ids = [];
+        let missing = false;
 
-        cands.forEach(d => {
-          const chk = virtualCheck(d);
-          let s = chk.score;
-          if (!chk.okAll) s -= 14;
-          if (usedAt[d.id] !== undefined) s -= 10;   // 一周内尽量不重复
-          if (usedAt[d.id] === i) s -= 16;           // 同一天内不重复
-          if (usedAt[d.id] === i - 1) s -= 8;        // 相邻两天不重复
-          if (slot === '早' && d.minutes > 25) s -= 6;
-          if (slot === '晚' && d.minutes > 60) s -= 2;
-          s += Math.random() * 2;
-          if (s > bestScore) { bestScore = s; best = d; bestOk = chk.okAll; }
+        roles.forEach(function (role) {
+          let cands = D.DISHES.filter(d => d.role === role && d.meals.indexOf(slot) >= 0 && dishAllowed(d, avoid) && !usedThisMeal[d.id]);
+          if (!cands.length) cands = D.DISHES.filter(d => d.role === role && dishAllowed(d, avoid) && !usedThisMeal[d.id]);
+          if (!cands.length) cands = D.DISHES.filter(d => d.meals.indexOf(slot) >= 0 && dishAllowed(d, avoid) && !usedThisMeal[d.id]);
+          if (!cands.length) return;
+
+          let best = null, bestScore = -1e9;
+          cands.forEach(function (d) {
+            const sc = scoreDish(d);
+            if (sc > bestScore) { bestScore = sc; best = d; }
+          });
+          if (!best) return;
+
+          ids.push(best.id);
+          usedThisMeal[best.id] = 1;
+          usedAt[best.id] = i;
+          best.ingredients.forEach(function (ing) {
+            const v = virt[ing.name];
+            if (!v) { missing = true; return; }
+            if (v.qty < ing.qty) missing = true;
+            v.qty = Math.max(0, v.qty - ing.qty);
+          });
         });
 
-        if (!best) return;
-        day.meals[slot] = { id: best.id, missing: !bestOk };
-        usedAt[best.id] = i;
-
-        // 虚拟扣减，让后几天不会重复消耗同一批食材
-        if (bestOk) {
-          best.ingredients.forEach(ing => {
-            if (virt[ing.name]) virt[ing.name].qty = Math.max(0, virt[ing.name].qty - ing.qty);
-          });
-        }
+        day.meals[slot] = { ids: ids, id: ids[0], missing: missing };
       });
 
-      // 当天营养备注
-      const ids = Object.keys(day.meals).map(k => day.meals[k].id);
-      const ds = ids.map(id => D.DISHES.find(d => d.id === id)).filter(Boolean);
+      const allIds = [];
+      Object.keys(day.meals).forEach(k => { allIds.push.apply(allIds, day.meals[k].ids || []); });
+      const ds = allIds.map(id => D.DISHES.filter(d => d.id === id)[0]).filter(Boolean);
       const tagSet = {};
       ds.forEach(d => (d.tags || []).forEach(t => { tagSet[t] = (tagSet[t] || 0) + 1; }));
-      const order = ['补铁', '补钙', '高蛋白', '清淡', '孩子爱吃', '老人友好', '幼儿', '控糖', '低脂', 'Omega-3'];
+      const order = ['补铁', '补钙', '高蛋白', '清淡', '孩子爱吃', '老人友好', '幼儿', '控糖', '低脂', 'Omega-3', '下饭', '快手'];
       day.notes = order.filter(t => tagSet[t]).slice(0, 3);
 
       days.push(day);

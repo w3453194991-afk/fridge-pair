@@ -110,7 +110,7 @@
      点击分发
      ============================================================ */
   d.addEventListener('click', function (e) {
-    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play],[data-ext],[data-count],[data-report],[data-timer],[data-speak],[data-speakall],[data-chip],[data-pin]');
+    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play],[data-ext],[data-count],[data-report],[data-timer],[data-speak],[data-speakall],[data-chip],[data-pin],[data-system],[data-city]');
     if (!t) return;
 
     if (t.hasAttribute('data-pin')) {
@@ -143,6 +143,15 @@
       return;
     }
     if (t.hasAttribute('data-nav')) { tabTo(t.getAttribute('data-nav')); return; }
+    if (t.hasAttribute('data-system')) {
+      S.state.family.system = t.getAttribute('data-system');
+      S.state.week = null;
+      S.save();
+      renderAll(false);
+      const sys = D.SYSTEM_MAP[t.getAttribute('data-system')];
+      toast('已切到' + (sys ? sys.name : '') + '餐饮体系');
+      return;
+    }
     if (t.hasAttribute('data-city')) {
       const c = t.getAttribute('data-city');
       const preset = CITY_COORDS[c];

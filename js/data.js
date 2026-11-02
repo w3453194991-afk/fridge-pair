@@ -1289,9 +1289,66 @@
     d.cuisine = (d.cuisine || ['家常']).map(function (c) { return c === '西式' ? '西餐' : c; });
   });
 
+  /* ============================================================
+     15. 各国餐饮体系（一餐的「结构」，不只是菜）
+     角色：主食 / 荤菜 / 素菜 / 汤羹 / 蛋奶
+     ============================================================ */
+  const MEAL_SYSTEMS = [
+    {
+      key: 'cn', name: '中式', emoji: '🥢',
+      desc: '早/午/晚 · 主食 + 荤 + 素 + 汤',
+      structure: '一桌菜共享，讲究荤素搭配、最后喝汤',
+      bias: ['家常', '川菜', '粤菜', '江浙', '鲁菜', '湘菜', '东北', '西北', '清淡'],
+      slots: { '早': ['主食', '蛋奶'], '午': ['主食', '荤菜', '素菜'], '晚': ['荤菜', '素菜', '汤羹'] }
+    },
+    {
+      key: 'west', name: '西式', emoji: '🍽️',
+      desc: '前菜 → 主菜 → 配菜/汤',
+      structure: '分道上菜，一人一份，主菜定调',
+      bias: ['西餐'],
+      slots: { '早': ['蛋奶', '主食'], '午': ['荤菜', '素菜'], '晚': ['素菜', '荤菜', '汤羹'] }
+    },
+    {
+      key: 'jp', name: '日式', emoji: '🍱',
+      desc: '一汁三菜：主食 + 主菜 + 副菜 + 汤',
+      structure: '定食摆盘，米饭、汤、主菜各一份',
+      bias: ['日韩'],
+      slots: { '早': ['主食', '汤羹'], '午': ['主食', '荤菜', '素菜'], '晚': ['荤菜', '素菜', '汤羹'] }
+    },
+    {
+      key: 'kr', name: '韩式', emoji: '🍚',
+      desc: '饭 + 汤 + 主菜 + 小菜',
+      structure: '小菜共享、可以续，汤是固定项',
+      bias: ['日韩'],
+      slots: { '早': ['主食', '汤羹'], '午': ['主食', '荤菜'], '晚': ['荤菜', '汤羹', '素菜'] }
+    },
+    {
+      key: 'sea', name: '东南亚', emoji: '🍛',
+      desc: '咖喱/汤 + 主食 + 蔬菜',
+      structure: '重香料与椰浆，一菜一饭为主',
+      bias: ['东南亚'],
+      slots: { '早': ['主食', '蛋奶'], '午': ['荤菜', '主食'], '晚': ['汤羹', '荤菜', '素菜'] }
+    }
+  ];
+  const SYSTEM_MAP = {};
+  MEAL_SYSTEMS.forEach(function (s) { SYSTEM_MAP[s.key] = s; });
+
+  // 给每道菜标一个"这一餐里它扮演什么角色"
+  DISHES.forEach(function (d) {
+    const ns = d.ingredients.map(function (i) { return i.name; });
+    const has = function (re) { return ns.some(function (n) { return re.test(n); }); };
+    let role;
+    if (has(/酸奶/) || has(/牛奶/)) role = '蛋奶';
+    else if (/汤|羹|粥/.test(d.name)) role = '汤羹';
+    else if (has(/大米|挂面|面粉|馒头|面包|意面|粉丝|饺子皮|米线|河粉|乌冬|年糕|吐司|饼皮/)) role = '主食';
+    else if (has(/牛|羊|猪|鸡|鸭|鱼|虾|蟹|贝|肉|排骨|培根|香肠|火腿|鸡蛋|蛋/)) role = '荤菜';
+    else role = '素菜';
+    d.role = role;
+  });
+
   w.DD_DATA = {
     FOOD_DB, FOOD_MAP, DISHES, PAIRS, SEED, PHOTO_SCENES,
     CUISINES: CUISINE_ALL, CUISINE_ALL, VIDEOS, PLATFORMS, PLATFORM_MAP,
-    ALLERGENS, SUBSTITUTES, NUT
+    ALLERGENS, SUBSTITUTES, NUT, MEAL_SYSTEMS, SYSTEM_MAP
   };
 })(window);
