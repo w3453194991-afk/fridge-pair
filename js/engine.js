@@ -282,15 +282,22 @@
       .split(/[、,，;；\s+／/]+/).map(s => s.trim()).filter(Boolean).slice(0, 6);
 
     const foods = state.foods;
+    // 每道菜给一个随机扰动，并把上一桌的菜降权，保证每次排出来不一样
+    const jitter = {};
+    D.DISHES.forEach(function (d) { jitter[d.id] = Math.random() * 12; });
+    const exclude = opts.exclude || [];
+
     const sorted = D.DISHES.slice()
       .filter(d => dishAllowed(d, opts.avoid))
       .filter(d => conditionPenalty(d, opts.conditions) > -100)
       .sort(function (a, b) {
-      const ca = cuisine && a.cuisine.indexOf(cuisine) >= 0 ? 1 : 0;
-      const cb = cuisine && b.cuisine.indexOf(cuisine) >= 0 ? 1 : 0;
-      if (ca !== cb) return cb - ca;
-      return dishScore(b, foods) - dishScore(a, foods);
-    });
+        const ca = cuisine && a.cuisine.indexOf(cuisine) >= 0 ? 1 : 0;
+        const cb = cuisine && b.cuisine.indexOf(cuisine) >= 0 ? 1 : 0;
+        if (ca !== cb) return cb - ca;
+        const ka = dishScore(a, foods) + jitter[a.id] - (exclude.indexOf(a.id) >= 0 ? 30 : 0);
+        const kb = dishScore(b, foods) + jitter[b.id] - (exclude.indexOf(b.id) >= 0 ? 30 : 0);
+        return kb - ka;
+      });
     const cuisineHit = cuisine ? sorted.filter(d => d.cuisine.indexOf(cuisine) >= 0).length : 0;
     const picked = [];
     const wantMeat = ['牛里脊', '排骨', '鸡翅', '三文鱼'];

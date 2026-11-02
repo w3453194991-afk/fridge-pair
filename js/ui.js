@@ -643,6 +643,9 @@
         ${fam.taboos ? `<div class="tiny muted" style="margin-top:8px">忌口：${esc(fam.taboos)}</div>` : ''}
         ${(fam.avoid || []).length ? `<div class="tiny" style="margin-top:6px;color:#B45309">过敏原：${fam.avoid.join(' · ')}</div>` : ''}
         ${(fam.conditions || []).length ? `<div class="tiny" style="margin-top:6px;color:#B45309">疾病史：${fam.conditions.join(' · ')}</div>` : ''}
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn ghost sm" data-action="openHealth">🩺 健康档案（过敏原 / 疾病史）</button>
+        </div>
       </div>
 
       <div class="section-head"><div class="t">餐饮体系<small>决定一餐的结构</small></div></div>
@@ -1287,6 +1290,52 @@
     };
   }
 
+  /* ---------------- 健康档案（过敏原 / 疾病史） ---------------- */
+  function viewHealth() {
+    const h = w.DD_VIEW.healthDraft || { avoid: [], conditions: [], taboos: '' };
+    const blocked = D.DISHES.filter(function (d) {
+      return !E.dishAllowed(d, h.avoid) || E.conditionPenalty(d, h.conditions) <= -100;
+    }).length;
+
+    return {
+      title: '健康档案', back: true, tab: 'me',
+      html: `
+      <div class="panel" style="background:linear-gradient(135deg,#F2FBF5,#FFFFFF 72%);border:1px solid #D8F3E2;box-shadow:none">
+        <h3><span class="dot" style="background:#16A34A"></span>这些会直接影响排餐</h3>
+        <div class="p-body">
+          选中的过敏原和疾病史，会从菜谱库里剔除对应的菜。当前设置会避开 <b>${blocked}</b> 道（共 ${D.DISHES.length} 道）。
+        </div>
+      </div>
+
+      <div class="section-head"><div class="t">过敏原<small>可多选</small></div></div>
+      <div class="chips" style="padding-top:9px">
+        ${D.ALLERGENS.map(a => `<button class="chip ${h.avoid.indexOf(a) >= 0 ? 'on' : ''}" data-allergy="${a}">${a}</button>`).join('')}
+      </div>
+
+      <div class="section-head"><div class="t">疾病史<small>可多选</small></div></div>
+      <div class="chips" style="padding-top:9px">
+        ${D.CONDITIONS.map(c => `<button class="chip ${h.conditions.indexOf(c.key) >= 0 ? 'on' : ''}" data-condition="${c.key}">${c.emoji} ${c.key}</button>`).join('')}
+      </div>
+      ${h.conditions.length ? `<div class="panel" style="margin-top:10px;padding:6px 14px">
+        ${h.conditions.map(function (k) {
+          const c = D.CONDITION_MAP[k];
+          return `<div class="ing"><div class="l">${c.emoji} ${esc(c.key)}</div><div class="q">${esc(c.note)}</div></div>`;
+        }).join('')}
+      </div>` : ''}
+
+      <div class="onb-field">
+        <label>忌口 / 不吃（可留空）</label>
+        <input id="healthTaboo" value="${esc(h.taboos || '')}" placeholder="如：香菜、辣、海鲜" maxlength="20">
+      </div>
+
+      <button class="btn primary full" style="margin-top:16px" data-action="saveHealth">保存并重排菜单</button>
+      <div class="tiny muted" style="text-align:center;margin-top:12px;line-height:1.6">
+        也可以从「我的 → 家庭档案」里改家庭成员信息
+      </div>
+      <div style="height:6px"></div>`
+    };
+  }
+
   /* ---------------- 我的 ---------------- */
   function viewMe() {
     const st = S.state;
@@ -1331,6 +1380,18 @@
         </div>`).join('') : '<div class="p-body" style="margin-top:0">还没填家庭成员</div>'}
         ${st.family.taboos ? `<div class="tiny muted" style="padding:8px 0 4px">忌口：${esc(st.family.taboos)}</div>` : ''}
       </div>
+
+      <div class="section-head"><div class="t">健康档案<small>过敏原 · 疾病史</small></div>
+        <button class="more" data-action="openHealth">编辑 ›</button></div>
+      <button class="dish" data-action="openHealth" style="margin-top:9px">
+        <div class="em" style="background:linear-gradient(140deg,#F0FBF4,#E4F7EC)">🩺</div>
+        <div class="bd">
+          <div class="nm">过敏原与疾病史</div>
+          <div class="ds">${(st.family.avoid || []).length ? '过敏原：' + esc(st.family.avoid.join(' / ')) : '过敏原：未设置'}
+            · ${(st.family.conditions || []).length ? '疾病史：' + esc(st.family.conditions.join(' / ')) : '疾病史：未设置'}</div>
+        </div>
+        <div class="go">›</div>
+      </button>
 
       <div class="section-head"><div class="t">四色保质期规则</div></div>
       <div class="panel" style="margin-top:8px;padding:6px 13px">
@@ -1419,6 +1480,7 @@
       case 'family': return viewFamilySetup();
       case 'search': return viewSearch();
       case 'nearby': return viewNearby();
+      case 'health': return viewHealth();
       case 'report': return viewReport();
       default: return viewFridge();
     }

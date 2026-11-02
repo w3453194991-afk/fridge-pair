@@ -153,6 +153,8 @@
         readFamDraft();
         FAMD.conditions = FAMD.conditions || [];
         arr = FAMD.conditions;
+      } else if (w.DD_VIEW.healthDraft) {
+        arr = w.DD_VIEW.healthDraft.conditions;
       } else {
         w.DD_VIEW.onb.conditions = w.DD_VIEW.onb.conditions || [];
         arr = w.DD_VIEW.onb.conditions;
@@ -170,6 +172,8 @@
         readFamDraft();
         FAMD.avoid = FAMD.avoid || [];
         arr = FAMD.avoid;
+      } else if (w.DD_VIEW.healthDraft) {
+        arr = w.DD_VIEW.healthDraft.avoid;
       } else {
         w.DD_VIEW.onb.avoid = w.DD_VIEW.onb.avoid || [];
         arr = w.DD_VIEW.onb.avoid;
@@ -302,8 +306,10 @@
           cuisine: P.cuisine, dateLabel: U.partyDateLabel(P.dateKey),
           wish: P.wish, taste: P.taste, budget: P.budget,
           avoid: (S.state.family && S.state.family.avoid) || [],
-          conditions: (S.state.family && S.state.family.conditions) || []
+          conditions: (S.state.family && S.state.family.conditions) || [],
+          exclude: w.DD_VIEW.lastParty || []
         });
+        w.DD_VIEW.lastParty = (S.state.party.dishes || []).map(function (d) { return d.id; });
         S.save();
         renderAll(false);
         toast('已按 ' + total + ' 人排好这桌菜');
@@ -328,6 +334,31 @@
         w.DD_VIEW.q = '';
         renderAll(false);
         break;
+      case 'openHealth': {
+        const fam2 = S.state.family || {};
+        w.DD_VIEW.healthDraft = {
+          avoid: (fam2.avoid || []).slice(),
+          conditions: (fam2.conditions || []).slice(),
+          taboos: fam2.taboos || ''
+        };
+        go({ name: 'health' });
+        break;
+      }
+      case 'saveHealth': {
+        const h = w.DD_VIEW.healthDraft;
+        if (!h) { back(); break; }
+        const tb = d.getElementById('healthTaboo');
+        if (tb) h.taboos = tb.value.trim();
+        S.state.family.avoid = h.avoid.slice();
+        S.state.family.conditions = h.conditions.slice();
+        S.state.family.taboos = h.taboos;
+        S.state.week = null;
+        S.save();
+        w.DD_VIEW.healthDraft = null;
+        back();
+        toast('健康档案已保存，菜单会按新设定重排');
+        break;
+      }
       case 'openChat': openChat(); break;
       case 'openNearby':
         go({ name: 'nearby' });

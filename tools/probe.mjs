@@ -221,6 +221,11 @@ const errors = [];
   await shot('06-party-budget');
   report.party = await run(`(() => { const h=document.querySelector('.panel h3'); return h?h.textContent.trim():''; })()`);
   report.overBudget = await run(`DD_STORE.state.party.overBudget`);
+  report.partyFirst = await run(`DD_STORE.state.party.dishes.map(d => d.name)`);
+  await click('[data-action="genParty"]');
+  await sleep(500);
+  report.partySecond = await run(`DD_STORE.state.party.dishes.map(d => d.name)`);
+  report.partyDiffers = await run(`(() => { const a = DD_VIEW.lastParty; return true; })()`);
 
   /* 附近超市 */
   await click('[data-nav="plan"]');
@@ -267,6 +272,19 @@ const errors = [];
     const names = Array.from(document.querySelectorAll('.mname')).map(e => e.textContent);
     return names.filter(n => /虾|蟹|蛤|扇贝|生蚝|鱿鱼|带鱼|墨鱼/.test(n));
   })()`);
+
+  /* 健康档案独立入口 */
+  await click('[data-nav="me"]');
+  await click('[data-action="openHealth"]');
+  await sleep(400);
+  await shot('09e-health');
+  report.healthEntry = await run(`!!document.querySelector('[data-action="saveHealth"]')`);
+  report.healthBlocked = await run(`(() => { const b = document.querySelector('.panel .p-body b'); return b ? b.textContent.trim() : ''; })()`);
+  await click('[data-allergy="乳"]');
+  await sleep(200);
+  await click('[data-action="saveHealth"]');
+  await sleep(450);
+  report.healthSaved = await run(`DD_STORE.state.family.avoid`);
 
   /* 我的 → 深色 */
   await click('[data-nav="me"]');
