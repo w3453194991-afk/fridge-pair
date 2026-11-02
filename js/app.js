@@ -1285,7 +1285,7 @@
     if (!w.DD_VIEW.chat) {
       w.DD_VIEW.chat = [{
         role: 'bot',
-        text: '我是冰箱管家 🧊 可以问我：今晚吃什么、什么快坏了、冰箱还有啥、该买什么，或者「怎么做番茄炒蛋」。'
+        text: '我是冰箱管家 🧊 我不只会回答，还能直接帮你改：说「我对海鲜过敏」「我有高血压」「这周吃西餐」「把番茄炒蛋置顶」「刚买了2个番茄」，我会立刻写进去。'
       }];
     }
     drawChat();
@@ -1306,7 +1306,7 @@
         <input id="chatInput" placeholder="比如：今晚吃什么" maxlength="30">
         <button class="chat-send" data-action="chatSend">发送</button>
       </div>
-      <div class="chat-tips">也可以直接说：「土豆能做什么」「清淡点的菜」「这周浪费了多少」</div>`);
+      <div class="chat-tips">能改设置：「我对海鲜过敏」「家里有高血压」「这周吃西餐」「预算300」「这周五请4个人吃川菜」<br>能查：「今晚吃什么」「什么快坏了」「该买什么」「怎么做番茄炒蛋」</div>`);
     setTimeout(function () {
       const box = d.getElementById('chatBox');
       if (box) box.scrollTop = box.scrollHeight;
@@ -1315,10 +1315,97 @@
     }, 40);
   }
 
+  function applyAssistantAction(act) {
+    if (!act || !act.op) return;
+    const fam = S.state.family;
+    const arr = (k) => (fam[k] = fam[k] || []);
+
+    switch (act.op) {
+      case 'allergy.add':
+        if (arr('avoid').indexOf(act.value) < 0) fam.avoid.push(act.value);
+        S.state.week = null; S.save();
+        break;
+      case 'allergy.remove': {
+        const i = arr('avoid').indexOf(act.value);
+        if (i >= 0) fam.avoid.splice(i, 1);
+        S.state.week = null; S.save();
+        break;
+      }
+      case 'condition.add':
+        if (arr('conditions').indexOf(act.value) < 0) fam.conditions.push(act.value);
+        S.state.week = null; S.save();
+        break;
+      case 'condition.remove': {
+        const i = arr('conditions').indexOf(act.value);
+        if (i >= 0) fam.conditions.splice(i, 1);
+        S.state.week = null; S.save();
+        break;
+      }
+      case 'system':
+        fam.system = act.value;
+        S.state.week = null;
+        S.save();
+        break;
+      case 'pin':
+        S.togglePin(act.value);
+        break;
+      case 'theme':
+        d.documentElement.dataset.theme = act.value;
+        try { localStorage.setItem('ddm.theme', act.value); } catch (e) {}
+        break;
+      case 'food.add':
+        S.add(act.value.name, act.value.qty, (E.foodMeta(act.value.name).shelf) || 7);
+        break;
+      case 'food.consume': {
+        const f = S.state.foods.filter(x => x.name === act.value)[0];
+        if (f) S.consume(f.id, 1);
+        break;
+      }
+      case 'budget':
+        w.DD_VIEW.party.budget = act.value;
+        break;
+      case 'nav':
+        if (act.value === 'health') {
+          w.DD_VIEW.healthDraft = {
+            avoid: (fam.avoid || []).slice(),
+            conditions: (fam.conditions || []).slice(),
+            taboos: fam.taboos || ''
+          };
+        }
+        APP.stack = [];
+        APP.view = { name: act.value };
+        break;
+      case 'party': {
+        const p = w.DD_VIEW.party;
+        if (act.value.people) {
+          p.men = Math.ceil(act.value.people / 2);
+          p.women = act.value.people - p.men;
+          p.kids = 0;
+        }
+        if (act.value.cuisine) p.cuisine = act.value.cuisine;
+        if (act.value.dateKey) p.dateKey = act.value.dateKey;
+        S.state.party = E.partyPlan(S.state, {
+          men: p.men, women: p.women, kids: p.kids, cuisine: p.cuisine,
+          dateLabel: U.partyDateLabel(p.dateKey), wish: p.wish, taste: p.taste, budget: p.budget,
+          avoid: (fam.avoid || []), conditions: (fam.conditions || [])
+        });
+        S.save();
+        APP.stack = [];
+        APP.view = { name: 'party' };
+        break;
+      }
+      default: break;
+    }
+    renderAll(false);
+  }
+
   function chatAsk(q) {
     if (!q || !String(q).trim()) return;
     w.DD_VIEW.chat.push({ role: 'me', text: String(q).trim() });
     const res = E.assistant(q, S.state);
+    if (res.action) {
+      try { applyAssistantAction(res.action); } catch (e) { console.error(e); }
+    }
     w.DD_VIEW.chat.push({ role: 'bot', text: res.reply, chips: res.chips });
     drawChat();
   }

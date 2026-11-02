@@ -581,6 +581,12 @@
       return { reply: '可以问我：今晚吃什么 / 什么快坏了 / 冰箱还有啥 / 买什么 / 怎么做番茄炒蛋', chips: defaultChips() };
     }
 
+    // 先看是不是「让 AI 改设置」的指令（过敏原 / 疾病史 / 体系 / 置顶 / 入库…）
+    const cmd = parseCommand(text, state);
+    if (cmd) {
+      return { reply: cmd.say, chips: defaultChips(), action: cmd.op ? { op: cmd.op, value: cmd.value } : null };
+    }
+
     // 怎么做 X / 菜谱
     const dishHit = D.DISHES.filter(d => text.indexOf(d.name) >= 0)[0]
       || D.DISHES.filter(d => d.name.indexOf(text.replace(/怎么做|咋做|做法|教程|菜谱/g, '').trim()) >= 0)[0];
@@ -669,6 +675,7 @@
       };
     }
 
+    // 指令：让 AI 直接改设置（已在上方处理，这里保留兜底）
     // 兜底：搜索
     const res = search(text, foods);
     return {
@@ -756,6 +763,168 @@
     };
   }
 
+  /* ============================================================
+     指令解析：让 AI 能"操作界面"
+     返回 { op, value, say } —— say 是给用户的确认语
+     ============================================================ */
+  const ALLERGY_SYN = {
+    海鲜: ['海鲜', '虾', '蟹', '贝类', '鱼'],
+    乳: ['乳制品', '乳', '牛奶', '奶制品', '奶油'],
+    蛋: ['鸡蛋', '蛋'],
+    豆: ['豆制品', '大豆', '黄豆', '豆'],
+    麸质: ['麸质', '小麦', '面粉', '面筋'],
+    坚果: ['坚果', '花生', '核桃', '腰果', '杏仁']
+  };
+  const COND_SYN = {
+    高血压: ['高血压', '血压高', '血压'],
+    高血脂: ['高血脂', '血脂高', '血脂'],
+    糖尿病: ['糖尿病', '血糖高', '血糖'],
+    痛风: ['痛风', '尿酸'],
+    肾病: ['肾病', '肾不好', '肾功能'],
+    胃病: ['胃病', '胃不好', '胃疼', '胃炎']
+  };
+  const SYSTEM_SYN = {
+    west: ['西餐', '西式'], jp: ['日式', '日本菜'], kr: ['韩式', '韩国菜'],
+    sea: ['东南亚', '泰式', '泰国菜'], cn: ['中式', '中餐']
+  };
+
+  function pickEntity(text, dict) {
+    for (const k in dict) {
+      if (dict[k].some(function (w) { return text.indexOf(w) >= 0; })) return k;
+    }
+    return '';
+  }
+
+  function pickFood(text, foods) {
+    const names = D.FOOD_DB.map(f => f.name).sort((a, b) => b.length - a.length);
+    for (const n of names) if (text.indexOf(n) >= 0) return n;
+    return '';
+  }
+
+  function parseCommand(text, state) {
+    const t = String(text || '').trim();
+    if (!t) return null;
+    const neg = /不(要|用|加|吃|是)?|别|取消|去掉|没有/.test(t);
+
+    /* 1. 过敏原 */
+    if (/过敏/.test(t)) {
+      const a = pickEntity(t, ALLERGY_SYN);
+      if (a) {
+        return {
+          op: neg ? 'allergy.remove' : 'allergy.add',
+          value: a,
+          say: neg
+            ? '好，已经把「' + a + '」从过敏原里去掉。'
+            : '记下了：你对「' + a + '」过敏，已写进健康档案，之后排餐会避开含' + a + '的菜。'
+        };
+      }
+      if (neg) return { op: null, say: '好的，那就不加过敏原。' };
+      return { op: 'nav', value: 'health', say: '我帮你打开健康档案，你在里面勾选具体的过敏原就行。' };
+    }
+
+    /* 2. 疾病史 */
+    {
+      const c = pickEntity(t, COND_SYN);
+      if (c && /有|患|是|得|没|没有|取消|去掉/.test(t)) {
+        return {
+          op: neg ? 'condition.remove' : 'condition.add',
+          value: c,
+          say: neg
+            ? '好，已把「' + c + '」从疾病史里去掉。'
+            : '记下了：家里有「' + c + '」，之后排餐会自动避开相关食材（' + (D.CONDITION_MAP[c] ? D.CONDITION_MAP[c].note : '') + '）。'
+        };
+      }
+    }
+
+    /* 3. 餐饮体系 */
+    if (/换成|改成|这周|以后|都吃|想吃/.test(t)) {
+      const s = pickEntity(t, SYSTEM_SYN);
+      if (s) {
+        const nm = D.SYSTEM_MAP[s] ? D.SYSTEM_MAP[s].name : s;
+        return { op: 'system', value: s, say: '好的，餐饮体系切换成「' + nm + '」，重新生成一周菜单就会按这套结构排。' };
+      }
+    }
+
+    /* 4. 置顶 */
+    if (/置顶|顶上去|排前面/.test(t)) {
+      const d = D.DISHES.filter(x => t.indexOf(x.name) >= 0)[0];
+      if (d) return { op: 'pin', value: d.id, say: '已经把「' + d.name + '」置顶到菜谱最前面。' };
+    }
+
+    /* 5. 采购 */
+    if (/采购|清单|补货/.test(t) && !/买了|刚买/.test(t)) {
+      return { op: 'nav', value: 'plan', say: '我打开配餐页，采购清单在下面，缺什么一目了然。' };
+    }
+
+    /* 6. 入库 / 吃掉 */
+    if (/买了|刚买|入库|带回来/.test(t)) {
+      const f = pickFood(t, state.foods);
+      if (f) {
+        const m = t.match(/(\d+)\s*(个|颗|根|把|盒|袋|枚|斤|克|g|kg)/);
+        let qty = m ? parseFloat(m[1]) : 1;
+        if (m && m[2] === '斤') qty = qty * 500;
+        if (m && (m[2] === '克' || m[2] === 'g')) qty = qty;
+        const meta = foodMeta(f);
+        if (meta.unit === 'g' && qty <= 20) qty = qty * 500;
+        return { op: 'food.add', value: { name: f, qty: Math.max(1, qty) }, say: '已入库：' + f + ' ' + fmtQty(qty) + ' ' + meta.unit + '（按标准保质期算）。' };
+      }
+    }
+    if (/吃完|吃掉|用完了|没了/.test(t)) {
+      const f = pickFood(t, state.foods);
+      if (f) return { op: 'food.consume', value: f, say: '好，' + f + ' 已标记吃完，库存清掉了。' };
+    }
+
+    /* 7. 预算 */
+    {
+      const b = t.match(/预算[^\d]{0,4}(\d{2,5})/);
+      if (b) return { op: 'budget', value: parseInt(b[1], 10), say: '聚餐预算设为 ¥' + b[1] + '，超了会自动换掉最贵的菜。' };
+    }
+
+    /* 8. 聚餐 */
+    if (/聚餐|请客|请.{0,2}人|来.{0,3}人|朋友来|吃饭.{0,4}人/.test(t)) {
+      const p = t.match(/(\d+)\s*(个|位)?\s*人/);
+      const cu = pickCuisine(t);
+      const dateKey = /周五/.test(t) ? 'fri' : /周六/.test(t) ? 'sat' : /明天/.test(t) ? 'tomorrow' : /今天/.test(t) ? 'today' : '';
+      const parts = [];
+      if (p) parts.push(parseInt(p[1], 10) + ' 人');
+      if (cu) parts.push(cu);
+      if (dateKey) parts.push({ fri: '本周五', sat: '本周六', today: '今天', tomorrow: '明天' }[dateKey]);
+      return {
+        op: 'party',
+        value: { people: p ? parseInt(p[1], 10) : 4, cuisine: cu || '', dateKey: dateKey || '' },
+        say: '好的，按' + (parts.join(' · ') || '默认 4 人') + '帮你排一桌，已经排好了。'
+      };
+    }
+
+    /* 9. 主题 / 导航 */
+    if (/深色|夜间模式|黑一点/.test(t)) return { op: 'theme', value: 'dark', say: '已切到深色模式。' };
+    if (/浅色|白天模式|亮一点/.test(t)) return { op: 'theme', value: 'light', say: '已切回浅色模式。' };
+
+    if (/打开|看看|看一下|去/.test(t)) {
+      const navMap = [
+        [/超市|买菜|附近/, 'nearby', '附近超市'],
+        [/健康|过敏|疾病/, 'health', '健康档案'],
+        [/报告|周报|统计/, 'report', '每周报告'],
+        [/冰箱|库存/, 'fridge', '冰箱'],
+        [/配餐|菜单|食谱/, 'plan', '配餐'],
+        [/菜谱|做菜/, 'recipe', '菜谱']
+      ];
+      for (const it of navMap) {
+        if (it[0].test(t)) return { op: 'nav', value: it[1], say: '好的，打开' + it[2] + '。' };
+      }
+    }
+
+    return null;
+  }
+
+  function pickCuisine(t) {
+    const map = { 川菜: ['川菜', '麻辣', '四川'], 粤菜: ['粤菜', '广东'], 江浙: ['江浙', '杭帮', '上海菜'],
+      鲁菜: ['鲁菜', '山东'], 湘菜: ['湘菜', '湖南'], 东北: ['东北'], 西北: ['西北', '新疆'],
+      西餐: ['西餐', '西式'], 日韩: ['日式', '韩式', '日本', '韩国'], 东南亚: ['东南亚', '泰式', '咖喱'] };
+    for (const k in map) if (map[k].some(w => t.indexOf(w) >= 0)) return k;
+    return '';
+  }
+
   /* ---------- 疾病史 ---------- */
   function conditionPenalty(dish, conds) {
     if (!conds || !conds.length) return 0;
@@ -791,6 +960,7 @@
     videoEmbed, videoPage, videoSearch,
     NUT_KEYS, dishNutrition, dishNutritionPerServing, dailyTarget, dayNutrition, nutritionBars,
     mealNutrition, perMealTarget,
-    allergensOf, dishAllowed, conditionPenalty, substitutesFor, zones, assistant, weeklyReport
+    allergensOf, dishAllowed, conditionPenalty, substitutesFor, zones, assistant, weeklyReport,
+    parseCommand
   };
 })(window);

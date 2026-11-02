@@ -187,6 +187,14 @@ const errors = [];
   await sleep(400);
   await shot('05-chat');
   report.chatMsgs = await run(`document.querySelectorAll('.msg').length`);
+
+  /* 让 AI 直接执行指令：说「我对花生过敏」应自动写入健康档案 */
+  await type('#chatInput', '我对花生过敏');
+  await click('[data-action="chatSend"]');
+  await sleep(450);
+  await shot('05b-chat-action');
+  report.chatActionAvoid = await run(`DD_STORE.state.family.avoid`);
+  report.chatActionReply = await run(`(() => { const m = document.querySelectorAll('.msg.bot'); return m.length ? m[m.length - 1].textContent.trim().slice(0, 24) : ''; })()`);
   await click('[data-action="closeModal"]');
 
   /* 全局搜索：别名命中 / 菜名兜底 / 完全搜不到 */
@@ -246,6 +254,7 @@ const errors = [];
   report.avoid = await run(`DD_STORE.state.family.avoid`);
 
   /* 打开含海鲜的菜，看是否告警 */
+  await run(`DD_VIEW.q = ''`);
   await click('[data-nav="recipe"]');
   await click('[data-tabrec="all"]');
   await sleep(300);
