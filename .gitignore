@@ -1,0 +1,21 @@
+# 无头浏览器调试产物（probe.mjs 会自己清理，这里兜个底）
+.cdp-profile/
+.chrome-tmp/
+.edge-tmp/
+.c2/
+.c3/
+.c4/
+*.crdownload
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+
+# 调试用的 DOM dump
+shots/dom.html

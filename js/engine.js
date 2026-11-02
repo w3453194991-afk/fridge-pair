@@ -1,0 +1,328 @@
+/* ============================================================
+   冰箱对对碰 · 业务引擎
+   四色分级 / 相生相克 / 可做菜谱 / 一周配餐 / 聚餐补货
+   ============================================================ */
+(function (w) {
+  'use strict';
+  const D = w.DD_DATA;
+  const DAY = 86400000;
+
+  /* ---------- 时间 ---------- */
+  function now() {
+    const off = (w.DD_STORE && w.DD_STORE.state && w.DD_STORE.state.clockOffset) || 0;
+    return Date.now() + off;
+  }
+
+  /* ---------- 四色分级 ----------
+     ⚫ 已过期 : 剩余 ≤ 0 天
+     🟣 临期   : 剩余 1~2 天（必须优先吃掉）
+     🟡 正常   : 剩余 3~5 天（常规轮换）
+     🟢 充足   : 剩余 ≥ 6 天（安心存放）
+     阈值集中在这里，方便按业务调整。 */
+  const TIER_RULES = { purple: 2, yellow: 5 };
+  const TIERS = {
+    g: { key: 'g', label: '充足', emoji: '🟢', hint: '保质期充足，安心存放', color: '#22C55E' },
+    y: { key: 'y', label: '正常', emoji: '🟡', hint: '正常新鲜，建议常规轮换', color: '#EAAA08' },
+    p: { key: 'p', label: '临期', emoji: '🟣', hint: '高度临期，必须优先吃掉', color: '#8B5CF6' },
+    b: { key: 'b', label: '过期', emoji: '⚫', hint: '已过期，禁止食用，请清理', color: '#4B5563' }
+  };
+
+  function daysLeft(food) { return Math.ceil((food.expireAt - now()) / DAY); }
+
+  function tier(food) {
+    const d = daysLeft(food);
+    if (d <= 0) return 'b';
+    if (d <= TIER_RULES.purple) return 'p';
+    if (d <= TIER_RULES.yellow) return 'y';
+    return 'g';
+  }
+
+  const TIER_WEIGHT = { g: 1, y: 3, p: 7, b: -100 };
+
+  function counts(foods) {
+    const c = { g: 0, y: 0, p: 0, b: 0 };
+    foods.forEach(f => { c[tier(f)]++; });
+    return c;
+  }
+
+  /* ---------- 格式化 ---------- */
+  function fmtQty(n) {
+    if (n === null || n === undefined) return '';
+    const r = Math.round(n * 10) / 10;
+    return Number.isInteger(r) ? String(r) : r.toFixed(1);
+  }
+  function dayText(food) {
+    const d = daysLeft(food);
+    if (d === 0) return '今天到期';
+    if (d < 0) return '已过期 ' + Math.abs(d) + ' 天';
+    if (d === 1) return '仅剩 1 天';
+    return '剩 ' + d + ' 天';
+  }
+  function dateLabel(ts) {
+    const d = new Date(ts);
+    return (d.getMonth() + 1) + '月' + d.getDate() + '日';
+  }
+
+  /* ---------- 库存工具 ---------- */
+  function byName(foods) {
+    const m = {};
+    foods.forEach(f => { if (!m[f.name]) m[f.name] = f; });
+    return m;
+  }
+  function findFood(foods, name) {
+    for (let i = 0; i < foods.length; i++) if (foods[i].name === name) return foods[i];
+    return null;
+  }
+  function foodMeta(name) { return D.FOOD_MAP[name] || { name: name, emoji: '🍽', unit: '份', price: 5, cat: '其他', shelf: 7 }; }
+
+  /* ---------- 相生相克 ---------- */
+  function pairList(foods, onlyPresent) {
+    const have = byName(foods);
+    return D.PAIRS.filter(p => {
+      const a = have[p.a], b = have[p.b];
+      if (!onlyPresent) return true;
+      if (!a || !b) return false;
+      return tier(a) !== 'b' && tier(b) !== 'b';
+    }).map(p => {
+      const a = have[p.a], b = have[p.b];
+      const score = a && b ? TIER_WEIGHT[tier(a)] + TIER_WEIGHT[tier(b)] : 0;
+      return Object.assign({}, p, { score: score, present: !!(a && b) });
+    });
+  }
+
+  function topSuggestion(foods, offset) {
+    const list = pairList(foods, true).filter(p => p.type === 'syn' && p.dish);
+    list.sort((x, y) => y.score - x.score);
+    if (list.length) return list[(offset || 0) % list.length];
+    // 没有相生组合时，退化为"最临期的两样食材"
+    const live = foods.filter(f => tier(f) !== 'b').sort((a, b) => daysLeft(a) - daysLeft(b));
+    if (live.length >= 2) {
+      return { a: live[0].name, b: live[1].name, type: 'fallback', title: '临期优先组合', dish: null, score: 0,
+               desc: '这两样最快要过期，建议今天先处理掉其中一样。' };
+    }
+    return null;
+  }
+
+  function urgentList(foods) {
+    return foods.filter(f => tier(f) === 'p').sort((a, b) => daysLeft(a) - daysLeft(b));
+  }
+
+  /* ---------- 菜谱匹配 ---------- */
+  function ingredientState(dish, foods) {
+    const have = byName(foods);
+    return dish.ingredients.map(i => {
+      const f = have[i.name];
+      const enough = !!f && f.qty >= i.qty - 1e-6 && tier(f) !== 'b';
+      return {
+        name: i.name, qty: i.qty, unit: foodMeta(i.name).unit, emoji: foodMeta(i.name).emoji,
+        have: !!f, haveQty: f ? f.qty : 0, ok: enough,
+        expired: !!f && tier(f) === 'b'
+      };
+    });
+  }
+
+  function cookable(foods) {
+    return D.DISHES.filter(d => ingredientState(d, foods).every(s => s.ok));
+  }
+
+  function nearMiss(foods) {
+    return D.DISHES.filter(d => {
+      const st = ingredientState(d, foods);
+      const missing = st.filter(s => !s.ok);
+      return missing.length === 1 && !st.some(s => s.expired);
+    }).map(d => {
+      const st = ingredientState(d, foods);
+      return { dish: d, need: st.find(s => !s.ok) };
+    });
+  }
+
+  function dishScore(dish, foods) {
+    const st = ingredientState(dish, foods);
+    let s = 0;
+    st.forEach(x => {
+      if (!x.ok) return;
+      const f = findFood(foods, x.name);
+      s += TIER_WEIGHT[tier(f)];
+    });
+    return s;
+  }
+
+  /* ---------- 做菜：扣减库存 ---------- */
+  function cook(dish, state) {
+    const res = { used: [], removed: [], saved: 0 };
+    dish.ingredients.forEach(ing => {
+      const f = findFood(state.foods, ing.name);
+      if (!f) return;
+      const before = f.qty;
+      f.qty = Math.max(0, Math.round((f.qty - ing.qty) * 100) / 100);
+      res.used.push({ name: ing.name, qty: ing.qty, unit: foodMeta(ing.name).unit, left: f.qty });
+      if (f.qty <= 0) {
+        const meta = foodMeta(ing.name);
+        res.removed.push(f.name);
+        res.saved += (meta.price || 0) * before;
+      }
+    });
+    state.foods = state.foods.filter(f => f.qty > 0);
+    state.stats = state.stats || { cooked: 0, saved: 0 };
+    state.stats.cooked++;
+    state.stats.saved += res.saved;
+    return res;
+  }
+
+  /* ---------- 一周配餐 ---------- */
+  const WD = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+
+  function planWeek(state) {
+    const foods = state.foods.slice();
+    const virt = {};
+    foods.forEach(f => { virt[f.name] = { qty: f.qty, tier: tier(f) }; });
+
+    const usedAt = {};
+    const days = [];
+
+    function virtualCheck(dish) {
+      let sum = 0, okAll = true;
+      dish.ingredients.forEach(i => {
+        const v = virt[i.name];
+        if (!v || v.qty < i.qty - 1e-6) { okAll = false; return; }
+        sum += TIER_WEIGHT[v.tier] || 1;
+      });
+      return { okAll: okAll, score: sum };
+    }
+
+    for (let i = 0; i < 7; i++) {
+      const date = now() + i * DAY;
+      const dt = new Date(date);
+      const day = {
+        idx: i,
+        label: i === 0 ? '今天' : (i === 1 ? '明天' : WD[dt.getDay()]),
+        date: (dt.getMonth() + 1) + '/' + dt.getDate(),
+        meals: {},
+        notes: []
+      };
+
+      ['早', '午', '晚'].forEach(slot => {
+        const cands = D.DISHES.filter(d => d.meals.indexOf(slot) >= 0);
+        let best = null, bestScore = -1e9, bestOk = false;
+
+        cands.forEach(d => {
+          const chk = virtualCheck(d);
+          let s = chk.score;
+          if (!chk.okAll) s -= 14;
+          if (usedAt[d.id] !== undefined) s -= 10;   // 一周内尽量不重复
+          if (usedAt[d.id] === i) s -= 16;           // 同一天内不重复
+          if (usedAt[d.id] === i - 1) s -= 8;        // 相邻两天不重复
+          if (slot === '早' && d.minutes > 25) s -= 6;
+          if (slot === '晚' && d.minutes > 60) s -= 2;
+          s += Math.random() * 2;
+          if (s > bestScore) { bestScore = s; best = d; bestOk = chk.okAll; }
+        });
+
+        if (!best) return;
+        day.meals[slot] = { id: best.id, missing: !bestOk };
+        usedAt[best.id] = i;
+
+        // 虚拟扣减，让后几天不会重复消耗同一批食材
+        if (bestOk) {
+          best.ingredients.forEach(ing => {
+            if (virt[ing.name]) virt[ing.name].qty = Math.max(0, virt[ing.name].qty - ing.qty);
+          });
+        }
+      });
+
+      // 当天营养备注
+      const ids = Object.keys(day.meals).map(k => day.meals[k].id);
+      const ds = ids.map(id => D.DISHES.find(d => d.id === id)).filter(Boolean);
+      const tagSet = {};
+      ds.forEach(d => (d.tags || []).forEach(t => { tagSet[t] = (tagSet[t] || 0) + 1; }));
+      const order = ['补铁', '补钙', '高蛋白', '清淡', '孩子爱吃', '老人友好', '幼儿', '控糖', '低脂', 'Omega-3'];
+      day.notes = order.filter(t => tagSet[t]).slice(0, 3);
+
+      days.push(day);
+    }
+    return days;
+  }
+
+  /* ---------- 聚餐规划 ---------- */
+  function partyPlan(state, people) {
+    const foods = state.foods;
+    const sorted = D.DISHES.slice().sort((a, b) => dishScore(b, foods) - dishScore(a, foods));
+    const picked = [];
+    const wantMeat = ['牛里脊', '排骨', '鸡翅', '三文鱼'];
+    const has = byName(foods);
+
+    // 1 道肉菜 + 1 道素菜 + 1 道汤 + 1 道蛋/豆腐 + 1 道凉/水果
+    const buckets = [
+      { test: d => d.ingredients.some(i => wantMeat.indexOf(i.name) >= 0), n: 2 },
+      { test: d => d.ingredients.some(i => ['西兰花', '菠菜', '青椒', '土豆', '香菇'].indexOf(i.name) >= 0), n: 1 },
+      { test: d => d.tags.indexOf('清淡') >= 0 || d.name.indexOf('汤') >= 0, n: 1 },
+      { test: d => d.ingredients.some(i => ['鸡蛋', '豆腐', '牛奶'].indexOf(i.name) >= 0), n: 1 },
+      { test: d => d.tags.indexOf('早餐') >= 0 || d.ingredients.some(i => ['苹果', '香蕉', '酸奶'].indexOf(i.name) >= 0), n: 1 }
+    ];
+
+    buckets.forEach(b => {
+      let got = 0;
+      for (const d of sorted) {
+        if (got >= b.n) break;
+        if (picked.some(p => p.id === d.id)) continue;
+        if (!b.test(d)) continue;
+        picked.push(d); got++;
+      }
+    });
+    // 不够 4 道就补
+    for (const d of sorted) {
+      if (picked.length >= Math.min(5, 3 + Math.ceil(people / 4))) break;
+      if (!picked.some(p => p.id === d.id)) picked.push(d);
+    }
+
+    // 聚餐要有一道"硬菜"：如果全桌都现成，替换一道需要补购的菜，才看得出补货能力
+    const allReady = picked.every(d => ingredientState(d, foods).every(s => s.ok));
+    if (allReady) {
+      const hard = sorted.filter(d => !picked.some(p => p.id === d.id)).find(d => {
+        const miss = ingredientState(d, foods).filter(s => !s.ok).length;
+        return miss >= 1 && miss <= 2;
+      });
+      if (hard) picked[picked.length - 1] = hard;
+    }
+
+    // 缺料汇总
+    const missMap = {};
+    picked.forEach(d => {
+      ingredientState(d, foods).forEach(s => {
+        if (s.ok) return;
+        const need = Math.max(0, s.qty - s.haveQty);
+        if (!missMap[s.name]) {
+          const m = foodMeta(s.name);
+          missMap[s.name] = { name: s.name, emoji: m.emoji, unit: m.unit, qty: 0, price: m.price || 0, expired: s.expired };
+        }
+        missMap[s.name].qty += need;
+      });
+    });
+    const scale = Math.max(1, people / 3);
+    const missing = Object.values(missMap).map(m => {
+      m.qty = Math.ceil(m.qty * scale * 10) / 10;
+      m.cost = Math.round(m.qty * m.price * 10) / 10;
+      return m;
+    });
+
+    return { people: people, dishes: picked.slice(0, Math.min(picked.length, 6)), missing: missing };
+  }
+
+  /* ---------- 统计 ---------- */
+  function summary(state) {
+    const foods = state.foods;
+    const c = counts(foods);
+    const saved = (state.stats && state.stats.saved) || 0;
+    const cooked = (state.stats && state.stats.cooked) || 0;
+    return { counts: c, total: foods.length, saved: saved, cooked: cooked };
+  }
+
+  w.DD_ENGINE = {
+    now, tier, daysLeft, counts, TIERS, TIER_RULES, TIER_WEIGHT,
+    fmtQty, dayText, dateLabel,
+    byName, findFood, foodMeta,
+    pairList, topSuggestion, urgentList,
+    ingredientState, cookable, nearMiss, dishScore, cook,
+    planWeek, partyPlan, summary
+  };
+})(window);
