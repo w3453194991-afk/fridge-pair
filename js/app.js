@@ -62,7 +62,20 @@
   }
 
   function renderAll(scrollTop) {
-    const r = U.render(APP.view);
+    let r;
+    try {
+      r = U.render(APP.view);
+    } catch (err) {
+      // 渲染出错时不要"点了没反应"，直接把错误显示出来
+      console.error('渲染失败', err);
+      pageEl.innerHTML = `<div class="panel" style="margin-top:12px">
+        <h3><span class="dot" style="background:#B91C1C"></span>这个页面渲染出错了</h3>
+        <div class="p-body">${U.esc(String(err && err.message || err))}<br>
+        <span class="tiny muted">常见原因：浏览器缓存了旧版脚本。按 Ctrl+F5 强刷，或在「我的 → 恢复示例数据」重置。</span></div>
+        <div class="btn-row"><button class="btn primary" onclick="location.reload(true)">强制刷新</button></div>
+      </div>`;
+      return;
+    }
     pageEl.innerHTML = r.html;
     titleEl.innerHTML = r.title === '冰箱对对碰'
       ? '<span class="nav-logo">🧊</span>冰箱对对碰'
@@ -1444,6 +1457,8 @@
   S.load();
   tick();
   setInterval(tick, 20000);
+  w.DD_VERSION = 'v11';
+  console.log('%c冰箱对对碰 ' + w.DD_VERSION, 'color:#FF5C7A;font-weight:700', '加载成功');
 
   // 主题：优先用上次选择的
   try {
