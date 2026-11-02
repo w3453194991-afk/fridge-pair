@@ -22,7 +22,9 @@
         { name: '我', role: '成人', gender: '女', age: 30 },
         { name: '孩子', role: '幼儿', gender: '男', age: 4 }
       ],
-      taboos: ''
+      taboos: '',
+      avoid: [],
+      conditions: []
     };
   }
 
@@ -110,7 +112,7 @@
      点击分发
      ============================================================ */
   d.addEventListener('click', function (e) {
-    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play],[data-ext],[data-count],[data-report],[data-timer],[data-speak],[data-speakall],[data-chip],[data-pin],[data-system],[data-city]');
+    const t = e.target.closest('[data-nav],[data-food],[data-dish],[data-filter],[data-tabrec],[data-action],[data-cook],[data-week],[data-people],[data-cam-step],[data-party-date],[data-party-cuisine],[data-hot],[data-play],[data-ext],[data-count],[data-report],[data-timer],[data-speak],[data-speakall],[data-chip],[data-pin],[data-system],[data-city],[data-allergy],[data-condition]');
     if (!t) return;
 
     if (t.hasAttribute('data-pin')) {
@@ -143,6 +145,40 @@
       return;
     }
     if (t.hasAttribute('data-nav')) { tabTo(t.getAttribute('data-nav')); return; }
+    if (t.hasAttribute('data-condition')) {
+      const k = t.getAttribute('data-condition');
+      const inModal = (modalEl.hidden === false) && FAMD;
+      let arr;
+      if (inModal) {
+        readFamDraft();
+        FAMD.conditions = FAMD.conditions || [];
+        arr = FAMD.conditions;
+      } else {
+        w.DD_VIEW.onb.conditions = w.DD_VIEW.onb.conditions || [];
+        arr = w.DD_VIEW.onb.conditions;
+      }
+      const i = arr.indexOf(k);
+      if (i >= 0) arr.splice(i, 1); else arr.push(k);
+      if (inModal) drawFamily(); else renderAll(false);
+      return;
+    }
+    if (t.hasAttribute('data-allergy')) {
+      const a = t.getAttribute('data-allergy');
+      const inModal = (modalEl.hidden === false) && FAMD;
+      let arr;
+      if (inModal) {
+        readFamDraft();
+        FAMD.avoid = FAMD.avoid || [];
+        arr = FAMD.avoid;
+      } else {
+        w.DD_VIEW.onb.avoid = w.DD_VIEW.onb.avoid || [];
+        arr = w.DD_VIEW.onb.avoid;
+      }
+      const i = arr.indexOf(a);
+      if (i >= 0) arr.splice(i, 1); else arr.push(a);
+      if (inModal) drawFamily(); else renderAll(false);
+      return;
+    }
     if (t.hasAttribute('data-system')) {
       S.state.family.system = t.getAttribute('data-system');
       S.state.week = null;
@@ -265,7 +301,8 @@
           men: P.men, women: P.women, kids: P.kids,
           cuisine: P.cuisine, dateLabel: U.partyDateLabel(P.dateKey),
           wish: P.wish, taste: P.taste, budget: P.budget,
-          avoid: (S.state.family && S.state.family.avoid) || []
+          avoid: (S.state.family && S.state.family.avoid) || [],
+          conditions: (S.state.family && S.state.family.conditions) || []
         });
         S.save();
         renderAll(false);
@@ -1011,6 +1048,18 @@
         </div>`).join('')}
         <div class="field"><div class="lab">忌口 / 不吃<small>会从菜单里排除</small></div>
           <input type="text" data-famfield="taboos" data-i="0" value="${U.esc(FAMD.taboos || '')}" placeholder="如：香菜、辣" maxlength="20"></div>
+        <div class="field" style="display:block">
+          <div class="lab">过敏原<small>排餐自动避开，菜谱会提示</small></div>
+          <div class="chips" style="padding-top:8px">
+            ${D.ALLERGENS.map(a => `<button class="chip ${(FAMD.avoid || []).indexOf(a) >= 0 ? 'on' : ''}" data-allergy="${a}">${a}</button>`).join('')}
+          </div>
+        </div>
+        <div class="field" style="display:block">
+          <div class="lab">疾病史<small>排餐自动避开相关食材</small></div>
+          <div class="chips" style="padding-top:8px">
+            ${D.CONDITIONS.map(c => `<button class="chip ${(FAMD.conditions || []).indexOf(c.key) >= 0 ? 'on' : ''}" data-condition="${c.key}">${c.emoji} ${c.key}</button>`).join('')}
+          </div>
+        </div>
       </div>
       <div class="btn-row">
         <button class="btn ghost" data-action="famAdd">+ 加成员</button>
@@ -1072,7 +1121,10 @@
       registered: true,
       name: (ob.name || '家长').trim() || '家长',
       members: members,
-      taboos: (ob.taboos || '').trim()
+      taboos: (ob.taboos || '').trim(),
+      avoid: (ob.avoid || []).slice(),
+      conditions: (ob.conditions || []).slice(),
+      system: (S.state.family && S.state.family.system) || 'cn'
     });
     S.state.week = E.planWeek(S.state);
     S.save();

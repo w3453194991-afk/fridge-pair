@@ -149,6 +149,7 @@ const errors = [];
   await sleep(350);
   report.timers = await run(`document.querySelectorAll('[data-timer]').length`);
   report.speakBtns = await run(`document.querySelectorAll('[data-speak]').length`);
+  report.dishCost = await run(`(document.querySelector('.nutline') || {}).textContent || ''`);
   await click('[data-timer]');
   await sleep(1200);
   report.timerText = await run(`document.querySelector('[data-timer]').textContent.trim()`);
@@ -206,6 +207,45 @@ const errors = [];
   await sleep(1500);
   await shot('07-nearby');
   report.nearby = await run(`(() => { const n = DD_VIEW.nearby; return { status: n.status, city: n.city, src: n.src, shops: (n.shops || []).length }; })()`);
+
+  /* 我的 → 过敏原设置 */
+  await click('[data-nav="me"]');
+  await click('[data-action="editFamily"]');
+  await sleep(350);
+  await shot('09-family-allergy');
+  await click('[data-allergy="海鲜"]');
+  await sleep(200);
+  await click('[data-action="famSave"]');
+  await sleep(400);
+  report.avoid = await run(`DD_STORE.state.family.avoid`);
+
+  /* 打开含海鲜的菜，看是否告警 */
+  await click('[data-nav="recipe"]');
+  await click('[data-tabrec="all"]');
+  await sleep(300);
+  await run(`(() => { const b = Array.from(document.querySelectorAll('.dish[data-dish]')).find(x => x.textContent.indexOf('虾仁滑蛋') >= 0); if (b) b.click(); return !!b; })()`);
+  await sleep(350);
+  await shot('09b-allergy-warning');
+  report.allergenWarn = await run(`(() => { const a = document.querySelector('.alert.bad'); return a ? a.textContent.trim().slice(0, 30) : ''; })()`);
+
+  /* 疾病史：加「痛风」后，一周菜单里不该再出现海鲜 */
+  await click('[data-nav="me"]');
+  await click('[data-action="editFamily"]');
+  await sleep(300);
+  await shot('09c-family-conditions');
+  await click('[data-condition="痛风"]');
+  await sleep(200);
+  await click('[data-action="famSave"]');
+  await sleep(350);
+  await click('[data-nav="plan"]');
+  await click('[data-action="genWeek"]');
+  await sleep(700);
+  await shot('09d-week-no-seafood');
+  report.conditions = await run(`DD_STORE.state.family.conditions`);
+  report.seafoodInWeek = await run(`(() => {
+    const names = Array.from(document.querySelectorAll('.mname')).map(e => e.textContent);
+    return names.filter(n => /虾|蟹|蛤|扇贝|生蚝|鱿鱼|带鱼|墨鱼/.test(n));
+  })()`);
 
   /* 我的 → 深色 */
   await click('[data-nav="me"]');

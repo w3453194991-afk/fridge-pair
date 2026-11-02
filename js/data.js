@@ -1346,9 +1346,57 @@
     d.role = role;
   });
 
+  /* ============================================================
+     16. 菜价（来源：农业农村部 2026-11-02 全国批发均价，元/公斤）
+     单价 = 批发价 × 每单位重量(kg) × 1.6（零售折算系数）
+     ============================================================ */
+  const PRICE_SOURCE = '农业农村部 2026-11-02 批发均价';
+  const RETAIL_FACTOR = 1.6;
+  const PRICE_BOOK = {
+    // 名称: [批发价 元/kg, 每单位约 kg]
+    番茄: [3.50, 0.15], 土豆: [2.03, 0.20], 大白菜: [1.10, 1.50], 黄瓜: [3.40, 0.15],
+    胡萝卜: [2.00, 0.12], 芹菜: [2.50, 0.30], 茄子: [3.00, 0.30], 青椒: [3.00, 0.10],
+    冬瓜: [1.50, 0.001], 香菇: [10.75, 0.015], 菠菜: [4.20, 0.30], 莲藕: [6.00, 0.30],
+    山药: [7.00, 0.50], 香菜: [5.00, 0.10], 韭菜: [4.00, 0.30], 大葱: [2.60, 0.10],
+    油菜: [2.80, 0.30], 莴笋: [3.20, 0.40], 尖椒: [3.00, 0.05],
+    五花肉: [15.15, 0.001], 猪里脊: [26, 0.001], 排骨: [30, 0.001],
+    牛里脊: [72, 0.001], 鸡胸肉: [18, 0.001], 鸡蛋: [9.50, 0.05]
+  };
+  FOOD_DB.forEach(function (f) {
+    const b = PRICE_BOOK[f.name];
+    if (!b) return;
+    const p = b[0] * b[1] * RETAIL_FACTOR;
+    f.price = f.unit === 'g' ? Math.round(p * 1000) / 1000 : Math.round(p * 100) / 100;
+    f.pricePerKg = b[0];
+    f.priceSource = PRICE_SOURCE;
+  });
+
+  /* ============================================================
+     17. 疾病史 / 饮食禁忌
+     命中 foods 的菜直接排除；命中 tags 的降权
+     ============================================================ */
+  const CONDITIONS = [
+    { key: '高血压', emoji: '🩺', note: '低盐、少吃腌制品',
+      foods: ['腊肉', '香肠', '火腿', '午餐肉', '咸鸭蛋', '泡菜'], tags: [] },
+    { key: '高血脂', emoji: '🫀', note: '少油少肥肉，避免油炸',
+      foods: ['五花肉', '培根', '猪蹄', '黄油', '淡奶油'], tags: ['油炸'] },
+    { key: '糖尿病', emoji: '🍬', note: '控糖、主食减半、多蔬菜',
+      foods: ['白糖', '冰糖', '炼乳', '巧克力', '年糕', '汤圆'], tags: ['甜'] },
+    { key: '痛风', emoji: '🦶', note: '低嘌呤，避海鲜内脏',
+      foods: ['虾', '虾仁', '螃蟹', '蛤蜊', '扇贝', '生蚝', '鱿鱼', '墨鱼', '猪肝', '带鱼', '虾仁滑蛋'], tags: [] },
+    { key: '肾病', emoji: '💧', note: '控植物蛋白与钾',
+      foods: ['豆浆', '腐竹', '豆干', '香蕉', '紫菜'], tags: [] },
+    { key: '胃病', emoji: '🔥', note: '少辣少刺激，忌油炸',
+      foods: ['小米椒', '二荆条', '杭椒', '干辣椒', '花椒'], tags: ['麻辣', '香辣', '油炸'] }
+  ];
+  const CONDITION_MAP = {};
+  CONDITIONS.forEach(function (c) { CONDITION_MAP[c.key] = c; });
+
   w.DD_DATA = {
     FOOD_DB, FOOD_MAP, DISHES, PAIRS, SEED, PHOTO_SCENES,
     CUISINES: CUISINE_ALL, CUISINE_ALL, VIDEOS, PLATFORMS, PLATFORM_MAP,
-    ALLERGENS, SUBSTITUTES, NUT, MEAL_SYSTEMS, SYSTEM_MAP
+    ALLERGENS, SUBSTITUTES, NUT, MEAL_SYSTEMS, SYSTEM_MAP,
+    PRICE_BOOK, PRICE_SOURCE, RETAIL_FACTOR,
+    CONDITIONS, CONDITION_MAP
   };
 })(window);

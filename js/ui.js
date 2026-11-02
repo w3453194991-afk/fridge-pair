@@ -359,6 +359,9 @@
       : '';
     const nut = E.dishNutritionPerServing(d);
     const pinned = (S.state.pinned || []).indexOf(d.id) >= 0;
+    const cost = d.ingredients.reduce(function (s, i) {
+      return s + i.qty * (E.foodMeta(i.name).price || 0);
+    }, 0);
 
     return {
       title: d.name, back: true, tab: 'recipe',
@@ -384,7 +387,11 @@
           }).join('')}
         </div>
         <div class="taglist">${d.seasonings.map(s => `<span class="tg">${esc(s)}</span>`).join('')}</div>
+        ${allergens.length ? `<div class="taglist" style="margin-top:6px">${allergens.map(a => `<span class="tg" style="background:#FFF4E6;color:#B45309">含${esc(a)}</span>`).join('')}</div>` : ''}
+        <div class="nutline">食材成本约 ¥${cost.toFixed(1)} · 按当日行情折算</div>
       </div>
+
+      ${allergenHtml}
 
       <div class="panel">
         <h3><span class="dot"></span>预处理</h3>
@@ -419,8 +426,6 @@
           }).join('')}
         </div>
       </div>
-
-      ${allergenHtml}
 
       <div class="panel">
         <h3><span class="dot"></span>小贴士</h3>
@@ -500,6 +505,7 @@
           标准保质期 ${esc(String(f.shelfDays || m.shelf))} 天 · 建议储存：${esc(f.storage)}<br>
           到期日 ${E.dateLabel(f.expireAt)}（${E.dayText(f)}）<br>
           参考单价 ¥${m.price}/${esc(m.unit)}，当前价值约 ¥${(E.fmtQty(f.qty * m.price))}
+          ${m.pricePerKg ? `<br><span class="tiny muted">行情 ¥${m.pricePerKg}/kg · ${esc(m.priceSource || '批发均价')}，零售按 1.6 倍折算</span>` : ''}
         </div>
       </div>
 
@@ -635,6 +641,8 @@
           } ${esc(m.role)} ${m.age} 岁</span>`).join('')}
         </div>
         ${fam.taboos ? `<div class="tiny muted" style="margin-top:8px">忌口：${esc(fam.taboos)}</div>` : ''}
+        ${(fam.avoid || []).length ? `<div class="tiny" style="margin-top:6px;color:#B45309">过敏原：${fam.avoid.join(' · ')}</div>` : ''}
+        ${(fam.conditions || []).length ? `<div class="tiny" style="margin-top:6px;color:#B45309">疾病史：${fam.conditions.join(' · ')}</div>` : ''}
       </div>
 
       <div class="section-head"><div class="t">餐饮体系<small>决定一餐的结构</small></div></div>
@@ -1080,6 +1088,22 @@
       <div class="onb-field">
         <label>忌口 / 不吃（可留空）</label>
         <input data-onb="taboos" value="${esc(ob.taboos)}" placeholder="如：香菜、辣、海鲜" maxlength="20">
+      </div>
+
+      <div class="onb-field">
+        <label>过敏原（可多选，排餐会自动避开）</label>
+        <div class="chips" style="padding-top:8px">
+          ${D.ALLERGENS.map(a => `<button class="chip ${(ob.avoid || []).indexOf(a) >= 0 ? 'on' : ''}" data-allergy="${a}">${a}</button>`).join('')}
+        </div>
+        <div class="tiny muted" style="margin-top:7px">选中的过敏原，相关菜谱不会排进菜单，菜谱详情也会提示</div>
+      </div>
+
+      <div class="onb-field">
+        <label>疾病史（可多选，排餐会自动避开）</label>
+        <div class="chips" style="padding-top:8px">
+          ${D.CONDITIONS.map(c => `<button class="chip ${(ob.conditions || []).indexOf(c.key) >= 0 ? 'on' : ''}" data-condition="${c.key}">${c.emoji} ${c.key}</button>`).join('')}
+        </div>
+        <div class="tiny muted" style="margin-top:7px">高血压会避开腌制品，痛风会避开海鲜内脏，糖尿病会避开高糖菜</div>
       </div>
 
       <button class="btn primary full" style="margin-top:16px" data-action="famDone">保存并生成菜单 ›</button>`

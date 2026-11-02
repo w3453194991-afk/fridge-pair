@@ -47,6 +47,7 @@
         members: [],
         taboos: '',
         avoid: [],
+        conditions: [],
         system: 'cn'
       },
       foods: foods,
@@ -73,6 +74,8 @@
       if (!Array.isArray(s.pinned)) s.pinned = [];
       if (!s.family) s.family = seedState().family;
       if (!s.family.system) s.family.system = 'cn';
+      if (!Array.isArray(s.family.avoid)) s.family.avoid = [];
+      if (!Array.isArray(s.family.conditions)) s.family.conditions = [];
       // 老数据迁移：填过家庭信息就视为已注册
       if (s.family.registered === undefined) {
         s.family.registered = !!(s.family.name && s.family.members && s.family.members.length);

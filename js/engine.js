@@ -176,6 +176,7 @@
     const sysKey = (state.family && state.family.system) || 'cn';
     const sys = D.SYSTEM_MAP[sysKey] || D.MEAL_SYSTEMS[0];
     const avoid = (state.family && state.family.avoid) || [];
+    const conds = (state.family && state.family.conditions) || [];
     const foods = state.foods.slice();
     const virt = {};
     foods.forEach(f => { virt[f.name] = { qty: f.qty, tier: tier(f) }; });
@@ -195,6 +196,7 @@
         else s -= 4;
       }
       if (usedAt[d.id] !== undefined) s -= 9; else s += 2;
+      s += conditionPenalty(d, conds);
       return s + Math.random() * 2;
     }
 
@@ -282,6 +284,7 @@
     const foods = state.foods;
     const sorted = D.DISHES.slice()
       .filter(d => dishAllowed(d, opts.avoid))
+      .filter(d => conditionPenalty(d, opts.conditions) > -100)
       .sort(function (a, b) {
       const ca = cuisine && a.cuisine.indexOf(cuisine) >= 0 ? 1 : 0;
       const cb = cuisine && b.cuisine.indexOf(cuisine) >= 0 ? 1 : 0;
@@ -700,6 +703,22 @@
     };
   }
 
+  /* ---------- 疾病史 ---------- */
+  function conditionPenalty(dish, conds) {
+    if (!conds || !conds.length) return 0;
+    let p = 0;
+    conds.forEach(function (k) {
+      const c = D.CONDITION_MAP[k];
+      if (!c) return;
+      const hit = dish.ingredients.some(function (i) { return c.foods.indexOf(i.name) >= 0; });
+      if (hit) p -= 1000;
+      if (c.tags && c.tags.length && (dish.tags || []).some(function (t) { return c.tags.indexOf(t) >= 0; })) p -= 8;
+      if (c.key === '糖尿病' && /糖醋|拔丝|蜜汁/.test(dish.name)) p -= 8;
+      if (c.key === '胃病' && /辣|椒麻/.test(dish.name)) p -= 6;
+    });
+    return p;
+  }
+
   /* ---------- 统计 ---------- */
   function summary(state) {
     const foods = state.foods;
@@ -719,6 +738,6 @@
     videoEmbed, videoPage, videoSearch,
     NUT_KEYS, dishNutrition, dishNutritionPerServing, dailyTarget, dayNutrition, nutritionBars,
     mealNutrition, perMealTarget,
-    allergensOf, dishAllowed, substitutesFor, zones, assistant, weeklyReport
+    allergensOf, dishAllowed, conditionPenalty, substitutesFor, zones, assistant, weeklyReport
   };
 })(window);
