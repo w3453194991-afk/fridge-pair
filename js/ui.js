@@ -992,6 +992,7 @@
     } else {
       body = `
         ${res.changed ? `<div class="tiny muted" style="padding:8px 2px 0">已按「${esc(res.norm)}」搜索</div>` : ''}
+        ${res.byIngredient ? `<div class="tiny muted" style="padding:8px 2px 0">没有叫「${esc(res.raw)}」的菜，按食材「${esc(res.guessed.join(' + '))}」找到这些：</div>` : ''}
         ${res.dishes.length ? `<div class="section-head"><div class="t">菜谱<small>${res.dishes.length} 道</small></div></div>
           ${res.dishes.map(d => dishRow(d, E.ingredientState(d, st.foods).every(s => s.ok))).join('')}` : ''}
 

@@ -1,5 +1,5 @@
 /* 冰箱对对碰 · 离线缓存 */
-const CACHE = 'ddm-v15';
+const CACHE = 'ddm-v16';
 const SHELL = [
   './', './index.html', './css/app.css', './manifest.json',
   './js/data.js', './js/engine.js', './js/store.js', './js/ui.js', './js/app.js',

@@ -748,8 +748,27 @@
     const direct = search(norm, foods);
     const guessed = guessFoods(raw);
     let suggestion = [];
+    let dishes = direct.dishes;
+    let byIngredient = false;
 
-    if (!direct.dishes.length && guessed.length) {
+    // 整道菜搜不到时，退一步：用抽出的食材做"全部命中"匹配
+    if (!dishes.length && guessed.length >= 2) {
+      const all = D.DISHES.filter(function (d) {
+        return guessed.every(function (g) {
+          return d.ingredients.some(function (i) { return i.name === g; });
+        });
+      });
+      if (all.length) {
+        dishes = all.sort(function (a, b) {
+          const ca = ingredientState(a, foods).every(s => s.ok) ? 1 : 0;
+          const cb = ingredientState(b, foods).every(s => s.ok) ? 1 : 0;
+          return cb - ca;
+        });
+        byIngredient = true;
+      }
+    }
+
+    if (!dishes.length && guessed.length) {
       suggestion = D.DISHES.filter(function (d) {
         return d.ingredients.some(function (i) { return guessed.indexOf(i.name) >= 0; });
       }).sort(function (a, b) {
@@ -763,8 +782,9 @@
     }
 
     return {
-      raw: raw, norm: norm, dishes: direct.dishes, foods: direct.foods,
-      guessed: guessed, suggestion: suggestion, changed: norm !== raw
+      raw: raw, norm: norm, dishes: dishes, foods: direct.foods,
+      guessed: guessed, suggestion: suggestion, byIngredient: byIngredient,
+      changed: norm !== raw
     };
   }
 
@@ -938,6 +958,7 @@
     鸡丁: '鸡胸肉', 鸡块: '鸡腿', 鸡翅: '鸡翅', 鸡腿: '鸡腿',
     鱼片: '草鱼', 鱼头: '鲈鱼', 鱼: '鲈鱼', 虾仁: '虾仁', 虾: '虾',
     排骨: '排骨', 牛腩: '牛腩', 牛肉: '牛里脊', 羊肉: '羊肉', 豆腐: '豆腐',
+    蟹: '螃蟹', 贝: '扇贝', 蚝: '生蚝', 蛤: '蛤蜊', 螺: '蛤蜊', 菇: '香菇', 笋: '竹笋',
     茄子: '茄子', 土豆: '土豆', 番茄: '番茄', 西红柿: '番茄', 鸡蛋: '鸡蛋', 蛋: '鸡蛋',
     白菜: '大白菜', 菠菜: '菠菜', 豆角: '豆角', 藕: '莲藕', 香菇: '香菇', 蘑菇: '香菇',
     黄瓜: '黄瓜', 冬瓜: '冬瓜', 南瓜: '南瓜', 青椒: '青椒', 芹菜: '芹菜', 韭菜: '韭菜'
