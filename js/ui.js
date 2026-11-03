@@ -1512,6 +1512,14 @@
 
       <div class="section-head"><div class="t">演示工具<small>答辩时可现场演示</small></div></div>
       <div class="panel" style="margin-top:8px">
+        <h3><span class="dot"></span>开屏动画</h3>
+        <div class="p-body">会说话的小机器人开屏，每次会话只播一次。想再放一遍点下面。</div>
+        <div class="chips" style="padding:8px 0 0">
+          <button class="chip" data-action="replaySplash">▶ 重播开屏</button>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:10px">
         <h3><span class="dot"></span>时间旅行</h3>
         <div class="p-body">时间当前偏移 <b>${off > 0 ? '+' : ''}${Math.round(off / 86400000)} 天</b>。
           推进几天，能看到食材颜色实时变成黄 / 紫 / 黑——这正是四色系统的核心。</div>

@@ -113,9 +113,19 @@ const errors = [];
   report.foods = await run(`DD_DATA.FOOD_DB.length`);
   report.dishes = await run(`DD_DATA.DISHES.length`);
 
-  /* 重新打开页面：应自动弹出临期提醒 */
+  /* 重新打开：先出开屏机器人 */
   await cdp.send('Page.navigate', { url: URL });
-  await sleep(1700);
+  await sleep(2200);
+  report.splashShown = await run(`!!document.querySelector('.splash')`);
+  report.splashLines = await run(`document.querySelectorAll('.splash .sp-line').length`);
+  report.splashText = await run(`(() => { const l = document.querySelectorAll('.splash .sp-line'); return l.length ? l[l.length - 1].textContent.trim().slice(0, 30) : ''; })()`);
+  await shot('01a-splash');
+  await click('[data-sp="skip"]');
+  await sleep(600);
+
+  /* 再开一次：开屏已看过，应弹临期提醒 */
+  await cdp.send('Page.navigate', { url: URL });
+  await sleep(1900);
   await shot('01b-reminder');
   report.reminderShown = await run(`!!document.querySelector('.remind')`);
   report.reminderItems = await run(`document.querySelectorAll('.remind-item').length`);

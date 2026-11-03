@@ -1595,3 +1595,258 @@ body{ background:#EAF3EE; }
 .page{ padding-bottom:26px; }
 /* 城市等长标签行允许换行，避免边缘按钮被裁 */
 .chips{ flex-wrap:wrap; }
+
+/* ============================================================
+   开屏：会说话的小机器人
+   ============================================================ */
+.splash{
+  position:fixed; inset:0; z-index:300;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:18px; padding:34px 26px 40px;
+  background:
+    radial-gradient(420px 340px at 50% 18%, #DFFBEF 0%, transparent 68%),
+    radial-gradient(520px 420px at 12% 96%, #E3F6FF 0%, transparent 64%),
+    linear-gradient(165deg,#F4FCF8,#E8F7F0 55%,#EFFAF5);
+  overflow:hidden;
+  animation:spIn .42s ease both;
+}
+@keyframes spIn{ from{ opacity:0 } to{ opacity:1 } }
+.splash.out{ animation:spOut .4s ease forwards; }
+@keyframes spOut{ to{ opacity:0; transform:scale(1.03) } }
+
+.sp-glow{
+  position:absolute; width:340px; height:340px; border-radius:50%;
+  background:radial-gradient(circle, rgba(46,211,154,.30), transparent 68%);
+  top:6%; left:50%; transform:translateX(-50%);
+  animation:glowBreathe 3.6s ease-in-out infinite;
+}
+@keyframes glowBreathe{ 0%,100%{ transform:translateX(-50%) scale(1); opacity:.85 } 50%{ transform:translateX(-50%) scale(1.12); opacity:1 } }
+
+.sp-bubbles{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }
+.sp-bubbles i{
+  position:absolute; bottom:-40px; font-size:24px; opacity:0;
+  animation:floatUp 7s linear infinite;
+}
+@keyframes floatUp{
+  0%{ transform:translateY(0) rotate(0); opacity:0 }
+  12%{ opacity:.85 }
+  85%{ opacity:.5 }
+  100%{ transform:translateY(-118vh) rotate(24deg); opacity:0 }
+}
+
+.sp-skip{
+  position:absolute; top:18px; right:18px; z-index:3;
+  font-size:11px; font-weight:700; color:#5E7D71;
+  background:rgba(255,255,255,.8); border:1px solid #DFF0E7;
+  padding:6px 13px; border-radius:20px;
+}
+.sp-skip:active{ transform:scale(.95); }
+
+/* 机器人 */
+.sp-robot{ position:relative; margin-top:8px; animation:robotFloat 3.2s ease-in-out infinite; }
+@keyframes robotFloat{ 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-9px) } }
+
+.r-antenna{
+  width:4px; height:26px; margin:0 auto -2px; border-radius:3px;
+  background:linear-gradient(#C9E9DA,#9FD9C2); position:relative;
+}
+.r-antenna span{
+  position:absolute; top:-13px; left:50%; transform:translateX(-50%);
+  width:15px; height:15px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #B4FFDD, #2FD79E 60%, #12A576);
+  box-shadow:0 0 14px 3px rgba(46,211,154,.75);
+  animation:bulb 1.5s ease-in-out infinite;
+}
+@keyframes bulb{ 0%,100%{ box-shadow:0 0 12px 2px rgba(46,211,154,.6) } 50%{ box-shadow:0 0 22px 7px rgba(46,211,154,.95) } }
+
+.r-head{
+  position:relative; width:146px; height:124px; border-radius:36px;
+  background:linear-gradient(160deg,#FFFFFF,#EAFBF3 78%);
+  border:2px solid #D3F0E2;
+  box-shadow:0 18px 34px -18px rgba(16,120,90,.5), inset 0 -8px 18px -12px rgba(18,165,118,.5);
+  display:grid; place-items:center;
+}
+.r-ear{
+  position:absolute; top:46px; width:9px; height:28px; border-radius:5px;
+  background:linear-gradient(#D8F2E6,#B6E4D2);
+}
+.r-ear.l{ left:-9px; } .r-ear.r{ right:-9px; }
+
+.r-face{
+  width:112px; height:86px; border-radius:24px;
+  background:linear-gradient(170deg,#0F2A22,#173A30);
+  box-shadow:inset 0 0 18px rgba(46,211,154,.35);
+  display:flex; align-items:center; justify-content:center; gap:16px;
+  position:relative;
+}
+.r-eye{
+  width:30px; height:30px; border-radius:50%;
+  background:radial-gradient(circle at 34% 30%, #FFFFFF, #CFF6E6 70%);
+  box-shadow:0 0 10px rgba(46,211,154,.8);
+  display:grid; place-items:center;
+  animation:blink 4.2s ease-in-out infinite;
+}
+.r-eye i{
+  width:13px; height:13px; border-radius:50%;
+  background:radial-gradient(circle at 32% 30%, #4FF0B8, #0B5442 72%);
+}
+@keyframes blink{
+  0%,90%,100%{ transform:scaleY(1) }
+  93%{ transform:scaleY(.12) }
+  96%{ transform:scaleY(1) }
+}
+.r-mouth{
+  position:absolute; left:50%; bottom:12px; transform:translateX(-50%);
+  width:34px; height:7px; border-radius:6px;
+  background:#3FE6AE; box-shadow:0 0 10px rgba(63,230,174,.8);
+  transition:height .1s;
+}
+.r-mouth.talking{ animation:talk .16s ease-in-out infinite alternate; }
+@keyframes talk{
+  from{ height:5px; width:26px; opacity:.85 }
+  to{ height:15px; width:34px; opacity:1 }
+}
+
+.r-body{
+  position:relative; width:124px; height:88px; margin:-6px auto 0; border-radius:30px;
+  background:linear-gradient(160deg,#3FE0A6,#12A576);
+  box-shadow:0 20px 34px -18px rgba(18,165,118,.85);
+  display:grid; place-items:center;
+}
+.r-screen{
+  width:58px; height:40px; border-radius:12px;
+  background:rgba(255,255,255,.92); display:grid; place-items:center; font-size:20px;
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.6);
+}
+.r-arm{
+  position:absolute; top:18px; width:12px; height:34px; border-radius:8px;
+  background:linear-gradient(#2FD79E,#0E9573);
+}
+.r-arm.l{ left:-12px; transform-origin:top center; animation:armL 2.6s ease-in-out infinite; }
+.r-arm.r{ right:-12px; transform-origin:top center; animation:armR 2.6s ease-in-out infinite; }
+@keyframes armL{ 0%,100%{ transform:rotate(6deg) } 50%{ transform:rotate(-14deg) } }
+@keyframes armR{ 0%,100%{ transform:rotate(-6deg) } 50%{ transform:rotate(14deg) } }
+
+.sp-wave{
+  position:absolute; right:-52px; top:64px; width:34px; height:60px; pointer-events:none;
+}
+.sp-wave i{
+  position:absolute; left:0; top:50%; width:34px; height:34px;
+  border:2px solid rgba(18,165,118,.55); border-radius:50%;
+  transform:translateY(-50%) scale(.4); opacity:0;
+  animation:wave 1.5s ease-out infinite;
+}
+.sp-wave i:nth-child(2){ animation-delay:.3s; }
+.sp-wave i:nth-child(3){ animation-delay:.6s; }
+@keyframes wave{
+  0%{ transform:translateY(-50%) scale(.35); opacity:.9 }
+  100%{ transform:translateY(-50%) scale(1.25); opacity:0 }
+}
+
+/* 台词 */
+.sp-words{
+  width:100%; max-width:340px; min-height:96px;
+  display:flex; flex-direction:column; gap:7px; justify-content:center;
+}
+.sp-line{
+  font-size:13px; line-height:1.65; font-weight:700; color:#12352B;
+  background:rgba(255,255,255,.92); border:1px solid #DDF2E7;
+  padding:9px 13px; border-radius:14px;
+  box-shadow:0 6px 16px -12px rgba(16,120,90,.6);
+  animation:lineIn .32s cubic-bezier(.22,.9,.28,1) both;
+}
+.sp-line:last-child{ color:#0E8F63; }
+@keyframes lineIn{ from{ opacity:0; transform:translateY(8px) } to{ opacity:1; transform:none } }
+
+.sp-actions{
+  width:100%; max-width:320px; display:flex; flex-direction:column; gap:9px;
+  opacity:0; transform:translateY(10px); pointer-events:none;
+  transition:opacity .35s, transform .35s;
+}
+.sp-actions.show{ opacity:1; transform:none; pointer-events:auto; }
+.sp-btn{
+  width:100%; padding:14px; border-radius:16px; font-size:14px; font-weight:800;
+}
+.sp-btn.primary{
+  color:#fff; background:linear-gradient(135deg,#2FD79E,#12A576);
+  box-shadow:0 14px 26px -12px rgba(18,165,118,.9);
+  animation:pulseBtn 2.2s ease-in-out infinite;
+}
+@keyframes pulseBtn{
+  0%,100%{ box-shadow:0 14px 26px -12px rgba(18,165,118,.9) }
+  50%{ box-shadow:0 16px 32px -10px rgba(18,165,118,1) }
+}
+.sp-btn.ghost{ color:#4E6B61; background:rgba(255,255,255,.85); border:1px solid #DFF0E7; }
+.sp-btn:active{ transform:scale(.97); }
+
+.sp-sound{
+  position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
+  font-size:10.5px; font-weight:700; color:#7C948B;
+  padding:5px 12px; border-radius:14px; background:rgba(255,255,255,.7);
+}
+
+/* ---------- 开屏机器人 · 重做脸部（大白脸 + 大眼睛） ---------- */
+.sp-robot .r-head{
+  width:170px; height:146px; border-radius:52px;
+  background:linear-gradient(165deg,#FFFFFF,#EFFBF5 76%);
+  border:2px solid #D3F0E2;
+  box-shadow:0 22px 40px -22px rgba(16,120,90,.55), inset 0 -10px 22px -14px rgba(18,165,118,.55);
+}
+.sp-robot .r-face{
+  width:auto; height:auto; background:none; box-shadow:none;
+  gap:22px; transform:translateY(-4px);
+}
+.sp-robot .r-eye{
+  width:46px; height:46px;
+  background:radial-gradient(circle at 34% 28%, #FFFFFF 0%, #E9FBF3 62%, #D6F2E7 100%);
+  box-shadow:0 0 0 3px #D3F0E2, 0 10px 18px -12px rgba(16,120,90,.8);
+  animation:blink 4.6s ease-in-out infinite;
+}
+.sp-robot .r-eye i{
+  width:19px; height:19px;
+  background:radial-gradient(circle at 32% 30%, #2FE39F 0%, #0C6B52 72%);
+  box-shadow:inset 0 0 6px rgba(0,0,0,.25);
+}
+.sp-robot .r-eye::after{
+  content:''; position:absolute; width:6px; height:6px; border-radius:50%;
+  background:#fff; transform:translate(7px,-8px); opacity:.95;
+}
+.sp-robot .r-eye{ position:relative; }
+.sp-robot .r-mouth{
+  bottom:22px; width:30px; height:9px; border-radius:6px;
+  background:linear-gradient(90deg,#3FE6AE,#12A576);
+  box-shadow:0 3px 8px -3px rgba(18,165,118,.9);
+}
+.sp-robot .r-face .cheek{
+  position:absolute; bottom:16px; width:16px; height:9px; border-radius:50%;
+  background:rgba(255,138,120,.35); filter:blur(1px);
+}
+.sp-robot .r-face .cheek.l{ left:6px } .sp-robot .r-face .cheek.r{ right:6px }
+
+.sp-robot .r-body{
+  width:136px; height:96px; border-radius:34px; margin-top:-8px;
+}
+.sp-robot .r-screen{ width:64px; height:44px; font-size:23px; }
+.sp-robot .r-arm{ top:22px; height:38px; width:13px; }
+
+/* 脸部结构修正：眼睛一排 + 嘴在下 */
+.sp-robot .r-face{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:14px; position:relative; transform:translateY(-2px);
+}
+.sp-robot .r-eyes{ display:flex; align-items:center; gap:26px; }
+.sp-robot .r-eye{
+  box-shadow:0 0 0 4px #C6EBD9, 0 12px 20px -14px rgba(16,120,90,.9),
+             inset 0 -4px 8px -4px rgba(16,120,90,.35);
+}
+.sp-robot .r-mouth{
+  position:static; transform:none !important; width:34px; height:10px;
+  border-radius:0 0 16px 16px; background:#12A576;
+  box-shadow:0 3px 8px -4px rgba(18,165,118,.9);
+}
+.sp-robot .r-mouth.talking{ animation:talk2 .18s ease-in-out infinite alternate !important; }
+@keyframes talk2{
+  from{ height:7px; border-radius:0 0 10px 10px }
+  to{ height:16px; border-radius:0 0 18px 18px }
+}
+.sp-robot .r-face .cheek{ bottom:8px; }

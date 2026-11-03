@@ -608,6 +608,10 @@
         if (inp) inp.click();
         break;
       }
+      case 'replaySplash':
+        try { sessionStorage.removeItem('ddm.splash'); } catch (e) {}
+        if (w.DD_SPLASH) w.DD_SPLASH.open();
+        break;
       case 'camSample': camSample(); break;
       case 'camLive': camLive(); break;
       case 'camStop': camStop(); break;
@@ -2188,15 +2192,32 @@
   bindCamButton();
   bindTabCenter();
   bindFabGhost();
+  setTimeout(function () {
+    if (w.DD_SPLASH) w.DD_SPLASH.auto();
+  }, 420);
   w.addEventListener('error', function (ev) {
     try { toast('脚本错误：' + String(ev.message || '').slice(0, 60)); } catch (e) {}
   });
-  setTimeout(maybeRemind, 650);
+  /* 开屏已经播过临期信息，就别再弹提醒 */
+  setTimeout(function () {
+    if (d.querySelector('.splash')) return;
+    maybeRemind();
+  }, 650);
 
   // PWA：注册 service worker（file:// 下会失败，忽略即可）
   if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
     navigator.serviceWorker.register('sw.js').catch(function () {});
   }
 
-  w.DD_APP = { go: go, tabTo: tabTo, back: back, render: renderAll };
+  w.DD_APP = {
+    go: go, tabTo: tabTo, back: back, render: renderAll,
+    openUrgentMenu: openUrgentMenu,
+    genTodayMenu: function () {
+      S.state.week = E.planWeek(S.state);
+      S.save();
+      APP.view = { name: 'fridge' };
+      renderAll(true);
+      toast('已按家庭档案排好今天的三餐');
+    }
+  };
 })(window, document);
