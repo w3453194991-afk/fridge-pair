@@ -330,6 +330,30 @@ const errors = [];
   await shot('09-report');
   report.reportText = await run(`(() => { const p=document.querySelector('.panel .p-body'); return p?p.textContent.trim().slice(0,40):''; })()`);
 
+  /* 拖动 AI 图标 */
+  await click('[data-nav="fridge"]');
+  await sleep(300);
+  const fabRect = await run(`(() => { const f = document.querySelector('.assist-fab'); const r = f.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, top: Math.round(r.top) }; })()`);
+  const tx = Math.round(fabRect.x - 140), ty = Math.round(fabRect.y - 260);
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: Math.round(fabRect.x), y: Math.round(fabRect.y), button: 'left', clickCount: 1 });
+  for (let i = 1; i <= 6; i++) {
+    await cdp.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved', button: 'left',
+      x: Math.round(fabRect.x + (tx - fabRect.x) * i / 6),
+      y: Math.round(fabRect.y + (ty - fabRect.y) * i / 6)
+    });
+    await sleep(40);
+  }
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: tx, y: ty, button: 'left', clickCount: 1 });
+  await sleep(400);
+  report.fabSaved = await run(`DD_STORE.state.fab`);
+  report.fabMovedTo = await run(`(() => { const f = document.querySelector('.assist-fab'); const r = f.getBoundingClientRect(); return { left: Math.round(r.left), top: Math.round(r.top) }; })()`);
+  report.fabStart = { left: Math.round(fabRect.x - 27), top: fabRect.top };
+  await shot('11-fab-dragged');
+
+  /* 拖动后不应误触发聊天 */
+  report.chatOpenedAfterDrag = await run(`!!document.querySelector('#chatInput')`);
+
   await cdp.send('Emulation.clearDeviceMetricsOverride');
   await sleep(300);
   await shot('10-desktop');

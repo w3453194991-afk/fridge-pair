@@ -375,7 +375,11 @@
         toast('健康档案已保存，菜单会按新设定重排');
         break;
       }
-      case 'openChat': openChat(); break;
+      case 'openChat':
+        if (FAB_DRAGGED) { FAB_DRAGGED = false; break; }
+        openChat();
+        break;
+      case 'resetFab': resetFab(); break;
       case 'openNearby':
         go({ name: 'nearby' });
         if (w.DD_VIEW.nearby && w.DD_VIEW.nearby.src === '默认城市') autoLocate();
@@ -1650,6 +1654,98 @@
   }
 
   /* ============================================================
+     可拖动的 AI 助手图标
+     ============================================================ */
+  let FAB_DRAGGED = false;
+
+  function initFab() {
+    const fab = d.querySelector('.assist-fab');
+    if (!fab) return;
+    const app = appEl;
+    const W = () => app.getBoundingClientRect().width || 430;
+    const H = () => app.getBoundingClientRect().height || 800;
+    const FW = () => fab.offsetWidth || 54;
+    const FH = () => fab.offsetHeight || 54;
+
+    function place(x, y) {
+      const maxX = W() - FW() - 6;
+      const maxY = H() - FH() - 88;
+      const nx = Math.max(6, Math.min(maxX, x));
+      const ny = Math.max(6, Math.min(maxY, y));
+      fab.style.left = nx + 'px';
+      fab.style.top = ny + 'px';
+      fab.style.right = 'auto';
+      fab.style.bottom = 'auto';
+      return { x: nx, y: ny };
+    }
+
+    const saved = S.state.fab;
+    if (saved && typeof saved.x === 'number') {
+      place(saved.x * W(), saved.y * H());
+    }
+
+    let dragging = false, moved = 0, sx = 0, sy = 0, ox = 0, oy = 0;
+
+    fab.addEventListener('pointerdown', function (e) {
+      if (e.button !== undefined && e.button > 0) return;
+      const r = app.getBoundingClientRect();
+      const b = fab.getBoundingClientRect();
+      sx = e.clientX; sy = e.clientY;
+      ox = b.left - r.left; oy = b.top - r.top;
+      dragging = true; moved = 0;
+      fab.classList.add('dragging');
+      try { fab.setPointerCapture(e.pointerId); } catch (err) {}
+    });
+
+    fab.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      moved = Math.max(moved, Math.abs(dx) + Math.abs(dy));
+      if (moved < 4) return;
+      place(ox + dx, oy + dy);
+    });
+
+    function endDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+      fab.classList.remove('dragging');
+      try { fab.releasePointerCapture(e.pointerId); } catch (err) {}
+      if (moved < 8) return;              // 没拖动，当成点击
+      FAB_DRAGGED = true;
+      setTimeout(function () { FAB_DRAGGED = false; }, 400);
+      const r = app.getBoundingClientRect();
+      const b = fab.getBoundingClientRect();
+      S.state.fab = {
+        x: (b.left - r.left) / r.width,
+        y: (b.top - r.top) / r.height
+      };
+      S.save();
+      toast('已记住这个位置');
+    }
+    fab.addEventListener('pointerup', endDrag);
+    fab.addEventListener('pointercancel', endDrag);
+
+    // 窗口尺寸变化时重新夹回可视区
+    w.addEventListener('resize', function () {
+      if (!S.state.fab) return;
+      place(S.state.fab.x * W(), S.state.fab.y * H());
+    });
+  }
+
+  function resetFab() {
+    const fab = d.querySelector('.assist-fab');
+    S.state.fab = null;
+    S.save();
+    if (fab) {
+      fab.style.left = '';
+      fab.style.top = '';
+      fab.style.right = '';
+      fab.style.bottom = '';
+    }
+    toast('助手图标已回到默认位置');
+  }
+
+  /* ============================================================
      启动
      ============================================================ */
   S.load();
@@ -1667,6 +1763,7 @@
 
   APP.view = S.state.family.loggedIn ? viewFromHash() : { name: 'login' };
   renderAll(true);
+  initFab();
 
   // PWA：注册 service worker（file:// 下会失败，忽略即可）
   if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {

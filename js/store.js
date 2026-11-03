@@ -54,6 +54,7 @@
       cart: [],
       pinned: [],
       custom: [],
+      fab: null,
       week: null,
       party: null,
       stats: { cooked: 0, saved: 0, added: 0, trashed: 0 }

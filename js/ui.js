@@ -1452,6 +1452,10 @@
           <div class="lab">问问冰箱<small>对话式找菜</small></div>
           <button class="chip" data-action="openChat">打开</button>
         </div>
+        <div class="field">
+          <div class="lab">助手图标<small>按住可以拖到任意位置</small></div>
+          <button class="chip" data-action="resetFab">恢复默认位置</button>
+        </div>
       </div>
 
       <div class="section-head"><div class="t">数据</div></div>

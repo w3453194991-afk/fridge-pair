@@ -971,3 +971,13 @@ input[type="range"]::-webkit-slider-thumb{
   border:1px solid #FFD6DF; border-radius:12px; padding:7px 12px;
 }
 .addchip:active{ transform:scale(.97); }
+
+/* 可拖动的助手图标 */
+.assist-fab{
+  touch-action:none; cursor:grab; user-select:none;
+  transition:box-shadow .18s ease, transform .18s ease;
+}
+.assist-fab.dragging{
+  cursor:grabbing; transform:scale(1.08);
+  box-shadow:0 20px 40px -16px rgba(70,55,40,.7);
+}
