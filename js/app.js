@@ -48,11 +48,14 @@
 
   function go(view, push) {
     if (push !== false) APP.stack.push(APP.view);
+    // 离开菜谱/搜索页就清掉搜索词，避免下次进来看到空列表
+    if (view.name !== 'recipe' && view.name !== 'search') w.DD_VIEW.q = '';
     APP.view = view;
     renderAll(true);
   }
   function tabTo(name) {
     APP.stack = [];
+    if (name !== 'recipe' && name !== 'search') w.DD_VIEW.q = '';
     APP.view = { name: name };
     renderAll(true);
   }
@@ -90,6 +93,7 @@
       pageEl.scrollTop = 0;
       animateNumbers(pageEl);
     }
+    refreshFabGhost();
     try {
       history.replaceState(null, '', '#' + APP.view.name + (APP.view.id ? '/' + APP.view.id : ''));
     } catch (err) { /* file:// 下忽略 */ }
@@ -245,7 +249,9 @@
       return;
     }
     if (t.hasAttribute('data-tabrec')) {
-      w.DD_VIEW.recTab = t.getAttribute('data-tabrec');
+      const tab = t.getAttribute('data-tabrec');
+      w.DD_VIEW.recTab = tab;
+      if (tab !== 'all') w.DD_VIEW.q = '';   // 切走时清掉搜索词
       renderAll(false);
       return;
     }
@@ -1240,6 +1246,75 @@
     });
   }
 
+  /* 图标压住可点元素时，自动挪到不挡路的位置；实在没位置才透明让路 */
+  function refreshFabGhost() {
+    const fab = d.querySelector('.assist-fab');
+    if (!fab || fab.classList.contains('dragging')) return;
+    const app = appEl;
+    const W = app.clientWidth || 430;
+    const H = app.clientHeight || 800;
+    const FW = fab.offsetWidth || 54;
+    const FH = fab.offsetHeight || 54;
+    if (!W || !H) return;
+
+    function underAt(x, y) {
+      const prev = fab.style.pointerEvents;
+      fab.style.pointerEvents = 'none';
+      const el = d.elementFromPoint(x, y);
+      fab.style.pointerEvents = prev;
+      return el;
+    }
+    function busy(el) {
+      return !!el && el !== fab && !fab.contains(el) &&
+        !!el.closest('button, a, input, select, [data-action], [data-dish], [data-food], [data-nav], .chip, .dish, .food');
+    }
+
+    const r = fab.getBoundingClientRect();
+    if (!r.width) return;
+    const blocking = busy(underAt(r.left + r.width / 2, r.top + r.height / 2));
+    if (!blocking) { fab.classList.remove('ghost'); return; }
+
+    // 试几个安全角落
+    const spots = [
+      [W - FW - 12, H - FH - 100],
+      [12, H - FH - 100],
+      [W - FW - 12, 96],
+      [12, 96],
+      [W - FW - 12, Math.round(H * 0.5)],
+      [12, Math.round(H * 0.5)]
+    ];
+    for (let i = 0; i < spots.length; i++) {
+      const x = Math.max(6, Math.min(W - FW - 6, spots[i][0]));
+      const y = Math.max(6, Math.min(H - FH - 88, spots[i][1]));
+      if (Math.abs(x - (r.left - app.getBoundingClientRect().left)) < 6 &&
+        Math.abs(y - (r.top - app.getBoundingClientRect().top)) < 6) continue;
+      if (!busy(underAt(app.getBoundingClientRect().left + x + FW / 2, app.getBoundingClientRect().top + y + FH / 2))) {
+        fab.style.left = x + 'px';
+        fab.style.top = y + 'px';
+        fab.style.right = 'auto';
+        fab.style.bottom = 'auto';
+        fab.classList.remove('ghost');
+        return;
+      }
+    }
+    // 全被占：透明让路，仍可拖动
+    fab.classList.add('ghost');
+  }
+
+  /* 滚动时让 AI 图标变淡并让出点击，避免盖住内容 */
+  function bindFabGhost() {
+    const fab = d.querySelector('.assist-fab');
+    if (!fab) return;
+    let timer = null;
+    const ghostOn = function () {
+      fab.classList.add('ghost');
+      clearTimeout(timer);
+      timer = setTimeout(function () { fab.classList.remove('ghost'); }, 700);
+    };
+    pageEl.addEventListener('scroll', ghostOn, { passive: true });
+    d.addEventListener('scroll', ghostOn, true);
+  }
+
   /* 水波纹 */
   function bindRipple() {
     d.addEventListener('pointerdown', function (e) {
@@ -2157,6 +2232,7 @@
   bindRipple();
   bindCamButton();
   bindTabCenter();
+  bindFabGhost();
   w.addEventListener('error', function (ev) {
     try { toast('脚本错误：' + String(ev.message || '').slice(0, 60)); } catch (e) {}
   });

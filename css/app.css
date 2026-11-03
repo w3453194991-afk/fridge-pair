@@ -1587,3 +1587,11 @@ body{ background:#EAF3EE; }
 .subhead::after{
   background:radial-gradient(circle at 40% 40%, rgba(90,235,178,.35), transparent 70%) !important;
 }
+
+/* 修复：AI 图标在滚动时让出点击，避免遮住内容按钮 */
+.assist-fab{ transition:opacity .26s ease, box-shadow .2s ease; }
+.assist-fab.ghost{ opacity:.3; pointer-events:none; }
+/* 内容底部留出呼吸区，避免最后一行压在图标下面 */
+.page{ padding-bottom:26px; }
+/* 城市等长标签行允许换行，避免边缘按钮被裁 */
+.chips{ flex-wrap:wrap; }

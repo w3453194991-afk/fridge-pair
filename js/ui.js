@@ -1392,7 +1392,7 @@
       <div class="tiny muted" style="text-align:center;margin-top:14px;line-height:1.7">
         店铺数据来自 OpenStreetMap 公开接口；连不上时会退到地图 App 搜索，<br>它们会直接告诉你最近的门店和路线。
       </div>
-      <div style="height:8px"></div>`
+      <div style="height:34px"></div>`
     };
   }
 
