@@ -981,3 +981,16 @@ input[type="range"]::-webkit-slider-thumb{
   cursor:grabbing; transform:scale(1.08);
   box-shadow:0 20px 40px -16px rgba(70,55,40,.7);
 }
+
+/* ---------- 图表精修 ---------- */
+.donut-arcs{ transform-box:view-box; transform-origin:50px 50px; animation:donutIn .7s cubic-bezier(.22,.9,.28,1) both; }
+@keyframes donutIn{ from{ opacity:0; transform:scale(.82) } to{ opacity:1; transform:scale(1) } }
+.radar-shape{ transform-box:view-box; transform-origin:62px 62px; animation:radarIn .65s cubic-bezier(.22,.9,.28,1) both; }
+@keyframes radarIn{ from{ opacity:0; transform:scale(.45) } to{ opacity:1; transform:scale(1) } }
+
+.nb-top{ display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:var(--muted); font-weight:700; }
+.nb-r{ display:flex; align-items:center; gap:5px; }
+.nb-tag{ font-style:normal; font-size:8px; font-weight:800; padding:1.5px 5px; border-radius:5px; letter-spacing:.2px; }
+.nb-top b{ font-size:10.5px; color:var(--ink); font-weight:800; font-variant-numeric:tabular-nums; }
+.nb-bar{ height:6px; background:#F1ECE4; border-radius:4px; margin-top:4px; overflow:hidden; }
+.nb-bar i{ display:block; height:100%; border-radius:4px; transition:width .55s cubic-bezier(.22,.9,.28,1); }

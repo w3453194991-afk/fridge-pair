@@ -43,52 +43,80 @@
   }
 
   /* ---------------- 四色环形图 ---------------- */
+  let GID = 0;
   function donutSvg(c, total) {
-    const R = 38, C = 2 * Math.PI * R;
-    const order = [['g', '#22C55E'], ['y', '#E9A50B'], ['p', '#8B5CF6'], ['b', '#525A6B']];
+    const R = 40, C = 2 * Math.PI * R;
+    const uid = 'd' + (++GID);
+    const defs = `<defs>
+      <linearGradient id="${uid}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ADE80"/><stop offset="1" stop-color="#15A34A"/></linearGradient>
+      <linearGradient id="${uid}y" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFD24D"/><stop offset="1" stop-color="#DE9A05"/></linearGradient>
+      <linearGradient id="${uid}p" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B79BFF"/><stop offset="1" stop-color="#7C3AED"/></linearGradient>
+      <linearGradient id="${uid}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#808894"/><stop offset="1" stop-color="#3F4653"/></linearGradient>
+    </defs>`;
+    if (!total) {
+      return `<svg viewBox="0 0 100 100">${defs}<circle cx="50" cy="50" r="${R}" fill="none" stroke="#F0EBE4" stroke-width="11"/></svg>`;
+    }
+    const order = [['g', `url(#${uid}g)`], ['y', `url(#${uid}y)`], ['p', `url(#${uid}p)`], ['b', `url(#${uid}b)`]];
     let acc = 0, arcs = '';
-    if (!total) return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="${R}" fill="none" stroke="#F0EBE4" stroke-width="10"/></svg>`;
     order.forEach(function (it) {
       const n = c[it[0]] || 0;
       if (!n) return;
       const len = n / total * C;
-      const dash = Math.max(len - 4, 1.6);
-      arcs += `<circle cx="50" cy="50" r="${R}" fill="none" stroke="${it[1]}" stroke-width="10"
-        stroke-linecap="round" stroke-dasharray="${dash.toFixed(2)} ${(C - dash).toFixed(2)}"
+      const dash = Math.max(len - 5, 2);
+      arcs += `<circle class="donut-arc" cx="50" cy="50" r="${R}" fill="none" stroke="${it[1]}"
+        stroke-width="11" stroke-linecap="round"
+        stroke-dasharray="${dash.toFixed(2)} ${(C - dash).toFixed(2)}"
         stroke-dashoffset="${(-acc).toFixed(2)}"/>`;
       acc += len;
     });
-    return `<svg viewBox="0 0 100 100">
-      <circle cx="50" cy="50" r="${R}" fill="none" stroke="#F0EBE4" stroke-width="10"/>${arcs}</svg>`;
+    return `<svg viewBox="0 0 100 100">${defs}
+      <circle cx="50" cy="50" r="${R}" fill="none" stroke="#F1ECE4" stroke-width="11"/>
+      <g class="donut-arcs">${arcs}</g></svg>`;
   }
 
   /* ---------------- 营养雷达图 ---------------- */
   function radarSvg(bars) {
-    const cx = 62, cy = 62, R = 46, n = bars.length;
+    const cx = 62, cy = 62, R = 44, n = bars.length;
+    const uid = 'r' + (++GID);
     const pt = function (i, ratio) {
       const a = -Math.PI / 2 + i * 2 * Math.PI / n;
       return [cx + Math.cos(a) * R * ratio, cy + Math.sin(a) * R * ratio];
     };
-    const grid = [0.25, 0.5, 0.75, 1].map(function (k) {
+    const ring = function (k) {
       const pts = bars.map(function (_, i) { return pt(i, k).map(v => v.toFixed(1)).join(','); }).join(' ');
-      return `<polygon points="${pts}" fill="none" stroke="#EFE7DA" stroke-width="1"/>`;
-    }).join('');
+      return `<polygon points="${pts}" fill="none"
+        stroke="${k === 1 ? '#E3D8C8' : '#F0EAE0'}" stroke-width="${k === 1 ? 1.4 : 1}"
+        ${k === 1 ? 'stroke-dasharray="3 3"' : ''}/>`;
+    };
+    const grid = [0.25, 0.5, 0.75, 1].map(ring).join('');
     const spokes = bars.map(function (_, i) {
       const p = pt(i, 1);
-      return `<line x1="${cx}" y1="${cy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="#EFE7DA" stroke-width="1"/>`;
+      return `<line x1="${cx}" y1="${cy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="#F0EAE0" stroke-width="1"/>`;
     }).join('');
     const shape = bars.map(function (b, i) {
-      return pt(i, Math.min(100, Math.max(4, b.pct)) / 100).map(v => v.toFixed(1)).join(',');
+      return pt(i, Math.min(100, Math.max(5, b.pct)) / 100).map(v => v.toFixed(1)).join(',');
     }).join(' ');
+    const dots = bars.map(function (b, i) {
+      const p = pt(i, Math.min(100, Math.max(5, b.pct)) / 100);
+      return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.6" fill="#fff" stroke="#FF6B3D" stroke-width="1.8"/>`;
+    }).join('');
     const labels = bars.map(function (b, i) {
-      const p = pt(i, 1.28);
+      const p = pt(i, 1.3);
+      const good = b.pct >= 90;
       return `<text x="${p[0].toFixed(1)}" y="${(p[1] + 3).toFixed(1)}" font-size="7.5"
-        fill="${b.pct >= 90 ? '#127A45' : '#8B909C'}" text-anchor="middle" font-weight="700">${b.short || b.label}</text>`;
+        fill="${good ? '#127A45' : '#9AA0AC'}" text-anchor="middle" font-weight="700">${b.short || b.label}</text>`;
     }).join('');
     return `<svg viewBox="0 0 124 124" class="radar">
+      <defs>
+        <radialGradient id="${uid}f" cx="50%" cy="45%" r="60%">
+          <stop offset="0" stop-color="#FF9A6B" stop-opacity=".55"/>
+          <stop offset="1" stop-color="#FF6B3D" stop-opacity=".12"/>
+        </radialGradient>
+      </defs>
       ${grid}${spokes}
-      <polygon points="${shape}" fill="rgba(255,107,61,.18)" stroke="#FF6B3D" stroke-width="2" stroke-linejoin="round"/>
-      ${labels}</svg>`;
+      <polygon class="radar-shape" points="${shape}" fill="url(#${uid}f)"
+        stroke="#FF6B3D" stroke-width="2" stroke-linejoin="round"/>
+      ${dots}${labels}</svg>`;
   }
 
   /* ---------------- 冰箱首页 ---------------- */
@@ -138,12 +166,17 @@
     const today = E.todayMenu(st);
     const todayHtml = (today && today.length)
       ? `<div class="panel" style="margin-top:9px;padding:6px 14px">
-          ${today.map(t => `<button class="meal" data-dish="${t.dish.id}">
-            <span class="slot">${t.slot}</span>
-            <span class="em">${t.dish.emoji}</span>
-            <span class="nm">${esc(t.dish.name)}</span>
-            ${t.missing ? '<span class="flag" style="background:#FEE2E2;color:#B91C1C">缺料</span>' : ''}
-          </button>`).join('')}
+          ${today.map(function (t) {
+            const m = t.ids && t.ids.length ? t.ids : [t.dish.id];
+            const ds = m.map(id => D.DISHES.filter(x => x.id === id)[0]).filter(Boolean);
+            return `<div class="meal">
+              <span class="slot">${t.slot}</span>
+              <div class="meal-dishes">
+                ${ds.map(dd => `<span class="mname" data-dish="${dd.id}">${dd.emoji} ${esc(dd.name)}</span>`).join('<span class="sep">·</span>')}
+              </div>
+              ${t.missing ? '<span class="flag" style="background:#FEE2E2;color:#B91C1C">补料</span>' : ''}
+            </div>`;
+          }).join('')}
         </div>`
       : `<div class="panel" style="margin-top:9px">
           <div class="p-body" style="margin-top:0">还没排今天的菜。按家庭档案生成一周菜单后，这里会显示早 / 午 / 晚。</div>
@@ -559,10 +592,23 @@
         <div class="nutri">
           ${radarSvg(nutBars)}
           <div class="nutri-bars">
-            ${nutBars.map(b => `<div class="nb">
-              <div class="nb-top"><span>${b.label}</span><b>${b.got}<small> / ${b.need}${b.unit}</small></b></div>
-              <div class="nb-bar"><i style="width:${Math.min(100, b.pct)}%;background:${b.pct >= 90 ? 'linear-gradient(90deg,#4ADE80,#22C55E)' : b.pct >= 60 ? 'linear-gradient(90deg,#FFC86B,#F0A020)' : 'linear-gradient(90deg,#FF9A8B,#FF5C7A)'}"></i></div>
-            </div>`).join('')}
+            ${nutBars.map(function (b) {
+              const over = b.pct > 130;
+              const good = b.pct >= 90 && b.pct <= 130;
+              const near = b.pct >= 60 && b.pct < 90;
+              const tag = over ? '偏高' : good ? '达标' : near ? '接近' : '偏低';
+              const color = over ? '#E0A00B' : good ? '#16A34A' : near ? '#F0A020' : '#FF5C7A';
+              return `<div class="nb">
+                <div class="nb-top">
+                  <span>${b.label}</span>
+                  <span class="nb-r">
+                    <i class="nb-tag" style="color:${color};background:${color}1A">${tag}</i>
+                    <b>${b.got}<small>/${b.need}${b.unit}</small></b>
+                  </span>
+                </div>
+                <div class="nb-bar"><i style="width:${Math.min(100, b.pct)}%;background:linear-gradient(90deg,${color}AA,${color})"></i></div>
+              </div>`;
+            }).join('')}
           </div>
         </div>
         <div class="tiny muted" style="margin-top:10px;line-height:1.6">
@@ -1183,8 +1229,15 @@
       <div class="panel">
         <h3><span class="dot"></span>浪费率</h3>
         <div class="p-body">清理 / （做菜 + 清理）= <b>${r.wasteRate}%</b></div>
-        <div class="nb-bar" style="height:8px;margin-top:8px"><i style="width:${Math.min(100, r.wasteRate)}%;background:linear-gradient(90deg,#4ADE80,#F0A020,#FF5C7A)"></i></div>
-        <div class="tiny muted" style="margin-top:6px">越低越好；一般家庭在 10% 以内算不错</div>
+        <div class="nb-bar" style="height:9px;margin-top:9px;position:relative">
+          <i style="width:${Math.min(100, r.wasteRate)}%;background:linear-gradient(90deg,#4ADE80,#F0A020 55%,#FF5C7A)"></i>
+          <span style="position:absolute;left:10%;top:-4px;width:1.5px;height:17px;background:#B7BEC9;opacity:.8"></span>
+        </div>
+        <div class="row between" style="margin-top:6px">
+          <span class="tiny muted">0%</span>
+          <span class="tiny" style="color:#B7BEC9">10% 及格线</span>
+          <span class="tiny muted">25%</span>
+        </div>
       </div>
 
       <div class="panel">

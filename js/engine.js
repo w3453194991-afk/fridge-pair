@@ -181,9 +181,10 @@
     const virt = {};
     foods.forEach(f => { virt[f.name] = { qty: f.qty, tier: tier(f) }; });
     const usedAt = {};
+    let usedToday = {};
     const days = [];
 
-    function scoreDish(d) {
+    function scoreDish(d, dayIdx) {
       let s = 0;
       d.ingredients.forEach(function (ing) {
         const v = virt[ing.name];
@@ -196,12 +197,15 @@
         else s -= 4;
       }
       if (usedAt[d.id] !== undefined) s -= 9; else s += 2;
+      if (usedAt[d.id] === dayIdx) s -= 22;      // 同一天内不重复
+      if (usedAt[d.id] === dayIdx - 1) s -= 12;  // 相邻两天也尽量不重复
       s += conditionPenalty(d, conds);
       return s + Math.random() * 2;
     }
 
     for (let i = 0; i < 7; i++) {
       const dt = new Date(now() + i * DAY);
+      usedToday = {};
       const day = {
         idx: i,
         label: i === 0 ? '今天' : (i === 1 ? '明天' : WD[dt.getDay()]),
@@ -223,13 +227,14 @@
 
           let best = null, bestScore = -1e9;
           cands.forEach(function (d) {
-            const sc = scoreDish(d);
+            const sc = scoreDish(d, i);
             if (sc > bestScore) { bestScore = sc; best = d; }
           });
           if (!best) return;
 
           ids.push(best.id);
           usedThisMeal[best.id] = 1;
+          usedToday[best.id] = 1;
           usedAt[best.id] = i;
           best.ingredients.forEach(function (ing) {
             const v = virt[ing.name];
@@ -419,7 +424,7 @@
       if (!m) return null;
       const dish = D.DISHES.filter(d => d.id === m.id)[0];
       if (!dish) return null;
-      return { slot: slot, dish: dish, missing: !!m.missing };
+      return { slot: slot, dish: dish, ids: m.ids || [m.id], missing: !!m.missing };
     }).filter(Boolean);
   }
 
