@@ -1,0 +1,416 @@
+[
+ {
+  "kind": "d",
+  "id": "tomato-egg",
+  "name": "番茄炒蛋",
+  "q": "tomato scrambled eggs"
+ },
+ {
+  "kind": "d",
+  "id": "beef-broccoli",
+  "name": "西兰花炒牛肉",
+  "q": "broccoli beef"
+ },
+ {
+  "kind": "d",
+  "id": "milk-oats",
+  "name": "牛奶燕麦粥",
+  "q": "oatmeal milk"
+ },
+ {
+  "kind": "d",
+  "id": "tomato-noodle",
+  "name": "番茄鸡蛋面",
+  "q": "tomato egg noodles"
+ },
+ {
+  "kind": "d",
+  "id": "spinach-tofu",
+  "name": "菠菜豆腐汤",
+  "q": "spinach tofu soup"
+ },
+ {
+  "kind": "d",
+  "id": "rib-carrot",
+  "name": "胡萝卜排骨汤",
+  "q": "carrot pork rib soup"
+ },
+ {
+  "kind": "d",
+  "id": "mushroom-tofu",
+  "name": "香菇豆腐煲",
+  "q": "tofu mushroom"
+ },
+ {
+  "kind": "d",
+  "id": "garlic-spinach",
+  "name": "蒜蓉菠菜",
+  "q": "garlic spinach"
+ },
+ {
+  "kind": "d",
+  "id": "apple-yogurt",
+  "name": "苹果酸奶杯",
+  "q": "yogurt parfait"
+ },
+ {
+  "kind": "d",
+  "id": "pan-salmon",
+  "name": "香煎三文鱼",
+  "q": "salmon grilled"
+ },
+ {
+  "kind": "d",
+  "id": "garlic-chicken",
+  "name": "蒜香鸡胸",
+  "q": "chicken breast grilled"
+ },
+ {
+  "kind": "d",
+  "id": "stir-youcai",
+  "name": "清炒油菜",
+  "q": "bok choy stir fry"
+ },
+ {
+  "kind": "d",
+  "id": "lotus-rib",
+  "name": "莲藕排骨汤",
+  "q": "lotus root pork ribs soup"
+ },
+ {
+  "kind": "d",
+  "id": "pumpkin-soup",
+  "name": "南瓜浓汤",
+  "q": "pumpkin soup"
+ },
+ {
+  "kind": "d",
+  "id": "hand-cabbage",
+  "name": "手撕包菜",
+  "q": "cabbage stir fry"
+ },
+ {
+  "kind": "d",
+  "id": "kungpao",
+  "name": "宫保鸡丁",
+  "q": "kung pao chicken"
+ },
+ {
+  "kind": "d",
+  "id": "mapo-tofu",
+  "name": "麻婆豆腐",
+  "q": "mapo tofu"
+ },
+ {
+  "kind": "d",
+  "id": "yuxiang-pork",
+  "name": "鱼香肉丝",
+  "q": "shredded pork stir fry"
+ },
+ {
+  "kind": "d",
+  "id": "steam-sparerib",
+  "name": "豉汁蒸排骨",
+  "q": "steamed pork ribs"
+ },
+ {
+  "kind": "d",
+  "id": "braised-pork",
+  "name": "红烧肉",
+  "q": "hong shao rou"
+ },
+ {
+  "kind": "d",
+  "id": "dongpo-pork",
+  "name": "东坡肉",
+  "q": "braised pork belly"
+ },
+ {
+  "kind": "d",
+  "id": "xihu-beef-soup",
+  "name": "西湖牛肉羹",
+  "q": "beef soup"
+ },
+ {
+  "kind": "d",
+  "id": "disanxian",
+  "name": "地三鲜",
+  "q": "eggplant potato pepper"
+ },
+ {
+  "kind": "d",
+  "id": "hand-lamb",
+  "name": "手抓羊肉",
+  "q": "boiled lamb"
+ },
+ {
+  "kind": "d",
+  "id": "mushroom-soup",
+  "name": "奶油蘑菇汤",
+  "q": "cream mushroom soup"
+ },
+ {
+  "kind": "d",
+  "id": "caesar",
+  "name": "凯撒沙拉",
+  "q": "caesar salad"
+ },
+ {
+  "kind": "d",
+  "id": "paella",
+  "name": "西班牙海鲜饭",
+  "q": "paella"
+ },
+ {
+  "kind": "d",
+  "id": "english-breakfast",
+  "name": "英式早餐",
+  "q": "full english breakfast"
+ },
+ {
+  "kind": "d",
+  "id": "kimchi-fried-rice",
+  "name": "韩式泡菜炒饭",
+  "q": "kimchi fried rice"
+ },
+ {
+  "kind": "d",
+  "id": "braised-eggplant",
+  "name": "红烧茄子",
+  "q": "braised eggplant"
+ },
+ {
+  "kind": "d",
+  "id": "sweet-sour-ribs",
+  "name": "糖醋排骨",
+  "q": "sweet sour pork ribs"
+ },
+ {
+  "kind": "d",
+  "id": "egg-fried-rice",
+  "name": "蛋炒饭",
+  "q": "fried rice egg"
+ },
+ {
+  "kind": "d",
+  "id": "jingjiang-pork",
+  "name": "京酱肉丝",
+  "q": "shredded pork"
+ },
+ {
+  "kind": "d",
+  "id": "dry-fried-beans",
+  "name": "干煸豆角",
+  "q": "green beans stir fry"
+ },
+ {
+  "kind": "d",
+  "id": "hot-sour-potato",
+  "name": "酸辣土豆丝",
+  "q": "shredded potato"
+ },
+ {
+  "kind": "d",
+  "id": "mushroom-chicken",
+  "name": "香菇滑鸡",
+  "q": "chicken mushroom"
+ },
+ {
+  "kind": "d",
+  "id": "steamed-scallop",
+  "name": "蒜蓉粉丝蒸扇贝",
+  "q": "steamed scallops"
+ },
+ {
+  "kind": "d",
+  "id": "tomato-egg-soup",
+  "name": "番茄鸡蛋汤",
+  "q": "tomato egg soup"
+ },
+ {
+  "kind": "d",
+  "id": "century-egg-congee",
+  "name": "皮蛋瘦肉粥",
+  "q": "congee"
+ },
+ {
+  "kind": "f",
+  "name": "番茄",
+  "q": "tomato"
+ },
+ {
+  "kind": "f",
+  "name": "土豆",
+  "q": "potato"
+ },
+ {
+  "kind": "f",
+  "name": "大白菜",
+  "q": "napa cabbage"
+ },
+ {
+  "kind": "f",
+  "name": "黄瓜",
+  "q": "cucumber"
+ },
+ {
+  "kind": "f",
+  "name": "胡萝卜",
+  "q": "carrot"
+ },
+ {
+  "kind": "f",
+  "name": "洋葱",
+  "q": "onion"
+ },
+ {
+  "kind": "f",
+  "name": "青椒",
+  "q": "green pepper"
+ },
+ {
+  "kind": "f",
+  "name": "茄子",
+  "q": "eggplant"
+ },
+ {
+  "kind": "f",
+  "name": "菠菜",
+  "q": "spinach"
+ },
+ {
+  "kind": "f",
+  "name": "西兰花",
+  "q": "broccoli"
+ },
+ {
+  "kind": "f",
+  "name": "香菇",
+  "q": "shiitake"
+ },
+ {
+  "kind": "f",
+  "name": "莲藕",
+  "q": "lotus root"
+ },
+ {
+  "kind": "f",
+  "name": "冬瓜",
+  "q": "winter melon"
+ },
+ {
+  "kind": "f",
+  "name": "南瓜",
+  "q": "pumpkin"
+ },
+ {
+  "kind": "f",
+  "name": "鸡蛋",
+  "q": "chicken eggs"
+ },
+ {
+  "kind": "f",
+  "name": "牛奶",
+  "q": "milk"
+ },
+ {
+  "kind": "f",
+  "name": "酸奶",
+  "q": "yogurt"
+ },
+ {
+  "kind": "f",
+  "name": "豆腐",
+  "q": "tofu"
+ },
+ {
+  "kind": "f",
+  "name": "五花肉",
+  "q": "pork belly"
+ },
+ {
+  "kind": "f",
+  "name": "猪里脊",
+  "q": "pork meat"
+ },
+ {
+  "kind": "f",
+  "name": "排骨",
+  "q": "pork ribs"
+ },
+ {
+  "kind": "f",
+  "name": "牛里脊",
+  "q": "beef raw"
+ },
+ {
+  "kind": "f",
+  "name": "牛腩",
+  "q": "beef brisket"
+ },
+ {
+  "kind": "f",
+  "name": "鸡胸肉",
+  "q": "chicken breast raw"
+ },
+ {
+  "kind": "f",
+  "name": "鸡腿",
+  "q": "chicken legs"
+ },
+ {
+  "kind": "f",
+  "name": "鸡翅",
+  "q": "chicken wings"
+ },
+ {
+  "kind": "f",
+  "name": "虾",
+  "q": "shrimp"
+ },
+ {
+  "kind": "f",
+  "name": "虾仁",
+  "q": "shrimp peeled"
+ },
+ {
+  "kind": "f",
+  "name": "鲈鱼",
+  "q": "sea bass"
+ },
+ {
+  "kind": "f",
+  "name": "三文鱼",
+  "q": "salmon"
+ },
+ {
+  "kind": "f",
+  "name": "大米",
+  "q": "rice grains"
+ },
+ {
+  "kind": "f",
+  "name": "挂面",
+  "q": "noodles dry"
+ },
+ {
+  "kind": "f",
+  "name": "面包",
+  "q": "bread"
+ },
+ {
+  "kind": "f",
+  "name": "苹果",
+  "q": "apple"
+ },
+ {
+  "kind": "f",
+  "name": "香蕉",
+  "q": "banana"
+ },
+ {
+  "kind": "f",
+  "name": "柠檬",
+  "q": "lemon"
+ }
+]

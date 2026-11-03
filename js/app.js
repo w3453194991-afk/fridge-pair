@@ -590,6 +590,8 @@
         drawFamily();
         break;
       }
+      case 'cookCheck': cookCheck(t.getAttribute('data-k')); break;
+      case 'cookPhoto': cookPhoto(); break;
       case 'camOpenFile': {
         const inp = d.getElementById('camFile');
         if (inp) inp.click();
@@ -732,6 +734,13 @@
   function openCamera(mode, id) {
     const food = id ? S.get(id) : null;
     if (mode === 'update' && !food) return;
+    if (mode === 'cook') {
+      const dish = D.DISHES.filter(x => x.id === id)[0];
+      if (!dish) return;
+      CAM = { mode: 'cook', dishId: id, dish: dish, phase: 'idle', img: null, items: [] };
+      drawCamera();
+      return;
+    }
     CAM = { mode: mode, foodId: id, food: food, phase: 'idle', img: null, scene: null, items: [], ratio: 60 };
     drawCamera();
   }
@@ -739,14 +748,18 @@
   function drawCamera() {
     if (!CAM) return;
     const isUpd = CAM.mode === 'update';
-    const title = isUpd ? ('更新剩余 · ' + CAM.food.name) : '拍照入库';
+    const isCook = CAM.mode === 'cook';
+    const title = isCook ? ('拍照记录 · ' + CAM.dish.name)
+      : isUpd ? ('更新剩余 · ' + CAM.food.name) : '拍照入库';
     let body = '';
 
     if (CAM.phase === 'idle') {
       body = `
         <div class="shot"><div class="ph"><div class="e">📷</div>
-          <div class="t">${isUpd ? '对着剩下的 ' + U.esc(CAM.food.name) + ' 拍一张' : '对着冰箱里的食材拍一张'}</div>
-          <div class="t" style="font-weight:400;color:#C4BAAF;margin-top:2px">支持生鲜 / 包装食品混拍</div>
+          <div class="t">${isCook ? '给做好的「' + U.esc(CAM.dish.name) + '」拍一张'
+            : isUpd ? '对着剩下的 ' + U.esc(CAM.food.name) + ' 拍一张'
+              : '对着冰箱里的食材拍一张'}</div>
+          <div class="t" style="font-weight:400;color:#C4BAAF;margin-top:2px">${isCook ? '拍完就自动扣减库存' : '支持生鲜 / 包装食品混拍'}</div>
         </div></div>
         <div class="btn-row">
           <button class="btn ghost" data-action="camOpenFile">选择照片</button>
@@ -761,7 +774,21 @@
         <div class="small bold" style="text-align:center;margin-top:12px">🤖 AI 正在识别食材与保质期…</div>
         <div class="small muted" style="text-align:center;margin-top:4px">匹配食材库 2,000+ 条 · 读取包装日期</div>`;
     } else if (CAM.phase === 'result') {
-      if (isUpd) {
+      if (isCook) {
+        body = `
+          <div class="shot has-img"><img src="${CAM.img}" alt=""></div>
+          <div class="panel" style="box-shadow:none;background:#fff">
+            <h3><span class="dot"></span>照片已记录</h3>
+            <div class="p-body">${CAM.dish.emoji} ${U.esc(CAM.dish.name)} 完成！确认后按菜谱用量扣减：</div>
+            <div class="taglist" style="margin-top:8px">
+              ${CAM.dish.ingredients.map(i => `<span class="tg">${U.esc(i.name)} −${E.fmtQty(i.qty)} ${U.esc(E.foodMeta(i.name).unit)}</span>`).join('')}
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn ghost" data-action="camSample">重拍</button>
+            <button class="btn primary" data-action="camConfirm">确认完成 · 更新库存</button>
+          </div>`;
+      } else if (isUpd) {
         body = `
           <div class="shot has-img"><img src="${CAM.img}" alt=""></div>
           <div class="panel" style="box-shadow:none;background:#fff">
@@ -1090,22 +1117,101 @@
     setTimeout(function () { f.remove(); }, 520);
   }
 
+  /* ------------------------------------------------------------
+     做菜：先看做法 → 拍照记录 → 扣库存
+     ------------------------------------------------------------ */
+  let COOK = null;
+
   function doCook(id) {
     const dish = D.DISHES.filter(x => x.id === id)[0];
     if (!dish) return;
-    const st = S.state;
-    const states = E.ingredientState(dish, st.foods);
+    const states = E.ingredientState(dish, S.state.foods);
     const missing = states.filter(s => !s.ok);
     if (missing.length) {
       toast('还差：' + missing.map(m => m.name).join('、') + '，先去补料');
       return;
     }
-    const res = E.cook(dish, st);
+    COOK = { dish: dish, done: {} };
+    drawCookGuide();
+  }
+
+  function drawCookGuide() {
+    if (!COOK) return;
+    const dish = COOK.dish, done = COOK.done;
+    const total = dish.prep.length + dish.steps.length;
+    const doneN = Object.keys(done).filter(k => done[k]).length;
+    const pct = total ? Math.round(doneN / total * 100) : 0;
+
+    const prepRows = dish.prep.map(function (p, i) {
+      const k = 'p' + i;
+      return `<div class="cookrow${done[k] ? ' ok' : ''}" data-action="cookCheck" data-k="${k}">
+        <span class="ck">${done[k] ? '✓' : i + 1}</span>
+        <span class="tx">${U.esc(p)}</span>
+      </div>`;
+    }).join('');
+
+    const stepRows = dish.steps.map(function (s, i) {
+      const k = 's' + i;
+      const mm = s.text.match(/(\d+(?:\.\d+)?)\s*分钟/);
+      const ss = s.text.match(/(\d+)\s*秒/);
+      const secs = mm ? Math.round(parseFloat(mm[1]) * 60) : (ss ? parseInt(ss[1], 10) : 0);
+      return `<div class="cookrow${done[k] ? ' ok' : ''}" data-action="cookCheck" data-k="${k}">
+        <span class="ck">${done[k] ? '✓' : i + 1}</span>
+        <div class="tx">
+          ${s.heat !== '无火' && s.heat !== '关火' ? `<span class="heat">${s.heat}</span>` : ''}
+          ${U.esc(s.text)}
+          <div class="cooktools">
+            ${secs ? `<button class="tool" data-timer="${secs}">⏱ ${fmtSec(secs)}</button>` : ''}
+            <button class="tool" data-speak="${U.esc(s.text)}">🔊 朗读</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    openModal(`
+      <div class="sheet-head"><div class="t">${dish.emoji} ${U.esc(dish.name)}</div>
+        <button class="x" data-action="closeModal">✕</button></div>
+
+      <div class="cookbar"><i style="width:${pct}%"></i></div>
+      <div class="tiny muted" style="text-align:center;margin-top:7px">
+        已完成 ${doneN}/${total} 步 · ${dish.minutes} 分钟 · ${U.esc(dish.level)}
+      </div>
+
+      <div class="section-head" style="margin-top:14px"><div class="t">先备料<small>怎么切、怎么腌</small></div></div>
+      ${prepRows}
+
+      <div class="section-head" style="margin-top:12px"><div class="t">再下锅<small>按顺序做，点一下打勾</small></div></div>
+      ${stepRows}
+
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn ghost" data-action="closeModal">先不做</button>
+        <button class="btn primary" data-action="cookPhoto">做完了 · 拍照记录 ›</button>
+      </div>
+      <div class="tiny muted" style="text-align:center;margin-top:9px;line-height:1.6">
+        拍完照片确认后，会按菜谱用量自动扣减冰箱库存
+      </div>`);
+  }
+
+  function cookCheck(k) {
+    if (!COOK) return;
+    COOK.done[k] = !COOK.done[k];
+    drawCookGuide();
+  }
+
+  function cookPhoto() {
+    if (!COOK) return;
+    openCamera('cook', COOK.dish.id);
+  }
+
+  /* 扣库存 + 结算弹层 */
+  function finishCooking(dish) {
+    const res = E.cook(dish, S.state);
     S.save();
     const left = res.used.filter(u => u.left > 0);
     burst(w.innerWidth / 2, w.innerHeight * 0.42);
     APP.view = { name: 'fridge' };
     renderAll(true);
+    COOK = null;
     openModal(`
       <div class="sheet-head"><div class="t">✅ 做完啦，库存已更新</div>
         <button class="x" data-action="closeModal">✕</button></div>

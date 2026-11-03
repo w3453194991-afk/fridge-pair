@@ -327,8 +327,8 @@
         const keys = GROUP_ORDER.filter(k => buckets[k] && buckets[k].length)
           .concat(Object.keys(buckets).filter(k => GROUP_ORDER.indexOf(k) < 0));
         return keys.map(function (k) {
-          return `<div class="section-head"><div class="t">${GROUP_LABEL[k] || k}<small>${buckets[k].length} 道</small></div></div>` +
-            buckets[k].map(d => dishRow(d, false)).join('');
+          return `<div class="section-head"><div class="t">${GROUP_LABEL[k] || k}<small>${buckets[k].length} 道</small></div></div>
+            <div class="cardgrid">${buckets[k].map(d => dishCard(d)).join('')}</div>`;
         }).join('');
       })()
         : `<div class="empty"><div class="e">🔍</div><div class="t">没找到相关菜谱</div></div>`;
@@ -351,6 +351,31 @@
     </div>`;
 
     return { title: '菜谱', tab: 'recipe', html: tabs + addRow + body };
+  }
+
+  /* 是否有真实照片（由 js/photos.js 提供） */
+  function hasPhoto(kind, id) {
+    const P = w.DD_PHOTOS;
+    return !!(P && P[kind] && P[kind][id]);
+  }
+
+  /* 大图封面菜品卡 */
+  function dishCard(d, hot) {
+    const pinned = (S.state.pinned || []).indexOf(d.id) >= 0;
+    const withPhoto = hasPhoto('d', d.id);
+    return `<div class="dcard${pinned ? ' pinned' : ''}" data-dish="${d.id}" role="button" tabindex="0">
+      <div class="dc-cover">
+        <div class="dc-fb">${d.emoji}</div>
+        ${withPhoto ? `<img src="img/d/${d.id}.jpg" alt="${esc(d.name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+        ${hot ? '<span class="dc-hot">可做</span>' : ''}
+        <button class="pin dc-pin${pinned ? ' on' : ''}" data-pin="${d.id}" aria-label="置顶">📌</button>
+      </div>
+      <div class="dc-body">
+        <div class="dc-name">${esc(d.name)}</div>
+        <div class="dc-sub">${d.ingredients.map(i => esc(i.name)).join(' + ')}</div>
+        <div class="dc-meta"><span>${d.minutes} 分钟</span><span>${esc(d.level)}</span></div>
+      </div>
+    </div>`;
   }
 
   function dishRow(d, hot, missing) {
@@ -410,6 +435,11 @@
     return {
       title: d.name, back: true, tab: 'recipe',
       html: `
+      <div class="dish-hero">
+        <div class="fb">${d.emoji}</div>
+        ${hasPhoto('d', d.id) ? `<img src="img/d/${d.id}.jpg" alt="${esc(d.name)}" onerror="this.style.display='none'">` : ''}
+      </div>
+
       <div class="subhead">
         <div class="em">${d.emoji}</div>
         <div style="flex:1;min-width:0"><h2>${esc(d.name)}</h2>

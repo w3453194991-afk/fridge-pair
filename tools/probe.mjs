@@ -133,9 +133,9 @@ const errors = [];
   await click('[data-nav="recipe"]');
   await sleep(350);
   const beforeFirst = await run(`document.querySelector('.dish .nm') ? document.querySelector('.dish .nm').textContent.trim() : ''`);
-  const dishCount = await run(`document.querySelectorAll('.dish[data-dish]').length`);
+  const dishCount = await run(`document.querySelectorAll('[data-dish]').length`);
   // 点倒数第二道（一定能做的）置顶，验证是否出现在顶部「我的置顶」块
-  const lastName = await run(`(() => { const all = document.querySelectorAll('.dish[data-dish]');
+  const lastName = await run(`(() => { const all = document.querySelectorAll('[data-dish]');
     if (all.length < 2) return '';
     const el = all[all.length - 2]; const nm = el.querySelector('.nm').textContent.trim();
     el.querySelector('.pin').click(); return nm; })()`);
@@ -155,7 +155,7 @@ const errors = [];
   await click('[data-tabrec="fit"]');
   await sleep(250);
 
-  await run(`(() => { const b = Array.from(document.querySelectorAll('.dish[data-dish]')).find(x=>x.textContent.indexOf('番茄炒蛋')>=0); if(b) b.click(); return !!b; })()`);
+  await run(`(() => { const b = Array.from(document.querySelectorAll('[data-dish]')).find(x=>x.textContent.indexOf('番茄炒蛋')>=0); if(b) b.click(); return !!b; })()`);
   await sleep(350);
   report.timers = await run(`document.querySelectorAll('[data-timer]').length`);
   report.speakBtns = await run(`document.querySelectorAll('[data-speak]').length`);
@@ -212,14 +212,14 @@ const errors = [];
   await type('#globalSearch', '西红柿炒蛋');
   await sleep(320);
   await shot('08-search-alias');
-  report.searchAlias = await run(`document.querySelectorAll('.dish[data-dish]').length`);
+  report.searchAlias = await run(`document.querySelectorAll('[data-dish]').length`);
   report.aliasHint = await run(`(() => { const e = document.querySelector('.tiny.muted'); return e ? e.textContent.trim().slice(0, 20) : ''; })()`);
 
   await type('#globalSearch', '鱼香茄子');
   await sleep(350);
   await shot('08b-search-fallback');
   report.fallbackTitle = await run(`(() => { const h = document.querySelector('.panel h3'); return h ? h.textContent.trim() : ''; })()`);
-  report.fallbackDishes = await run(`Array.from(document.querySelectorAll('.dish[data-dish] .nm')).map(e => e.textContent.trim()).slice(0, 4)`);
+  report.fallbackDishes = await run(`Array.from(document.querySelectorAll('[data-dish] .nm')).map(e => e.textContent.trim()).slice(0, 4)`);
 
   await type('#globalSearch', '可乐鸡翅');
   await sleep(350);
@@ -287,7 +287,7 @@ const errors = [];
   await click('[data-nav="recipe"]');
   await click('[data-tabrec="all"]');
   await sleep(300);
-  await run(`(() => { const b = Array.from(document.querySelectorAll('.dish[data-dish]')).find(x => x.textContent.indexOf('虾仁滑蛋') >= 0); if (b) b.click(); return !!b; })()`);
+  await run(`(() => { const b = Array.from(document.querySelectorAll('[data-dish]')).find(x => x.textContent.indexOf('虾仁滑蛋') >= 0); if (b) b.click(); return !!b; })()`);
   await sleep(350);
   await shot('09b-allergy-warning');
   report.allergenWarn = await run(`(() => { const a = document.querySelector('.alert.bad'); return a ? a.textContent.trim().slice(0, 30) : ''; })()`);
@@ -363,6 +363,33 @@ const errors = [];
 
   /* 拖动后不应误触发聊天 */
   report.chatOpenedAfterDrag = await run(`!!document.querySelector('#chatInput')`);
+
+  /* 做菜：做法 → 拍照 → 扣库存 */
+  await run(`DD_VIEW.q = ''`);
+  await click('[data-nav="recipe"]');
+  await click('[data-tabrec="fit"]');
+  await sleep(400);
+  const beforeQty = await run(`JSON.stringify(DD_STORE.state.foods.map(f => [f.name, f.qty]))`);
+  const cookId = await run(`(() => { const d = DD_DATA.DISHES.find(x => DD_ENGINE.ingredientState(x, DD_STORE.state.foods).every(s => s.ok)); return d ? d.id : ''; })()`);
+  await run(`location.hash = '#dish/' + ${JSON.stringify(cookId)} ; location.reload();`);
+  await sleep(1800);
+  await click('[data-cook]');
+  await sleep(450);
+  report.cookRows = await run(`document.querySelectorAll('.cookrow').length`);
+  report.cookGuideTitle = await run(`(() => { const h = document.querySelector('.sheet-head .t'); return h ? h.textContent.trim() : ''; })()`);
+  await shot('12a-cook-guide');
+  await click('[data-action="cookCheck"]');
+  await sleep(250);
+  await click('[data-action="cookPhoto"]');
+  await sleep(400);
+  await click('[data-action="camSample"]');
+  await sleep(1700);
+  await shot('12b-cook-photo');
+  await click('[data-action="camConfirm"]');
+  await sleep(700);
+  await shot('12c-cook-done');
+  const afterQty = await run(`JSON.stringify(DD_STORE.state.foods.map(f => [f.name, f.qty]))`);
+  report.cookQtyChanged = beforeQty !== afterQty;
 
   await cdp.send('Emulation.clearDeviceMetricsOverride');
   await sleep(300);
