@@ -54,6 +54,7 @@
       cart: [],
       pinned: [],
       custom: [],
+      photos: {},
       fab: null,
       week: null,
       party: null,
@@ -75,6 +76,7 @@
       if (!Array.isArray(s.cart)) s.cart = [];
       if (!Array.isArray(s.pinned)) s.pinned = [];
       if (!Array.isArray(s.custom)) s.custom = [];
+      if (!s.photos || typeof s.photos !== 'object') s.photos = {};
       if (!s.family) s.family = seedState().family;
       if (!s.family.system) s.family.system = 'cn';
       if (!Array.isArray(s.family.avoid)) s.family.avoid = [];
@@ -158,6 +160,24 @@
       const f = this.get(id);
       if (!f) return;
       f.expireAt = Date.now() + Math.round(days * DAY);
+      this.save();
+    },
+
+    /* ---------- 我的实拍（做菜时拍的照片，作为菜品封面） ---------- */
+    setDishPhoto: function (id, dataUrl) {
+      if (!id || !dataUrl) return;
+      if (!this.state.photos) this.state.photos = {};
+      this.state.photos[id] = dataUrl;
+      // 控制体积：最多留 18 张，先进先出
+      const keys = Object.keys(this.state.photos);
+      if (keys.length > 18) delete this.state.photos[keys[0]];
+      this.save();
+    },
+    getDishPhoto: function (id) {
+      return (this.state.photos || {})[id] || '';
+    },
+    clearDishPhoto: function (id) {
+      if (this.state.photos) delete this.state.photos[id];
       this.save();
     },
 

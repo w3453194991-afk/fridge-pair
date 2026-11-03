@@ -31,6 +31,12 @@
  },
  {
   "kind": "d",
+  "id": "pepper-potato",
+  "name": "青椒土豆丝",
+  "q": "shredded potato stir fry"
+ },
+ {
+  "kind": "d",
   "id": "rib-carrot",
   "name": "胡萝卜排骨汤",
   "q": "carrot pork rib soup"
@@ -46,6 +52,12 @@
   "id": "garlic-spinach",
   "name": "蒜蓉菠菜",
   "q": "garlic spinach"
+ },
+ {
+  "kind": "d",
+  "id": "steamed-egg",
+  "name": "水蒸蛋",
+  "q": "steamed egg custard"
  },
  {
   "kind": "d",
@@ -67,9 +79,33 @@
  },
  {
   "kind": "d",
+  "id": "onion-egg",
+  "name": "洋葱炒蛋",
+  "q": "scrambled eggs onion"
+ },
+ {
+  "kind": "d",
+  "id": "tomato-beef",
+  "name": "番茄牛腩",
+  "q": "tomato beef brisket"
+ },
+ {
+  "kind": "d",
+  "id": "wintermelon-rib",
+  "name": "冬瓜排骨汤",
+  "q": "winter melon soup"
+ },
+ {
+  "kind": "d",
   "id": "stir-youcai",
   "name": "清炒油菜",
   "q": "bok choy stir fry"
+ },
+ {
+  "kind": "d",
+  "id": "cucumber-salad",
+  "name": "凉拌黄瓜",
+  "q": "cucumber salad"
  },
  {
   "kind": "d",
@@ -79,15 +115,69 @@
  },
  {
   "kind": "d",
+  "id": "corn-carrot-soup",
+  "name": "玉米胡萝卜汤",
+  "q": "corn carrot soup"
+ },
+ {
+  "kind": "d",
+  "id": "chive-egg",
+  "name": "韭菜炒蛋",
+  "q": "scrambled eggs chive"
+ },
+ {
+  "kind": "d",
+  "id": "eggplant-beans",
+  "name": "茄子豆角",
+  "q": "eggplant green beans"
+ },
+ {
+  "kind": "d",
+  "id": "shrimp-egg",
+  "name": "虾仁滑蛋",
+  "q": "shrimp scrambled eggs"
+ },
+ {
+  "kind": "d",
+  "id": "pan-hairtail",
+  "name": "香煎带鱼",
+  "q": "fried hairtail fish"
+ },
+ {
+  "kind": "d",
   "id": "pumpkin-soup",
   "name": "南瓜浓汤",
   "q": "pumpkin soup"
  },
  {
   "kind": "d",
+  "id": "bolognese",
+  "name": "意面番茄肉酱",
+  "q": "spaghetti bolognese pasta"
+ },
+ {
+  "kind": "d",
+  "id": "bacon-sandwich",
+  "name": "培根鸡蛋三明治",
+  "q": "bacon egg sandwich"
+ },
+ {
+  "kind": "d",
   "id": "hand-cabbage",
   "name": "手撕包菜",
   "q": "cabbage stir fry"
+ },
+ {
+  "kind": "d",
+  "id": "yam-rib",
+  "name": "山药排骨汤",
+  "q": "pork rib soup"
+ },
+ {
+  "kind": "d",
+  "id": "noodle-bolognese",
+  "name": "番茄肉酱拌面",
+  "q": "noodles tomato sauce"
  },
  {
   "kind": "d",
@@ -109,9 +199,21 @@
  },
  {
   "kind": "d",
+  "id": "white-chicken",
+  "name": "白切鸡",
+  "q": "white cut chicken"
+ },
+ {
+  "kind": "d",
   "id": "steam-sparerib",
   "name": "豉汁蒸排骨",
   "q": "steamed pork ribs"
+ },
+ {
+  "kind": "d",
+  "id": "steam-bass",
+  "name": "清蒸鲈鱼",
+  "q": "steamed sea bass"
  },
  {
   "kind": "d",
@@ -133,15 +235,51 @@
  },
  {
   "kind": "d",
+  "id": "sweet-sour-pork",
+  "name": "糖醋里脊",
+  "q": "sweet sour pork"
+ },
+ {
+  "kind": "d",
+  "id": "muxu-pork",
+  "name": "木须肉",
+  "q": "moo shu pork"
+ },
+ {
+  "kind": "d",
+  "id": "chili-fish",
+  "name": "剁椒蒸鲈鱼",
+  "q": "steamed fish chili"
+ },
+ {
+  "kind": "d",
+  "id": "farm-pork",
+  "name": "农家小炒肉",
+  "q": "stir fried pork chili"
+ },
+ {
+  "kind": "d",
   "id": "disanxian",
   "name": "地三鲜",
   "q": "eggplant potato pepper"
  },
  {
   "kind": "d",
+  "id": "guobaorou",
+  "name": "锅包肉",
+  "q": "guo bao rou"
+ },
+ {
+  "kind": "d",
   "id": "hand-lamb",
   "name": "手抓羊肉",
   "q": "boiled lamb"
+ },
+ {
+  "kind": "d",
+  "id": "steak",
+  "name": "香煎牛排",
+  "q": "steak pan fried"
  },
  {
   "kind": "d",
@@ -169,9 +307,45 @@
  },
  {
   "kind": "d",
+  "id": "teriyaki",
+  "name": "日式照烧鸡腿",
+  "q": "teriyaki chicken"
+ },
+ {
+  "kind": "d",
+  "id": "miso-soup",
+  "name": "味噌汤",
+  "q": "miso soup"
+ },
+ {
+  "kind": "d",
+  "id": "oyakodon",
+  "name": "亲子丼",
+  "q": "oyakodon"
+ },
+ {
+  "kind": "d",
   "id": "kimchi-fried-rice",
   "name": "韩式泡菜炒饭",
   "q": "kimchi fried rice"
+ },
+ {
+  "kind": "d",
+  "id": "tom-yum",
+  "name": "泰式冬阴功汤",
+  "q": "tom yum soup"
+ },
+ {
+  "kind": "d",
+  "id": "curry-chicken",
+  "name": "印度咖喱鸡",
+  "q": "chicken curry indian"
+ },
+ {
+  "kind": "d",
+  "id": "taco",
+  "name": "墨西哥牛肉卷饼",
+  "q": "beef burrito"
  },
  {
   "kind": "d",

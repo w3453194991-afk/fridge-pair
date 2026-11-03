@@ -390,6 +390,12 @@ const errors = [];
   await shot('12c-cook-done');
   const afterQty = await run(`JSON.stringify(DD_STORE.state.foods.map(f => [f.name, f.qty]))`);
   report.cookQtyChanged = beforeQty !== afterQty;
+  report.cookPhotoSaved = await run(`Object.keys(DD_STORE.state.photos || {}).length`);
+  await run(`location.hash = '#dish/' + ${JSON.stringify('__ID__')}; location.reload();`.replace('__ID__', cookId));
+  await sleep(1700);
+  report.coverIsMine = await run(`(() => { const h = document.querySelector('.dish-hero img'); return h ? h.src.slice(0, 5) : 'none'; })()`);
+  report.detailIconGone = await run(`!document.querySelector('.subhead .em')`);
+  await shot('12d-cover');
 
   await cdp.send('Emulation.clearDeviceMetricsOverride');
   await sleep(300);

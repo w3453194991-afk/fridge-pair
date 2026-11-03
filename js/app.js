@@ -592,6 +592,7 @@
       }
       case 'cookCheck': cookCheck(t.getAttribute('data-k')); break;
       case 'cookPhoto': cookPhoto(); break;
+      case 'coverShot': openCamera('cover', t.getAttribute('data-id')); break;
       case 'camOpenFile': {
         const inp = d.getElementById('camFile');
         if (inp) inp.click();
@@ -734,10 +735,10 @@
   function openCamera(mode, id) {
     const food = id ? S.get(id) : null;
     if (mode === 'update' && !food) return;
-    if (mode === 'cook') {
+    if (mode === 'cook' || mode === 'cover') {
       const dish = D.DISHES.filter(x => x.id === id)[0];
       if (!dish) return;
-      CAM = { mode: 'cook', dishId: id, dish: dish, phase: 'idle', img: null, items: [] };
+      CAM = { mode: mode, dishId: id, dish: dish, phase: 'idle', img: null, items: [] };
       drawCamera();
       return;
     }
@@ -748,18 +749,21 @@
   function drawCamera() {
     if (!CAM) return;
     const isUpd = CAM.mode === 'update';
-    const isCook = CAM.mode === 'cook';
-    const title = isCook ? ('拍照记录 · ' + CAM.dish.name)
+    const isCook = CAM.mode === 'cook' || CAM.mode === 'cover';
+    const isCover = CAM.mode === 'cover';
+    const title = isCover ? ('拍封面 · ' + CAM.dish.name)
+      : isCook ? ('拍照记录 · ' + CAM.dish.name)
       : isUpd ? ('更新剩余 · ' + CAM.food.name) : '拍照入库';
     let body = '';
 
     if (CAM.phase === 'idle') {
       body = `
         <div class="shot"><div class="ph"><div class="e">📷</div>
-          <div class="t">${isCook ? '给做好的「' + U.esc(CAM.dish.name) + '」拍一张'
-            : isUpd ? '对着剩下的 ' + U.esc(CAM.food.name) + ' 拍一张'
-              : '对着冰箱里的食材拍一张'}</div>
-          <div class="t" style="font-weight:400;color:#C4BAAF;margin-top:2px">${isCook ? '拍完就自动扣减库存' : '支持生鲜 / 包装食品混拍'}</div>
+          <div class="t">${isCover ? '给「' + U.esc(CAM.dish.name) + '」拍一张，作为菜谱封面'
+            : isCook ? '给做好的「' + U.esc(CAM.dish.name) + '」拍一张'
+              : isUpd ? '对着剩下的 ' + U.esc(CAM.food.name) + ' 拍一张'
+                : '对着冰箱里的食材拍一张'}</div>
+          <div class="t" style="font-weight:400;color:#C4BAAF;margin-top:2px">${isCook ? '这张照片会存成这道菜的封面' : '支持生鲜 / 包装食品混拍'}</div>
         </div></div>
         <div class="btn-row">
           <button class="btn ghost" data-action="camOpenFile">选择照片</button>
@@ -936,8 +940,46 @@
     return c.toDataURL('image/png');
   }
 
+  /* 把做菜照片压一下再存（当作这道菜的封面） */
+  function saveCookPhoto(dish, dataUrl, cb) {
+    if (!dataUrl) { if (cb) cb(); return; }
+    const img = new Image();
+    img.onload = function () {
+      try {
+        const maxW = 760;
+        const scale = Math.min(1, maxW / img.width);
+        const c = d.createElement('canvas');
+        c.width = Math.round(img.width * scale);
+        c.height = Math.round(img.height * scale);
+        const g = c.getContext('2d');
+        g.drawImage(img, 0, 0, c.width, c.height);
+        S.setDishPhoto(dish.id, c.toDataURL('image/jpeg', 0.72));
+      } catch (e) { S.setDishPhoto(dish.id, dataUrl); }
+      if (cb) cb();
+    };
+    img.onerror = function () { if (cb) cb(); };
+    img.src = dataUrl;
+  }
+
   function camConfirm() {
     if (!CAM) return;
+    if (CAM.mode === 'cover') {
+      const dish = CAM.dish;
+      saveCookPhoto(dish, CAM.img, function () {
+        closeModal();
+        toast('已换成你的实拍封面');
+        renderAll(false);
+      });
+      return;
+    }
+    if (CAM.mode === 'cook') {
+      const dish = CAM.dish, shot = CAM.img;
+      saveCookPhoto(dish, shot, function () {
+        closeModal();
+        finishCooking(dish);
+      });
+      return;
+    }
     if (CAM.mode === 'update') {
       const fid = CAM.foodId, unitTxt = CAM.food.unit, fname = CAM.food.name;
       const q = Math.round(CAM.food.qty * CAM.ratio) / 100;

@@ -362,12 +362,13 @@
   /* 大图封面菜品卡 */
   function dishCard(d, hot) {
     const pinned = (S.state.pinned || []).indexOf(d.id) >= 0;
-    const withPhoto = hasPhoto('d', d.id);
+    const mine = S.getDishPhoto(d.id);
+    const src = mine || (hasPhoto('d', d.id) ? 'img/d/' + d.id + '.jpg' : '');
     return `<div class="dcard${pinned ? ' pinned' : ''}" data-dish="${d.id}" role="button" tabindex="0">
       <div class="dc-cover">
         <div class="dc-fb">${d.emoji}</div>
-        ${withPhoto ? `<img src="img/d/${d.id}.jpg" alt="${esc(d.name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
-        ${hot ? '<span class="dc-hot">可做</span>' : ''}
+        ${src ? `<img src="${src}" alt="${esc(d.name)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+        ${mine ? '<span class="dc-mine">我的实拍</span>' : (hot ? '<span class="dc-hot">可做</span>' : '')}
         <button class="pin dc-pin${pinned ? ' on' : ''}" data-pin="${d.id}" aria-label="置顶">📌</button>
       </div>
       <div class="dc-body">
@@ -436,15 +437,20 @@
       title: d.name, back: true, tab: 'recipe',
       html: `
       <div class="dish-hero">
-        <div class="fb">${d.emoji}</div>
-        ${hasPhoto('d', d.id) ? `<img src="img/d/${d.id}.jpg" alt="${esc(d.name)}" onerror="this.style.display='none'">` : ''}
+        ${(function () {
+          const mine = S.getDishPhoto(d.id);
+          if (mine) return `<img src="${mine}" alt="${esc(d.name)}">`;
+          if (hasPhoto('d', d.id)) return `<img src="img/d/${d.id}.jpg" alt="${esc(d.name)}" onerror="this.style.display='none';this.parentNode.classList.add('noimg')">`;
+          return `<div class="fb">${d.emoji}</div>`;
+        })()}
       </div>
 
       <div class="subhead">
-        <div class="em">${d.emoji}</div>
+        ${(S.getDishPhoto(d.id) || hasPhoto('d', d.id)) ? '' : `<div class="em">${d.emoji}</div>`}
         <div style="flex:1;min-width:0"><h2>${esc(d.name)}</h2>
           <div class="meta">⏱ ${d.minutes} 分钟 · ${d.level} · ${d.tags.join(' / ')}</div></div>
         <button class="pin big${pinned ? ' on' : ''}" data-pin="${d.id}" aria-label="置顶这道菜">📌</button>
+        <button class="pin big" data-action="coverShot" data-id="${d.id}" aria-label="拍一张封面">📷</button>
       </div>
 
       <div class="panel">

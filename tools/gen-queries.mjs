@@ -24,7 +24,17 @@ const DISH_Q = {
   '红烧茄子': 'braised eggplant', '糖醋排骨': 'sweet sour pork ribs', '蛋炒饭': 'fried rice egg',
   '京酱肉丝': 'shredded pork', '干煸豆角': 'green beans stir fry', '酸辣土豆丝': 'shredded potato',
   '香菇滑鸡': 'chicken mushroom', '番茄鸡蛋汤': 'tomato egg soup', '手撕包菜': 'cabbage stir fry',
-  '地三鲜': 'eggplant potato pepper', '红烧肉': 'hong shao rou', '可乐鸡翅': 'chicken wings'
+  '地三鲜': 'eggplant potato pepper', '红烧肉': 'hong shao rou', '可乐鸡翅': 'chicken wings',
+  '青椒土豆丝': 'shredded potato stir fry', '水蒸蛋': 'steamed egg custard', '洋葱炒蛋': 'scrambled eggs onion',
+  '番茄牛腩': 'tomato beef brisket', '冬瓜排骨汤': 'winter melon soup', '凉拌黄瓜': 'cucumber salad',
+  '玉米胡萝卜汤': 'corn carrot soup', '韭菜炒蛋': 'scrambled eggs chive', '茄子豆角': 'eggplant green beans',
+  '虾仁滑蛋': 'shrimp scrambled eggs', '香煎带鱼': 'fried hairtail fish', '意面番茄肉酱': 'spaghetti bolognese pasta',
+  '培根鸡蛋三明治': 'bacon egg sandwich', '山药排骨汤': 'pork rib soup', '番茄肉酱拌面': 'noodles tomato sauce',
+  '白切鸡': 'white cut chicken', '清蒸鲈鱼': 'steamed sea bass', '糖醋里脊': 'sweet sour pork',
+  '木须肉': 'moo shu pork', '剁椒蒸鲈鱼': 'steamed fish chili', '农家小炒肉': 'stir fried pork chili',
+  '锅包肉': 'guo bao rou', '香煎牛排': 'steak pan fried', '日式照烧鸡腿': 'teriyaki chicken',
+  '味噌汤': 'miso soup', '亲子丼': 'oyakodon', '泰式冬阴功汤': 'tom yum soup',
+  '印度咖喱鸡': 'chicken curry indian', '墨西哥牛肉卷饼': 'beef burrito'
 };
 
 const FOOD_Q = {
