@@ -265,7 +265,7 @@
     switch (act) {
       case 'closeModal': closeModal(); break;
 
-      case 'shoot': openCamera('add'); break;
+      case 'shoot': flashScreen(); openCamera('add'); break;
       case 'repic': openCamera('update', t.getAttribute('data-id')); break;
 
       case 'swap':
@@ -1045,6 +1045,51 @@
   /* ============================================================
      做菜（扣减库存）
      ============================================================ */
+  /* 水波纹 */
+  function bindRipple() {
+    d.addEventListener('pointerdown', function (e) {
+      const b = e.target.closest('.btn,.chip,.food,.dish,.tab,.addchip,.cnt,.vchip,.tool');
+      if (!b) return;
+      const r = b.getBoundingClientRect();
+      const s = d.createElement('span');
+      s.className = 'rip';
+      s.style.left = (e.clientX - r.left) + 'px';
+      s.style.top = (e.clientY - r.top) + 'px';
+      b.appendChild(s);
+      setTimeout(function () { s.remove(); }, 640);
+    }, { passive: true });
+  }
+
+  /* 彩带 */
+  function burst(cx, cy) {
+    const colors = ['#2FD79E', '#12A576', '#F5B301', '#9B6BF5', '#3FDCA4', '#FF8A3D'];
+    const r = appEl.getBoundingClientRect();
+    const x = (cx || w.innerWidth / 2) - r.left;
+    const y = (cy || w.innerHeight / 2) - r.top;
+    for (let i = 0; i < 20; i++) {
+      const s = d.createElement('i');
+      s.className = 'confetti';
+      s.style.left = x + 'px';
+      s.style.top = y + 'px';
+      s.style.background = colors[i % colors.length];
+      const ang = Math.random() * Math.PI * 2;
+      const dist = 55 + Math.random() * 120;
+      s.style.setProperty('--tx', (Math.cos(ang) * dist).toFixed(1) + 'px');
+      s.style.setProperty('--ty', (Math.sin(ang) * dist).toFixed(1) + 'px');
+      s.style.animationDelay = Math.round(Math.random() * 90) + 'ms';
+      appEl.appendChild(s);
+      setTimeout(function () { s.remove(); }, 1300);
+    }
+  }
+
+  /* 快门闪光 */
+  function flashScreen() {
+    const f = d.createElement('div');
+    f.className = 'flash';
+    appEl.appendChild(f);
+    setTimeout(function () { f.remove(); }, 520);
+  }
+
   function doCook(id) {
     const dish = D.DISHES.filter(x => x.id === id)[0];
     if (!dish) return;
@@ -1058,6 +1103,7 @@
     const res = E.cook(dish, st);
     S.save();
     const left = res.used.filter(u => u.left > 0);
+    burst(w.innerWidth / 2, w.innerHeight * 0.42);
     APP.view = { name: 'fridge' };
     renderAll(true);
     openModal(`
@@ -1570,6 +1616,7 @@
     const ok = S.addCustom(draft);
     E.attachCustom([draft]);
     closeModal();
+    burst(w.innerWidth / 2, w.innerHeight * 0.4);
     toast(ok ? '已加入菜谱：' + draft.name : '这道菜已经在库里了');
     go({ name: 'dish', id: draft.id });
   }
@@ -1830,6 +1877,7 @@
   APP.view = S.state.family.loggedIn ? viewFromHash() : { name: 'login' };
   renderAll(true);
   initFab();
+  bindRipple();
   setTimeout(maybeRemind, 650);
 
   // PWA：注册 service worker（file:// 下会失败，忽略即可）
