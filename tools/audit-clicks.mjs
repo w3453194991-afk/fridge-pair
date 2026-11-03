@@ -54,13 +54,14 @@ const SCAN = `(() => {
     // 跳过：中心落在 tabbar 下方 / 导航栏上方 / 不在视口内（滚动内容正常现象）
     if (cy > tbTop - 4 || cy < navBottom + 2 || cy < 0 || cy > innerHeight) return;
     if (el.closest('.tabbar')) return;
-    if (el.classList && el.classList.contains('ghost')) return;   // 已主动让路，不算遮挡
+    if (el.classList && (el.classList.contains('ghost') || el.classList.contains('assist-fab'))) return;   // 浮层不计
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0' || el.disabled) return;
     const hit = document.elementFromPoint(cx, cy);
     if (!hit) return;
     if (el === hit || el.contains(hit)) return;
     if (hit.classList && (hit.classList.contains('rip') || hit.classList.contains('confetti') || hit.classList.contains('flash'))) return;
+    if (hit.closest('.assist-fab')) return;   // 浮动助手层不计（可拖动，滚动时让路）
     if (hit.closest('.tabbar') || hit.closest('.navbar')) return;
     out.push({
       why: '被遮挡',
