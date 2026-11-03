@@ -86,7 +86,10 @@
     Array.from(tabbar.querySelectorAll('.tab[data-nav]')).forEach(function (b) {
       b.classList.toggle('on', b.getAttribute('data-nav') === r.tab);
     });
-    if (scrollTop) pageEl.scrollTop = 0;
+    if (scrollTop) {
+      pageEl.scrollTop = 0;
+      animateNumbers(pageEl);
+    }
     try {
       history.replaceState(null, '', '#' + APP.view.name + (APP.view.id ? '/' + APP.view.id : ''));
     } catch (err) { /* file:// 下忽略 */ }
@@ -1746,6 +1749,69 @@
   }
 
   /* ============================================================
+     打开就提醒：临期 / 过期
+     ============================================================ */
+  function maybeRemind() {
+    if (!S.state.family.loggedIn) return;
+    const urgent = E.urgentList(S.state.foods);
+    const bad = S.state.foods.filter(f => E.tier(f) === 'b');
+    if (!urgent.length && !bad.length) return;
+    openReminder(urgent, bad);
+  }
+
+  function openReminder(urgent, bad) {
+    const items = urgent.map(f => ({ f: f, tone: 'p' }))
+      .concat(bad.map(f => ({ f: f, tone: 'b' })));
+
+    openModal(`
+      <div class="sheet-head"><div class="t">冰箱提醒</div>
+        <button class="x" data-action="closeModal">✕</button></div>
+
+      <div class="remind">
+        <div class="remind-ico">⏰</div>
+        <h2>${urgent.length ? urgent.length + ' 件食材快到期了' : '有 ' + bad.length + ' 件已经过期'}</h2>
+        <p>${urgent.length ? '今天先吃掉这几样，别浪费' : '建议尽快清理，别影响其他食材'}</p>
+
+        <div class="remind-list">
+          ${items.slice(0, 6).map(function (it, i) {
+            return `<div class="remind-item" style="animation-delay:${(0.12 + i * 0.07).toFixed(2)}s">
+              <span class="ri-em">${it.f.emoji}</span>
+              <span class="ri-nm">${U.esc(it.f.name)}</span>
+              <span class="ri-d" style="color:${it.tone === 'p' ? '#6D28D9' : '#4B5563'}">${E.dayText(it.f)}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn ghost" data-action="closeModal">知道了</button>
+        ${urgent.length
+          ? '<button class="btn primary" data-action="genMenu">看临期菜单</button>'
+          : '<button class="btn primary" data-action="cleanExpired">去清理</button>'}
+      </div>`);
+  }
+
+  /* 数字滚动 */
+  function animateNumbers(root) {
+    if (!root) return;
+    root.querySelectorAll('[data-count]').forEach(function (el) {
+      const target = parseInt(el.getAttribute('data-count'), 10) || 0;
+      if (!target) return;
+      const dur = 620;
+      const t0 = performance.now();
+      function step(now) {
+        const p = Math.min(1, (now - t0) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * eased);
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = target;
+      }
+      el.textContent = '0';
+      requestAnimationFrame(step);
+    });
+  }
+
+  /* ============================================================
      启动
      ============================================================ */
   S.load();
@@ -1764,6 +1830,7 @@
   APP.view = S.state.family.loggedIn ? viewFromHash() : { name: 'login' };
   renderAll(true);
   initFab();
+  setTimeout(maybeRemind, 650);
 
   // PWA：注册 service worker（file:// 下会失败，忽略即可）
   if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {

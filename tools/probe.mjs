@@ -113,6 +113,16 @@ const errors = [];
   report.foods = await run(`DD_DATA.FOOD_DB.length`);
   report.dishes = await run(`DD_DATA.DISHES.length`);
 
+  /* 重新打开页面：应自动弹出临期提醒 */
+  await cdp.send('Page.navigate', { url: URL });
+  await sleep(1700);
+  await shot('01b-reminder');
+  report.reminderShown = await run(`!!document.querySelector('.remind')`);
+  report.reminderItems = await run(`document.querySelectorAll('.remind-item').length`);
+  report.reminderTitle = await run(`(() => { const h = document.querySelector('.remind h2'); return h ? h.textContent.trim() : ''; })()`);
+  if (report.reminderShown) await click('[data-action="closeModal"]');
+  await sleep(300);
+
   /* 冰箱分区 */
   await click('[data-filter="z:冷藏"]');
   await shot('02-zone');

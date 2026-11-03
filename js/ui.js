@@ -98,24 +98,24 @@
     }).join(' ');
     const dots = bars.map(function (b, i) {
       const p = pt(i, Math.min(100, Math.max(5, b.pct)) / 100);
-      return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.6" fill="#fff" stroke="#FF6B3D" stroke-width="1.8"/>`;
+      return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.6" fill="#fff" stroke="#12A576" stroke-width="1.8"/>`;
     }).join('');
     const labels = bars.map(function (b, i) {
       const p = pt(i, 1.3);
       const good = b.pct >= 90;
       return `<text x="${p[0].toFixed(1)}" y="${(p[1] + 3).toFixed(1)}" font-size="7.5"
-        fill="${good ? '#127A45' : '#9AA0AC'}" text-anchor="middle" font-weight="700">${b.short || b.label}</text>`;
+        fill="${good ? '#0E8F63' : '#9AA0AC'}" text-anchor="middle" font-weight="700">${b.short || b.label}</text>`;
     }).join('');
     return `<svg viewBox="0 0 124 124" class="radar">
       <defs>
         <radialGradient id="${uid}f" cx="50%" cy="45%" r="60%">
-          <stop offset="0" stop-color="#FF9A6B" stop-opacity=".55"/>
-          <stop offset="1" stop-color="#FF6B3D" stop-opacity=".12"/>
+          <stop offset="0" stop-color="#3FDCA4" stop-opacity=".62"/>
+          <stop offset="1" stop-color="#12A576" stop-opacity=".14"/>
         </radialGradient>
       </defs>
       ${grid}${spokes}
       <polygon class="radar-shape" points="${shape}" fill="url(#${uid}f)"
-        stroke="#FF6B3D" stroke-width="2" stroke-linejoin="round"/>
+        stroke="#12A576" stroke-width="2" stroke-linejoin="round"/>
       ${dots}${labels}</svg>`;
   }
 
@@ -211,22 +211,28 @@
           <div>
             <div class="eyebrow">${greet} · ${E.dateLabel(E.now())}</div>
             <h1>${esc(fam.name || '我')}的冰箱</h1>
-            <div class="hero-sub">共 ${foods.length} 件食材${c.p ? ' · <b>' + c.p + ' 件临期待处理</b>' : ' · 状态良好'}</div>
           </div>
           <div class="family-chip">👨‍👩‍👧 ${fam.members.length} 人</div>
         </div>
 
-        <div class="hero-body">
-          <div class="donut">
+        <div class="ring-wrap">
+          <div class="ring">
             ${donutSvg(c, foods.length)}
-            <div class="donut-c"><b>${foods.length}</b><span>件食材</span></div>
+            <div class="ring-c"><b data-count="${foods.length}">${foods.length}</b><span>种食材在库</span></div>
           </div>
-          <div class="legend">
-            <div class="lg g"><i style="background:#22C55E"></i><span>充足</span><b>${c.g}</b></div>
-            <div class="lg y"><i style="background:#E9A50B"></i><span>正常</span><b>${c.y}</b></div>
-            <div class="lg p"><i style="background:#8B5CF6"></i><span>临期</span><b>${c.p}</b></div>
-            <div class="lg b"><i style="background:#525A6B"></i><span>过期</span><b>${c.b}</b></div>
-          </div>
+        </div>
+
+        <div class="fresh-pill ${c.p ? 'warn' : 'ok'}">
+          ${c.p
+            ? '⚡ ' + c.p + ' 种食材临期了，请优先食用哦～'
+            : '✓ 食材新鲜，营养满分！'}
+        </div>
+
+        <div class="stats4">
+          <div class="st4 g"><span class="si">✓</span><b data-count="${c.g}">${c.g}</b><small>充足</small></div>
+          <div class="st4 y"><span class="si">!</span><b data-count="${c.y}">${c.y}</b><small>正常</small></div>
+          <div class="st4 p"><span class="si">⏱</span><b data-count="${c.p}">${c.p}</b><small>临期</small></div>
+          <div class="st4 b"><span class="si">×</span><b data-count="${c.b}">${c.b}</b><small>过期</small></div>
         </div>
 
         ${warnHtml}
@@ -425,7 +431,7 @@
           }).join('')}
         </div>
         <div class="taglist">${d.seasonings.map(s => `<span class="tg">${esc(s)}</span>`).join('')}</div>
-        ${allergens.length ? `<div class="taglist" style="margin-top:6px">${allergens.map(a => `<span class="tg" style="background:#FFF4E6;color:#B45309">含${esc(a)}</span>`).join('')}</div>` : ''}
+        ${allergens.length ? `<div class="taglist" style="margin-top:6px">${allergens.map(a => `<span class="tg" style="background:#FFF8E5;color:#9A6B00">含${esc(a)}</span>`).join('')}</div>` : ''}
         <div class="nutline">食材成本约 ¥${cost.toFixed(1)} · 按当日行情折算</div>
       </div>
 
@@ -619,7 +625,7 @@
     return {
       title: '一周配餐', tab: 'plan', back: true,
       html: `
-      <div class="panel" style="background:linear-gradient(120deg,#FFF7F0,#FFFDFB);border:1px solid #FBEADF;box-shadow:none">
+      <div class="panel" style="background:linear-gradient(120deg,#EFFBF4,#FFFDFB);border:1px solid #D8F1E3;box-shadow:none">
         <h3><span class="dot"></span>为你家生成的 7 天菜单</h3>
         <div class="p-body">
           <b>${sys.emoji} ${sys.name}</b>：${esc(sys.desc)}<br>
@@ -859,7 +865,7 @@
     return {
       title: '聚餐方案', tab: 'plan', back: true,
       html: `
-      <div class="panel" style="background:linear-gradient(120deg,#FFF7F0,#FFFDFB);border:1px solid #FBEADF;box-shadow:none">
+      <div class="panel" style="background:linear-gradient(120deg,#EFFBF4,#FFFDFB);border:1px solid #D8F1E3;box-shadow:none">
         <h3><span class="dot"></span>${esc(p.dateLabel || '')} · ${p.people} 人 · ${p.dishes.length} 道菜</h3>
         <div class="p-body">
           ${p.men ? '男 ' + p.men + ' ' : ''}${p.women ? '女 ' + p.women + ' ' : ''}${p.kids ? '小孩 ' + p.kids : ''}
@@ -997,7 +1003,7 @@
           ${res.dishes.map(d => dishRow(d, E.ingredientState(d, st.foods).every(s => s.ok))).join('')}` : ''}
 
         ${(!res.dishes.length && res.suggestion.length) ? `
-          <div class="panel" style="margin-top:10px;background:linear-gradient(135deg,#FFF7EE,#FFFFFF 72%);border:1px solid #FBE3CF;box-shadow:none">
+          <div class="panel" style="margin-top:10px;background:linear-gradient(135deg,#EFFBF4,#FFFFFF 72%);border:1px solid #D8F1E3;box-shadow:none">
             <h3><span class="dot"></span>没收录「${esc(res.raw)}」</h3>
             <div class="p-body">
               菜谱库里还没有这道菜的做法。${res.guessed.length
@@ -1009,7 +1015,7 @@
         ` : ''}
 
         ${(!res.dishes.length && !res.suggestion.length && res.guessed.length) ? `
-          <div class="panel" style="margin-top:10px;background:linear-gradient(135deg,#FFF7EE,#FFFFFF 72%);border:1px solid #FBE3CF;box-shadow:none">
+          <div class="panel" style="margin-top:10px;background:linear-gradient(135deg,#EFFBF4,#FFFFFF 72%);border:1px solid #D8F1E3;box-shadow:none">
             <h3><span class="dot"></span>没收录「${esc(res.raw)}」</h3>
             <div class="p-body">
               菜谱库里还没有用 <b>${esc(res.guessed.join('、'))}</b> 做的菜。
@@ -1213,7 +1219,7 @@
     return {
       title: '本周报告', back: true, tab: 'me',
       html: `
-      <div class="panel" style="background:linear-gradient(135deg,#FFF6EE,#FFFFFF 72%);border:1px solid rgba(255,150,100,.16);box-shadow:none">
+      <div class="panel" style="background:linear-gradient(135deg,#EFFBF4,#FFFFFF 72%);border:1px solid #D8F1E3;box-shadow:none">
         <h3><span class="dot"></span>这周的冰箱体检</h3>
         <div class="p-body">
           冰箱共 <b>${total}</b> 件，其中临期 <b>${r.counts.p}</b> 件、过期 <b>${r.counts.b}</b> 件。
@@ -1359,7 +1365,7 @@
     return {
       title: '健康档案', back: true, tab: 'me',
       html: `
-      <div class="panel" style="background:linear-gradient(135deg,#F2FBF5,#FFFFFF 72%);border:1px solid #D8F3E2;box-shadow:none">
+      <div class="panel" style="background:linear-gradient(135deg,#EAFBF2,#FFFFFF 72%);border:1px solid #CBEFE0;box-shadow:none">
         <h3><span class="dot" style="background:#16A34A"></span>这些会直接影响排餐</h3>
         <div class="p-body">
           选中的过敏原和疾病史，会从菜谱库里剔除对应的菜。当前设置会避开 <b>${blocked}</b> 道（共 ${D.DISHES.length} 道）。
