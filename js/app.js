@@ -1210,6 +1210,17 @@
   /* ============================================================
      做菜（扣减库存）
      ============================================================ */
+  /* 相机按钮直接绑定，不依赖事件委托（防止委托失效时完全没反应） */
+  function bindCamButton() {
+    const cam = d.querySelector('[data-action="shoot"]');
+    if (!cam) return;
+    cam.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openCamera('add');
+    });
+  }
+
   /* 水波纹 */
   function bindRipple() {
     d.addEventListener('pointerdown', function (e) {
@@ -1337,7 +1348,7 @@
   }
 
   function cookPhoto() {
-    if (!COOK) return;
+    if (!COOK) { toast('这道菜的做法已关闭，重新点「开始做菜」再拍照'); return; }
     openCamera('cook', COOK.dish.id);
   }
 
@@ -2112,8 +2123,8 @@
   E.attachCustom(S.state.custom);
   tick();
   setInterval(tick, 20000);
-  w.DD_VERSION = 'v11';
-  console.log('%c冰箱对对碰 ' + w.DD_VERSION, 'color:#FF5C7A;font-weight:700', '加载成功');
+  w.DD_VERSION = 'v26';
+  console.log('%c冰箱对对碰 ' + w.DD_VERSION, 'color:#12A576;font-weight:700', '加载成功');
 
   // 主题：优先用上次选择的
   try {
@@ -2125,6 +2136,7 @@
   renderAll(true);
   initFab();
   bindRipple();
+  bindCamButton();
   setTimeout(maybeRemind, 650);
 
   // PWA：注册 service worker（file:// 下会失败，忽略即可）

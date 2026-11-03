@@ -1557,7 +1557,7 @@
       <div class="section-head"><div class="t">数据</div></div>
       <div class="panel" style="margin-top:8px">
         <div class="p-body" style="margin-top:0">所有数据存在本机浏览器（localStorage），不会上传。刷新或关闭后仍在。
-          <br><span class="tiny muted">版本 ${w.DD_VERSION || 'v11'} · 如果页面看着不对，按 Ctrl+F5 强刷</span>
+          <br><span class="tiny muted">版本 ${w.DD_VERSION || 'v26'} · 如果页面看着不对，按 Ctrl+F5 强刷</span>
         </div>
         <div class="btn-row"><button class="btn soft" data-action="reset">恢复示例数据</button></div>
       </div>
