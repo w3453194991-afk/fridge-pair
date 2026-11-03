@@ -257,6 +257,11 @@
         }).join('')}
       </div>
 
+      <div class="row between" style="padding:12px 2px 0">
+        <button class="shot-entry" data-action="shoot">📷 拍照入库</button>
+        <button class="addchip" data-action="openAddDish">＋ 添加菜谱</button>
+      </div>
+
       <div class="grid">
         ${list.length ? list.map(foodCard).join('') : `<div class="empty" style="grid-column:1/-1">
           <div class="e">🧺</div><div class="t">这里空空的</div>

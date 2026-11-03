@@ -1210,6 +1210,25 @@
   /* ============================================================
      做菜（扣减库存）
      ============================================================ */
+  /* 兜底：在相机按钮范围内按下就拍照（不依赖按钮自身事件） */
+  function bindTabCenter() {
+    const bar = d.querySelector('.tabbar');
+    if (!bar) return;
+    let last = 0;
+    bar.addEventListener('pointerup', function (e) {
+      const cam = bar.querySelector('[data-action="shoot"]');
+      if (!cam) return;
+      const r = cam.getBoundingClientRect();
+      const pad = 8;
+      if (e.clientX < r.left - pad || e.clientX > r.right + pad) return;
+      if (e.clientY < r.top - pad || e.clientY > r.bottom + pad) return;
+      const now = Date.now();
+      if (now - last < 400) return;
+      last = now;
+      openCamera('add');
+    }, true);
+  }
+
   /* 相机按钮直接绑定，不依赖事件委托（防止委托失效时完全没反应） */
   function bindCamButton() {
     const cam = d.querySelector('[data-action="shoot"]');
@@ -2137,6 +2156,10 @@
   initFab();
   bindRipple();
   bindCamButton();
+  bindTabCenter();
+  w.addEventListener('error', function (ev) {
+    try { toast('脚本错误：' + String(ev.message || '').slice(0, 60)); } catch (e) {}
+  });
   setTimeout(maybeRemind, 650);
 
   // PWA：注册 service worker（file:// 下会失败，忽略即可）
