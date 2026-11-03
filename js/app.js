@@ -118,6 +118,7 @@
     modalEl.hidden = true;
     modalEl.innerHTML = '';
     CAM = null;
+    if (typeof camStop === 'function') camStop();
   }
   function openModal(html) {
     modalEl.hidden = false;
@@ -265,7 +266,10 @@
     switch (act) {
       case 'closeModal': closeModal(); break;
 
-      case 'shoot': flashScreen(); openCamera('add'); break;
+      case 'shoot':
+        openCamera('add');
+        flashScreen();
+        break;
       case 'repic': openCamera('update', t.getAttribute('data-id')); break;
 
       case 'swap':
@@ -599,6 +603,9 @@
         break;
       }
       case 'camSample': camSample(); break;
+      case 'camLive': camLive(); break;
+      case 'camStop': camStop(); break;
+      case 'camSnap': camSnap(); break;
       case 'camConfirm': camConfirm(); break;
       case 'applyEat': applyEat(); break;
       case 'doTrash': {
@@ -733,6 +740,15 @@
   let CAM = null;
 
   function openCamera(mode, id) {
+    try {
+      openCameraInner(mode, id);
+    } catch (err) {
+      console.error('相机打开失败', err);
+      toast('相机打不开：' + (err && err.message || err));
+    }
+  }
+
+  function openCameraInner(mode, id) {
     const food = id ? S.get(id) : null;
     if (mode === 'update' && !food) return;
     if (mode === 'cook' || mode === 'cover') {
@@ -766,8 +782,18 @@
           <div class="t" style="font-weight:400;color:#C4BAAF;margin-top:2px">${isCook ? '这张照片会存成这道菜的封面' : '支持生鲜 / 包装食品混拍'}</div>
         </div></div>
         <div class="btn-row">
+          <button class="btn primary" data-action="camLive">📷 打开摄像头</button>
           <button class="btn ghost" data-action="camOpenFile">选择照片</button>
-          <button class="btn primary" data-action="camSample">用示例图演示</button>
+        </div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn ghost" data-action="camSample">用示例图演示</button>
+        </div>
+        <div id="camLiveBox" hidden style="margin-top:12px;border-radius:18px;overflow:hidden;background:#0B1412;position:relative">
+          <video id="camVideo" autoplay playsinline muted style="width:100%;display:block"></video>
+        </div>
+        <div class="btn-row" id="camSnapBtns" hidden style="margin-top:10px">
+          <button class="btn ghost" data-action="camStop">取消</button>
+          <button class="btn primary" data-action="camSnap">拍下这张</button>
         </div>
         <input type="file" id="camFile" accept="image/*" capture="environment" hidden>
         <div class="small muted" style="margin-top:10px;line-height:1.6;text-align:center">
@@ -842,6 +868,76 @@
       <div class="sheet-head"><div class="t">${U.esc(title)}</div>
         <button class="x" data-action="closeModal">✕</button></div>
       ${body}`);
+  }
+
+  /* 真实摄像头 */
+  let CAM_STREAM = null;
+
+  function camLive() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      toast('这个浏览器不支持摄像头，用「选择照片」吧');
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+      .then(function (stream) {
+        CAM_STREAM = stream;
+        const v = d.getElementById('camVideo');
+        const box = d.getElementById('camLiveBox');
+        const snaps = d.getElementById('camSnapBtns');
+        if (!v || !box) return;
+        v.srcObject = stream;
+        v.play().catch(function () {});
+        box.hidden = false;
+        if (snaps) snaps.hidden = false;
+      })
+      .catch(function (err) {
+        const n = err && err.name;
+        toast(n === 'NotAllowedError' ? '没有摄像头权限，用「选择照片」或示例图'
+          : n === 'NotFoundError' ? '没找到摄像头，用「选择照片」或示例图'
+            : '摄像头打不开（' + (n || '未知') + '），可以改用「选择照片」');
+      });
+  }
+
+  function camStop() {
+    if (CAM_STREAM) {
+      CAM_STREAM.getTracks().forEach(function (t) { t.stop(); });
+      CAM_STREAM = null;
+    }
+    const box = d.getElementById('camLiveBox');
+    const snaps = d.getElementById('camSnapBtns');
+    if (box) box.hidden = true;
+    if (snaps) snaps.hidden = true;
+  }
+
+  function camSnap() {
+    const v = d.getElementById('camVideo');
+    if (!v || !v.videoWidth) { toast('摄像头还没准备好，稍等一下'); return; }
+    const c = d.createElement('canvas');
+    c.width = v.videoWidth;
+    c.height = v.videoHeight;
+    c.getContext('2d').drawImage(v, 0, 0);
+    CAM.img = c.toDataURL('image/jpeg', 0.82);
+    camStop();
+    flashScreen();
+    CAM.phase = 'scan';
+    drawCamera();
+    setTimeout(function () {
+      if (!CAM || CAM.phase !== 'scan') return;
+      if (CAM.mode === 'add') {
+        const scene = D.PHOTO_SCENES[Math.floor(Math.random() * D.PHOTO_SCENES.length)];
+        CAM.scene = scene;
+        CAM.items = scene.items.map(function (it) {
+          const m = E.foodMeta(it.name);
+          return {
+            name: it.name, emoji: m.emoji, cat: m.cat, unit: m.unit,
+            shelf: m.shelf, storage: m.storage || '冷藏',
+            qty: it.qty, conf: 88 + Math.floor(Math.random() * 11)
+          };
+        });
+      }
+      CAM.phase = 'result';
+      drawCamera();
+    }, 1400);
   }
 
   function camStep(dir, i) {
@@ -1948,9 +2044,12 @@
      ============================================================ */
   function maybeRemind() {
     if (!S.state.family.loggedIn) return;
+    // 同一次会话只提醒一次，避免挡住相机等操作
+    try { if (sessionStorage.getItem('ddm.reminded') === '1') return; } catch (e) {}
     const urgent = E.urgentList(S.state.foods);
     const bad = S.state.foods.filter(f => E.tier(f) === 'b');
     if (!urgent.length && !bad.length) return;
+    try { sessionStorage.setItem('ddm.reminded', '1'); } catch (e) {}
     openReminder(urgent, bad);
   }
 
