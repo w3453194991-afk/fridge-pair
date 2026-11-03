@@ -5,6 +5,71 @@
   const w = window, d = document;
   let timer = null, typing = null, muted = true, audioCtx = null;
 
+  /* ---------------- 开机动画：爆炸性启动 ---------------- */
+  function boot() {
+    if (d.querySelector('.boot')) return;
+    const parts = [];
+    for (let i = 0; i < 26; i++) {
+      const a = (i / 26) * Math.PI * 2 + Math.random() * 0.2;
+      const d1 = 90 + Math.random() * 190;
+      parts.push(`<i style="--tx:${(Math.cos(a) * d1).toFixed(0)}px;--ty:${(Math.sin(a) * d1).toFixed(0)}px`
+        + `;animation-delay:${(Math.random() * 120).toFixed(0)}ms`
+        + `;width:${4 + Math.random() * 6}px;height:${4 + Math.random() * 6}px`
+        + `;background:${['#7DEBFF', '#2FD79E', '#FFFFFF', '#FFD166', '#FF8A5B'][i % 5]}"></i>`);
+    }
+    const foods = ['🍅', '🥬', '🥚', '🥛', '🍖', '🐟'];
+    const foodParts = foods.map(function (f, i) {
+      const a = -Math.PI / 2 + (i - 2.5) * 0.42;
+      const d1 = 150 + Math.random() * 60;
+      return `<b style="--tx:${(Math.cos(a) * d1).toFixed(0)}px;--ty:${(Math.sin(a) * d1).toFixed(0)}px`
+        + `;animation-delay:${(i * 28).toFixed(0)}ms">${f}</b>`;
+    }).join('');
+
+    const el = d.createElement('div');
+    el.className = 'boot';
+    el.innerHTML = `
+      <div class="boot-crt"><i></i></div>
+      <div class="boot-fridge">
+        <svg viewBox="0 0 120 170">
+          <rect class="bd" x="12" y="8" width="96" height="154" rx="16"/>
+          <line class="bd" x1="12" y1="66" x2="108" y2="66"/>
+          <line class="bd" x1="88" y1="24" x2="88" y2="50"/>
+          <line class="bd" x1="88" y1="84" x2="88" y2="126"/>
+        </svg>
+        <span class="boot-leaf">🥬</span>
+      </div>
+      <div class="boot-burst">
+        <div class="boot-flash"></div>
+        <div class="boot-rays"></div>
+        <div class="boot-ring"></div>
+        <div class="boot-ring r2"></div>
+        <div class="boot-ring r3"></div>
+        <div class="boot-parts">${parts.join('')}${foodParts}</div>
+      </div>
+      <div class="boot-logo">冰箱<span>对对碰</span></div>
+      <div class="boot-tag">AI 全生命周期 · 家庭食材智能管理</div>
+      <div class="boot-tip">轻触跳过</div>
+    `;
+    d.body.appendChild(el);
+
+    // 时间轴
+    setTimeout(function () { el.classList.add('s1'); }, 60);    // CRT 亮线
+    setTimeout(function () { el.classList.add('s2'); }, 420);   // 冰箱门描边
+    setTimeout(function () { el.classList.add('s3'); beep(120, .18); }, 1020); // 爆开
+    setTimeout(function () { el.classList.add('s4'); beep(720, .1); }, 1280);  // 标题砸入
+    setTimeout(function () { el.classList.add('s5'); }, 2180);  // 收尾
+
+    let jumped = false;
+    function finish() {
+      if (jumped) return;
+      jumped = true;
+      el.remove();
+      open();
+    }
+    el.addEventListener('click', finish);
+    setTimeout(finish, 2520);
+  }
+
   function line(text) {
     return '<div class="sp-line">' + text + '</div>';
   }
@@ -248,8 +313,8 @@
     try {
       if (sessionStorage.getItem('ddm.splash') === '1') return;
     } catch (e) {}
-    open();
+    boot();
   }
 
-  w.DD_SPLASH = { open: open, close: close, auto: auto };
+  w.DD_SPLASH = { open: open, close: close, auto: auto, boot: boot };
 })();

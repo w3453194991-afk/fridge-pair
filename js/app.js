@@ -610,7 +610,7 @@
       }
       case 'replaySplash':
         try { sessionStorage.removeItem('ddm.splash'); } catch (e) {}
-        if (w.DD_SPLASH) w.DD_SPLASH.open();
+        if (w.DD_SPLASH) w.DD_SPLASH.boot();
         break;
       case 'camSample': camSample(); break;
       case 'camLive': camLive(); break;
@@ -2198,9 +2198,9 @@
   w.addEventListener('error', function (ev) {
     try { toast('脚本错误：' + String(ev.message || '').slice(0, 60)); } catch (e) {}
   });
-  /* 开屏已经播过临期信息，就别再弹提醒 */
+  /* 开屏/开机动画已经播过临期信息，就别再弹提醒 */
   setTimeout(function () {
-    if (d.querySelector('.splash')) return;
+    if (d.querySelector('.boot') || d.querySelector('.splash')) return;
     maybeRemind();
   }, 650);
 

@@ -1,5 +1,5 @@
 /* 冰箱对对碰 · 离线缓存（网络优先，保证代码永远是最新的） */
-const CACHE = 'ddm-v38';
+const CACHE = 'ddm-v40';
 const SHELL = [
   './', './index.html', './css/app.css', './manifest.json',
   './js/photos.js', './js/data.js', './js/engine.js', './js/store.js', './js/ui.js', './js/app.js',

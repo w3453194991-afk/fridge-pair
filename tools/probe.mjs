@@ -113,9 +113,14 @@ const errors = [];
   report.foods = await run(`DD_DATA.FOOD_DB.length`);
   report.dishes = await run(`DD_DATA.DISHES.length`);
 
-  /* 重新打开：先出开屏机器人 */
+  /* 重新打开：先开机爆炸动画，再进机器人开屏 */
   await cdp.send('Page.navigate', { url: URL });
-  await sleep(2200);
+  await sleep(1850);
+  report.bootShown = await run(`!!document.querySelector('.boot')`);
+  await shot('01a-boot');
+  await sleep(520);
+  await shot('01a-boot2');
+  await sleep(1700);
   report.splashShown = await run(`!!document.querySelector('.splash')`);
   report.splashLines = await run(`document.querySelectorAll('.splash .sp-line').length`);
   report.splashText = await run(`(() => { const l = document.querySelectorAll('.splash .sp-line'); return l.length ? l[l.length - 1].textContent.trim().slice(0, 30) : ''; })()`);
