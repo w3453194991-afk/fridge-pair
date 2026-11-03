@@ -1572,3 +1572,18 @@ body{ background:#EAF3EE; }
   box-shadow:0 8px 18px -8px rgba(18,165,118,.85); position:relative; overflow:hidden;
 }
 .shot-entry:active{ transform:scale(.96); }
+
+/* 修复：subhead 的装饰光斑盖住了右上角按钮，导致置顶/相机点不到 */
+.subhead::after{ pointer-events:none !important; }
+.subhead .pin{ position:relative; z-index:3; }
+.hero::after{ pointer-events:none; }
+.ai::after, .ai::before{ pointer-events:none; }
+
+/* 顺便把这个卡片改成绿色系（之前漏了） */
+.subhead{
+  background:linear-gradient(145deg,#F2FCF7,#FFFFFF 68%) !important;
+  border-color:#DFF3E9 !important;
+}
+.subhead::after{
+  background:radial-gradient(circle at 40% 40%, rgba(90,235,178,.35), transparent 70%) !important;
+}
