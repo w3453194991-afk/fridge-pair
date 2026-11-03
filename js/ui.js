@@ -306,7 +306,12 @@
       body += other.map(pairCard).join('');
     }
 
-    return { title: '菜谱', tab: 'recipe', html: tabs + body };
+    const addRow = `<div class="row between" style="padding:10px 2px 0">
+      <div class="tiny muted">共 ${D.DISHES.length} 道 · ${D.CUISINES.length} 个菜系</div>
+      <button class="addchip" data-action="openAddDish">＋ 添加菜谱</button>
+    </div>`;
+
+    return { title: '菜谱', tab: 'recipe', html: tabs + addRow + body };
   }
 
   function dishRow(d, hot, missing) {

@@ -925,6 +925,212 @@
     return '';
   }
 
+  /* ============================================================
+     自定义菜谱：按菜名生成一份可用的做法
+     ============================================================ */
+  const NAME_FRAG = {
+    肉丝: '猪里脊', 肉片: '猪里脊', 肉末: '猪肉馅', 肉馅: '猪肉馅', 里脊: '猪里脊',
+    鸡丁: '鸡胸肉', 鸡块: '鸡腿', 鸡翅: '鸡翅', 鸡腿: '鸡腿',
+    鱼片: '草鱼', 鱼头: '鲈鱼', 鱼: '鲈鱼', 虾仁: '虾仁', 虾: '虾',
+    排骨: '排骨', 牛腩: '牛腩', 牛肉: '牛里脊', 羊肉: '羊肉', 豆腐: '豆腐',
+    茄子: '茄子', 土豆: '土豆', 番茄: '番茄', 西红柿: '番茄', 鸡蛋: '鸡蛋', 蛋: '鸡蛋',
+    白菜: '大白菜', 菠菜: '菠菜', 豆角: '豆角', 藕: '莲藕', 香菇: '香菇', 蘑菇: '香菇',
+    黄瓜: '黄瓜', 冬瓜: '冬瓜', 南瓜: '南瓜', 青椒: '青椒', 芹菜: '芹菜', 韭菜: '韭菜'
+  };
+
+  const METHOD_TPL = {
+    红烧: {
+      cuisine: ['家常'], minutes: 45, level: '进阶', tag: '下饭',
+      season: ['生抽 20 ml', '老抽 5 ml', '冰糖 10 g', '料酒 15 ml', '姜 3 片'],
+      prep: ['{main}处理干净，切大小均匀的块。'],
+      steps: [
+        { heat: '中火', text: '{main}先煎到表面微黄，盛出备用。' },
+        { heat: '中火', text: '下冰糖炒出糖色，倒回{main}裹匀，加生抽、老抽、料酒和姜片。' },
+        { heat: '小火', text: '加热水没过，小火焖 25 分钟。' },
+        { heat: '大火', text: '开盖大火收汁，收到汤汁浓稠挂勺即可。' }
+      ],
+      tips: ['收汁时勤翻动，糖分容易糊底。', '加热水不加冷水，肉才不柴。']
+    },
+    清蒸: {
+      cuisine: ['粤菜'], minutes: 20, level: '新手', tag: '零油烟',
+      season: ['蒸鱼豉油 20 ml', '姜 4 片', '葱 2 段', '料酒 10 ml', '食用油 10 ml'],
+      prep: ['{main}洗净，表面划几刀更入味。'],
+      steps: [
+        { heat: '大火', text: '{main}抹料酒和少许盐，铺姜片，水开后上锅。' },
+        { heat: '大火', text: '大火蒸 8~10 分钟（按厚薄调整）。' },
+        { heat: '关火', text: '倒掉盘中腥水，铺葱丝，淋蒸鱼豉油。' },
+        { heat: '大火', text: '浇一勺烧到冒烟的热油激香。' }
+      ],
+      tips: ['一定要水开再上锅。', '蒸出来的水必须倒掉，那是腥味来源。']
+    },
+    汤: {
+      cuisine: ['清淡'], minutes: 45, level: '新手', tag: '清淡',
+      season: ['姜 3 片', '盐 3 g', '白胡椒 少许'],
+      prep: ['{main}处理干净，切块。'],
+      steps: [
+        { heat: '大火', text: '{main}冷水下锅焯水，撇净浮沫。' },
+        { heat: '小火', text: '加姜片和热水，小火煮 30 分钟。' },
+        { heat: '中火', text: '加盐和其余配料，再煮 8 分钟。' },
+        { heat: '关火', text: '撒白胡椒，起锅。' }
+      ],
+      tips: ['焯水冷水下锅，血沫才出得干净。', '盐最后放。']
+    },
+    凉拌: {
+      cuisine: ['家常', '清淡'], minutes: 10, level: '新手', tag: '快手',
+      season: ['蒜末 2 瓣', '生抽 10 ml', '香醋 8 ml', '香油 3 ml', '小米椒 1 个'],
+      prep: ['{main}洗净切丝或切块。'],
+      steps: [
+        { heat: '大火', text: '{main}焯水 60 秒捞出过凉水，沥干。' },
+        { heat: '无火', text: '蒜末、生抽、香醋、香油调成料汁。' },
+        { heat: '无火', text: '浇在{main}上拌匀，冷藏 5 分钟更爽口。' }
+      ],
+      tips: ['焯水后过凉水，口感才脆。', '料汁最后拌，早了会出水。']
+    },
+    炸: {
+      cuisine: ['家常'], minutes: 25, level: '进阶', tag: '解馋',
+      season: ['淀粉 50 g', '盐 2 g', '料酒 10 ml', '油 400 ml'],
+      prep: ['{main}切条，加盐和料酒腌 10 分钟。'],
+      steps: [
+        { heat: '中火', text: '{main}裹一层干淀粉。' },
+        { heat: '中火', text: '六成油温下锅炸 2 分钟定型。' },
+        { heat: '大火', text: '升高油温复炸 40 秒，外壳更脆。' },
+        { heat: '关火', text: '捞出控油，撒椒盐。' }
+      ],
+      tips: ['复炸是脆的关键。', '油温六成热：筷子插入冒小泡。']
+    },
+    炒: {
+      cuisine: ['家常'], minutes: 15, level: '新手', tag: '快手',
+      season: ['生抽 10 ml', '盐 2 g', '蒜末 2 瓣', '食用油 15 ml'],
+      prep: ['{main}切丝或切片，尽量大小一致。'],
+      steps: [
+        { heat: '大火', text: '锅烧热倒油，下蒜末爆香。' },
+        { heat: '大火', text: '下{main}大火快炒 1 分半。' },
+        { heat: '大火', text: '加生抽和盐翻匀。' },
+        { heat: '关火', text: '尝一下咸淡，出锅装盘。' }
+      ],
+      tips: ['大火快炒才脆嫩。', '调料提前备好，炒起来没时间找。']
+    }
+  };
+
+  function detectMethod(name) {
+    const n = String(name || '');
+    if (/红烧|糖醋|酱焖/.test(n)) return '红烧';
+    if (/蒸/.test(n)) return '清蒸';
+    if (/汤|羹|粥/.test(n)) return '汤';
+    if (/凉拌|拌/.test(n)) return '凉拌';
+    if (/炸|锅包|酥/.test(n)) return '炸';
+    return '炒';
+  }
+
+  function guessMain(name) {
+    const n = String(name || '');
+    for (const k in NAME_FRAG) if (n.indexOf(k) >= 0) return NAME_FRAG[k];
+    const names = D.FOOD_DB.map(f => f.name).sort((a, b) => b.length - a.length);
+    for (const x of names) if (n.indexOf(x) >= 0) return x;
+    return '';
+  }
+
+  function unitQty(food) {
+    const u = (foodMeta(food).unit || '个');
+    if (u === 'g') return 300;
+    if (u === '枚') return 3;
+    if (u === '朵') return 6;
+    if (u === '片') return 4;
+    if (u === '张') return 6;
+    return 2;
+  }
+
+  // 生成一份菜谱草稿
+  function generateRecipe(name, mainName) {
+    const nm = String(name || '').trim();
+    const main = mainName || guessMain(nm) || '五花肉';
+    const m = detectMethod(nm);
+    const tpl = METHOD_TPL[m] || METHOD_TPL['炒'];
+    const meta = foodMeta(main);
+    const isMeat = /肉|鱼|虾|蟹|鸡|鸭|牛|羊|猪/.test(main) || meta.cat === '肉类' || meta.cat === '水产';
+    const fill = s => s.replace(/\{main\}/g, main);
+
+    const ing = [{ name: main, qty: unitQty(main) }];
+    // 配菜只在炒/红烧的猪牛鸡肉上加，鱼虾和鸡翅不加
+    const companion = { 猪里脊: '青椒', 五花肉: '青椒', 牛里脊: '洋葱', 鸡胸肉: '青椒' }[main];
+    if (companion && (m === '炒' || m === '红烧')) ing.push({ name: companion, qty: 1 });
+
+    const d = {
+      id: 'c-' + hashName(nm),
+      name: nm,
+      emoji: meta.emoji || '🍽',
+      minutes: tpl.minutes,
+      level: tpl.level,
+      cuisine: tpl.cuisine.slice(),
+      meals: ['午', '晚'],
+      tags: [tpl.tag, '自定义'],
+      ingredients: ing,
+      seasonings: tpl.season.slice(),
+      prep: tpl.prep.map(fill),
+      steps: tpl.steps.map(s => ({ heat: s.heat, text: fill(s.text) })),
+      tips: tpl.tips.slice(),
+      nutrition: '按' + main + '为主要食材估算，营养值以食材折算为准。',
+      pair: '自定义菜谱 · 可按口味调整',
+      custom: true
+    };
+
+    // 鱼香：糖醋 + 泡椒，模板给不出来，单独写
+    if (/鱼香/.test(nm)) {
+      d.ingredients = [{ name: main, qty: unitQty(main) }, { name: '木耳', qty: 15 }, { name: '胡萝卜', qty: 1 }];
+      d.seasonings = ['泡椒 2 个', '醋 15 ml', '白糖 12 g', '生抽 10 ml', '淀粉 5 g', '蒜末 3 瓣'];
+      d.prep = [main + '切丝，加生抽和淀粉抓匀腌 10 分钟。', '木耳泡发切丝，胡萝卜切丝。'];
+      d.steps = [
+        { heat: '大火', text: '肉丝滑油变色，盛出备用。' },
+        { heat: '大火', text: '炒香泡椒和蒜末，下木耳、胡萝卜丝炒 1 分钟。' },
+        { heat: '大火', text: '倒回肉丝，淋糖醋汁大火收浓，翻匀出锅。' }
+      ];
+      d.tips = ['糖醋比例 1:1 是鱼香的关键。', '没有泡椒可以用一勺豆瓣酱代替。'];
+      d.tags.push('鱼香');
+      d.minutes = 20;
+    }
+
+    // 可乐：靠可乐里的糖收汁
+    if (/可乐/.test(nm)) {
+      d.seasonings = ['可乐 330 ml', '生抽 20 ml', '姜 3 片', '料酒 15 ml'];
+      d.prep = [main + '洗净，两面各划两刀更入味。'];
+      d.steps = [
+        { heat: '中火', text: main + '两面煎到金黄。' },
+        { heat: '中火', text: '加姜片、料酒、生抽，倒可乐没过' + main + '。' },
+        { heat: '小火', text: '小火焖 15 分钟。' },
+        { heat: '大火', text: '开盖大火收汁，收到浓稠发亮裹住' + main + '。' }
+      ];
+      d.tips = ['可乐本身有糖，不用另外放糖。', '收汁到能挂勺就关火，久了发苦。'];
+      d.tags.push('可乐');
+      d.minutes = 30;
+    }
+
+    return d;
+  }
+
+  function hashName(s) {
+    let h = 0;
+    for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return h.toString(36);
+  }
+
+  // 把用户自定义的菜谱挂进主库
+  function attachCustom(list) {
+    (list || []).forEach(function (d) {
+      if (!d || !d.id) return;
+      if (D.DISHES.some(x => x.id === d.id)) return;
+      d.cuisine = d.cuisine && d.cuisine.length ? d.cuisine : ['家常'];
+      d.videos = d.videos || [];
+      if (!d.role) {
+        const ns = d.ingredients.map(i => i.name);
+        const has = re => ns.some(n => re.test(n));
+        d.role = /汤|羹|粥/.test(d.name) ? '汤羹'
+          : has(/大米|挂面|面粉|馒头|面包|意面|粉丝|饺子皮|米线|河粉|乌冬|年糕|吐司|饼皮/) ? '主食'
+            : has(/牛|羊|猪|鸡|鸭|鱼|虾|蟹|贝|肉|排骨|培根|香肠|火腿|鸡蛋|蛋/) ? '荤菜' : '素菜';
+      }
+      D.DISHES.push(d);
+    });
+  }
+
   /* ---------- 疾病史 ---------- */
   function conditionPenalty(dish, conds) {
     if (!conds || !conds.length) return 0;
@@ -961,6 +1167,6 @@
     NUT_KEYS, dishNutrition, dishNutritionPerServing, dailyTarget, dayNutrition, nutritionBars,
     mealNutrition, perMealTarget,
     allergensOf, dishAllowed, conditionPenalty, substitutesFor, zones, assistant, weeklyReport,
-    parseCommand
+    parseCommand, generateRecipe, guessMain, detectMethod, attachCustom
   };
 })(window);

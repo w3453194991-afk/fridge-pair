@@ -53,6 +53,7 @@
       foods: foods,
       cart: [],
       pinned: [],
+      custom: [],
       week: null,
       party: null,
       stats: { cooked: 0, saved: 0, added: 0, trashed: 0 }
@@ -72,6 +73,7 @@
       if (!s.stats) s.stats = { cooked: 0, saved: 0, added: 0, trashed: 0 };
       if (!Array.isArray(s.cart)) s.cart = [];
       if (!Array.isArray(s.pinned)) s.pinned = [];
+      if (!Array.isArray(s.custom)) s.custom = [];
       if (!s.family) s.family = seedState().family;
       if (!s.family.system) s.family.system = 'cn';
       if (!Array.isArray(s.family.avoid)) s.family.avoid = [];
@@ -155,6 +157,21 @@
       const f = this.get(id);
       if (!f) return;
       f.expireAt = Date.now() + Math.round(days * DAY);
+      this.save();
+    },
+
+    /* ---------- 自定义菜谱 ---------- */
+    addCustom: function (dish) {
+      if (!dish || !dish.id) return false;
+      if (!Array.isArray(this.state.custom)) this.state.custom = [];
+      if (this.state.custom.some(d => d.id === dish.id)) return false;
+      this.state.custom.push(dish);
+      this.save();
+      return true;
+    },
+    removeCustom: function (id) {
+      this.state.custom = (this.state.custom || []).filter(d => d.id !== id);
+      this.state.pinned = (this.state.pinned || []).filter(x => x !== id);
       this.save();
     },
 

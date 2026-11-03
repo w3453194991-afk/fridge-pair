@@ -347,6 +347,9 @@
         w.DD_VIEW.q = '';
         renderAll(false);
         break;
+      case 'openAddDish': openAddDish(); break;
+      case 'addDishSearch': addDishSearch(); break;
+      case 'addDishConfirm': addDishConfirm(); break;
       case 'openHealth': {
         const fam2 = S.state.family || {};
         w.DD_VIEW.healthDraft = {
@@ -693,6 +696,11 @@
   });
 
   d.addEventListener('change', function (e) {
+    if (e.target.id === 'addMain' && ADDD && ADDD.draft) {
+      ADDD.draft = E.generateRecipe(ADDD.draft.name, e.target.value);
+      drawAddDish();
+      return;
+    }
     if (e.target.id === 'camFile') {      const file = e.target.files && e.target.files[0];
       if (!file) return;
       const rd = new FileReader();
@@ -1457,6 +1465,109 @@
   }
 
   /* ============================================================
+     添加菜谱（库里没有就按名字生成一份）
+     ============================================================ */
+  let ADDD = null;
+
+  function openAddDish() {
+    ADDD = { q: '', draft: null, exists: null };
+    drawAddDish();
+  }
+
+  function mainOptions(cur) {
+    const list = ['猪里脊', '五花肉', '猪肉馅', '牛里脊', '牛腩', '羊肉', '鸡胸肉', '鸡腿', '鸡翅', '排骨',
+      '鲈鱼', '虾仁', '虾', '鸡蛋', '豆腐', '番茄', '茄子', '土豆', '黄瓜', '白菜', '菠菜', '豆角',
+      '青椒', '芹菜', '韭菜', '香菇', '莲藕', '冬瓜', '南瓜', '胡萝卜', '大米', '挂面'];
+    const extra = D.FOOD_DB.map(f => f.name).filter(n => list.indexOf(n) < 0);
+    const all = list.filter(n => D.FOOD_MAP[n]).concat(extra);
+    return all.map(n => `<option value="${U.esc(n)}" ${n === cur ? 'selected' : ''}>${n}</option>`).join('');
+  }
+
+  function drawAddDish() {
+    const st = ADDD;
+    const draft = st.draft;
+    const preview = draft ? `
+      <div class="panel" style="margin-top:12px">
+        <h3><span class="dot"></span>自动生成的菜谱</h3>
+        <div class="tiny muted" style="margin-top:4px">${draft.emoji} ${U.esc(draft.name)} · ${draft.minutes} 分钟 · ${draft.level} · ${U.esc(draft.cuisine.join('/'))}</div>
+
+        <div class="field" style="margin-top:8px">
+          <div class="lab">主料<small>认错了可以改</small></div>
+          <select id="addMain">${mainOptions(draft.ingredients[0].name)}</select>
+        </div>
+
+        <div class="p-body" style="margin-top:8px">
+          食材：${draft.ingredients.map(i => U.esc(i.name) + ' ' + E.fmtQty(i.qty) + E.foodMeta(i.name).unit).join(' + ')}
+        </div>
+        <div class="p-body" style="padding:0">
+          ${draft.steps.map((s, i) => `<div class="stepline" style="border-bottom:0;padding:6px 0">
+            <div class="no" style="width:20px;height:20px;font-size:9.5px">${i + 1}</div>
+            <div class="body"><p>${U.esc(s.text)}</p></div>
+          </div>`).join('')}
+        </div>
+
+        <div class="btn-row">
+          <button class="btn primary" data-action="addDishConfirm">加入我的菜谱</button>
+        </div>
+      </div>` : '';
+
+    openModal(`
+      <div class="sheet-head"><div class="t">添加菜谱</div>
+        <button class="x" data-action="closeModal">✕</button></div>
+
+      <div class="onb-field" style="margin-top:0">
+        <label>想吃的菜</label>
+        <input id="addName" value="${U.esc(st.q)}" placeholder="比如：鱼香肉丝、可乐鸡翅" maxlength="12">
+      </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn primary" data-action="addDishSearch">搜索 / 生成</button>
+      </div>
+
+      ${st.exists ? `<div class="panel" style="margin-top:12px">
+        <h3><span class="dot"></span>库里已经有了</h3>
+        <div class="p-body">「${U.esc(st.exists.name)}」已经在菜谱库里，直接打开就行。</div>
+        <div class="btn-row"><button class="btn primary sm" data-dish="${st.exists.id}">打开这道菜</button></div>
+      </div>` : ''}
+
+      ${preview}
+
+      ${(!st.exists && !st.draft) ? `<div class="tiny muted" style="text-align:center;margin-top:16px;line-height:1.7">
+        库里没有的菜，按名字自动生成食材和步骤；<br>生成后可以修改主料，加入后就能参与排餐和采购。
+      </div>` : ''}
+    `);
+  }
+
+  function addDishSearch() {
+    const inp = d.getElementById('addName');
+    const q = (inp ? inp.value : '').trim();
+    if (!q) { toast('先写个菜名'); return; }
+    ADDD.q = q;
+    const hit = D.DISHES.filter(x => x.name === q || x.name.indexOf(q) >= 0)[0];
+    if (hit) {
+      ADDD.exists = hit;
+      ADDD.draft = null;
+    } else {
+      ADDD.exists = null;
+      ADDD.draft = E.generateRecipe(q);
+    }
+    drawAddDish();
+  }
+
+  function addDishConfirm() {
+    if (!ADDD || !ADDD.draft) return;
+    const sel = d.getElementById('addMain');
+    let draft = ADDD.draft;
+    if (sel && sel.value && sel.value !== draft.ingredients[0].name) {
+      draft = E.generateRecipe(draft.name, sel.value);
+    }
+    const ok = S.addCustom(draft);
+    E.attachCustom([draft]);
+    closeModal();
+    toast(ok ? '已加入菜谱：' + draft.name : '这道菜已经在库里了');
+    go({ name: 'dish', id: draft.id });
+  }
+
+  /* ============================================================
      附近超市（定位 + OpenStreetMap 真实点位）
      ============================================================ */
   const CITY_COORDS = {
@@ -1542,6 +1653,7 @@
      启动
      ============================================================ */
   S.load();
+  E.attachCustom(S.state.custom);
   tick();
   setInterval(tick, 20000);
   w.DD_VERSION = 'v11';

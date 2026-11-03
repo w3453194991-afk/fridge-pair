@@ -235,6 +235,25 @@ const errors = [];
   report.partySecond = await run(`DD_STORE.state.party.dishes.map(d => d.name)`);
   report.partyDiffers = await run(`(() => { const a = DD_VIEW.lastParty; return true; })()`);
 
+  /* 添加菜谱：库里没有的「鱼香肉丝」现场生成 */
+  await click('[data-nav="recipe"]');
+  await sleep(350);
+  await click('[data-action="openAddDish"]');
+  await sleep(350);
+  await shot('10a-add-dish');
+  await type('#addName', '可乐鸡翅');
+  await click('[data-action="addDishSearch"]');
+  await sleep(450);
+  await shot('10b-add-dish-preview');
+  report.addPreview = await run(`(() => { const h = document.querySelector('.panel h3'); return h ? h.textContent.trim() : ''; })()`);
+  await click('[data-action="addDishConfirm"]');
+  await sleep(500);
+  await shot('10c-add-dish-done');
+  report.customCount = await run(`(DD_STORE.state.custom || []).length`);
+  report.customName = await run(`(DD_STORE.state.custom || []).map(d => d.name).join(',')`);
+  report.dishInLib = await run(`DD_DATA.DISHES.some(d => d.name === '可乐鸡翅')`);
+  report.openedDish = await run(`(() => { const h = document.querySelector('#page .subhead h2'); return h ? h.textContent.trim() : ''; })()`);
+
   /* 附近超市 */
   await click('[data-nav="plan"]');
   await click('[data-action="openNearby"]');
