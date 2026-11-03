@@ -1879,3 +1879,36 @@ body{ background:#EAF3EE; }
 
 /* 声波位置随新尺寸调整 */
 .sp-robot .sp-wave{ right:-40px; top:78px; }
+
+/* ---------- 开屏细节打磨 ---------- */
+/* 面屏流动反光 */
+.face-gloss{ animation:glossMove 5.6s cubic-bezier(.4,0,.2,1) infinite; }
+@keyframes glossMove{
+  0%{ transform:translateX(0) }
+  42%,100%{ transform:translateX(250px) }
+}
+/* 脚下全息光环：点线流动 */
+.hud-ring{ animation:hudSpin 5s linear infinite; }
+@keyframes hudSpin{ to{ stroke-dashoffset:64 } }
+
+/* 台词气泡：小尾巴 + 打字光标 */
+.sp-words{ position:relative; }
+.sp-line:first-child{ position:relative; }
+.sp-line:first-child::before{
+  content:''; position:absolute; left:26px; top:-7px;
+  border-left:7px solid transparent; border-right:7px solid transparent;
+  border-bottom:8px solid #FFFFFF;
+}
+.sp-line.typing::after{
+  content:'▌'; margin-left:2px; color:#12A576;
+  animation:caret .9s steps(1) infinite;
+}
+@keyframes caret{ 0%,50%{ opacity:1 } 51%,100%{ opacity:0 } }
+
+/* 主按钮加一点光泽扫过 */
+.sp-btn.primary{ position:relative; overflow:hidden; }
+.sp-btn.primary::after{
+  content:''; position:absolute; top:-60%; left:-70%; width:50%; height:220%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:rotate(16deg); animation:sheen 4.2s ease-in-out infinite;
+}
