@@ -1850,3 +1850,32 @@ body{ background:#EAF3EE; }
   to{ height:16px; border-radius:0 0 18px 18px }
 }
 .sp-robot .r-face .cheek{ bottom:8px; }
+
+/* ---------- 开屏机器人 v2：SVG 版（黑屏 + 青色弧眼 + 小芽 + 耳机） ---------- */
+.sp-robot{ position:relative; width:236px; margin-top:4px; animation:robotFloat 3.4s ease-in-out infinite; }
+.sp-bot{ width:100%; height:auto; display:block; filter:drop-shadow(0 22px 30px rgba(10,90,66,.22)); }
+
+/* 眼睛：呼吸发光 + 眨眼 */
+.bot-eye{ filter:drop-shadow(0 0 6px rgba(125,235,255,.95)); }
+.bot-eyes{ transform-box:fill-box; transform-origin:center; animation:botBlink 4.8s ease-in-out infinite; }
+@keyframes botBlink{
+  0%,88%,100%{ transform:scaleY(1) }
+  91%{ transform:scaleY(.12) }
+  94%{ transform:scaleY(1) }
+}
+.bot-mouth{ filter:drop-shadow(0 0 6px rgba(125,235,255,.9)); transform-box:fill-box; transform-origin:center top; }
+.bot-mouth.talking{ animation:botTalk .17s ease-in-out infinite alternate; }
+@keyframes botTalk{ from{ transform:scaleY(.55) } to{ transform:scaleY(1.5) } }
+
+/* 小芽轻轻摆 */
+.bot-sprout{ transform-box:fill-box; transform-origin:bottom center; animation:sproutSway 3.6s ease-in-out infinite; }
+@keyframes sproutSway{ 0%,100%{ transform:rotate(-4deg) } 50%{ transform:rotate(5deg) } }
+
+/* 手臂 */
+.bot-arm.up{ transform-box:fill-box; transform-origin:bottom right; animation:armUp 3s ease-in-out infinite; }
+@keyframes armUp{ 0%,100%{ transform:rotate(-3deg) } 50%{ transform:rotate(-9deg) } }
+.bot-arm.down{ transform-box:fill-box; transform-origin:top left; animation:armDown 3s ease-in-out infinite; }
+@keyframes armDown{ 0%,100%{ transform:rotate(0) } 50%{ transform:rotate(7deg) } }
+
+/* 声波位置随新尺寸调整 */
+.sp-robot .sp-wave{ right:-40px; top:78px; }

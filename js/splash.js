@@ -98,25 +98,67 @@
       <button class="sp-skip" data-sp="skip">跳过</button>
 
       <div class="sp-robot">
-        <div class="r-antenna"><span></span></div>
-        <div class="r-head">
-          <div class="r-ear l"></div>
-          <div class="r-ear r"></div>
-          <div class="r-face">
-            <div class="r-eyes">
-              <div class="r-eye"><i></i></div>
-              <div class="r-eye"><i></i></div>
-            </div>
-            <div class="r-mouth"></div>
-            <div class="cheek l"></div>
-            <div class="cheek r"></div>
-          </div>
-        </div>
-        <div class="r-body">
-          <div class="r-screen">🥬</div>
-          <div class="r-arm l"></div>
-          <div class="r-arm r"></div>
-        </div>
+        <svg class="sp-bot" viewBox="0 0 220 260" aria-label="冰箱管家">
+          <defs>
+            <linearGradient id="botShell" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#E6F6EF"/>
+            </linearGradient>
+            <linearGradient id="botFace" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#1C2A33"/><stop offset="1" stop-color="#080E12"/>
+            </linearGradient>
+            <linearGradient id="botApron" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#7BE0FF"/><stop offset="1" stop-color="#2E9BD6"/>
+            </linearGradient>
+            <radialGradient id="botGlow">
+              <stop offset="0" stop-color="#8EF0FF" stop-opacity=".55"/>
+              <stop offset="1" stop-color="#8EF0FF" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <ellipse cx="110" cy="238" rx="62" ry="12" fill="#0E6B52" opacity=".12"/>
+
+          <!-- 耳机头梁（在头后面，从头顶绕过） -->
+          <path d="M29 98 q0 -86 81 -86 q81 0 81 86" fill="none" stroke="#E9F7F1" stroke-width="10" stroke-linecap="round"/>
+          <path d="M29 98 q0 -86 81 -86 q81 0 81 86" fill="none" stroke="#D3EDE1" stroke-width="2" stroke-linecap="round"/>
+
+          <!-- 手臂 -->
+          <path class="bot-arm up" d="M60 186 q-22 10 -23 38" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round"/>
+          <circle cx="37" cy="228" r="10" fill="#fff" stroke="#DCF0E7" stroke-width="2"/>
+          <path class="bot-arm down" d="M160 186 q22 10 23 38" fill="none" stroke="#fff" stroke-width="16" stroke-linecap="round"/>
+          <circle cx="183" cy="228" r="10" fill="#fff" stroke="#DCF0E7" stroke-width="2"/>
+
+          <!-- 身体 -->
+          <rect x="50" y="160" width="120" height="88" rx="42" fill="url(#botShell)" stroke="#DCF0E7" stroke-width="2"/>
+          <path d="M78 176 q32 -12 64 0 l-5 62 q-27 9 -54 0 z" fill="url(#botApron)" opacity=".92"/>
+          <rect x="88" y="188" width="44" height="32" rx="10" fill="#FFFFFF" opacity=".95"/>
+          <text x="110" y="210" text-anchor="middle" font-size="18">🥬</text>
+
+          <!-- 耳机 -->
+          <circle cx="31" cy="96" r="18" fill="#fff" stroke="#DCF0E7" stroke-width="2"/>
+          <circle cx="31" cy="96" r="8" fill="#CFE9DE"/>
+          <circle cx="189" cy="96" r="18" fill="#fff" stroke="#DCF0E7" stroke-width="2"/>
+          <circle cx="189" cy="96" r="8" fill="#CFE9DE"/>
+
+          <!-- 头 -->
+          <rect x="30" y="22" width="160" height="140" rx="54" fill="url(#botShell)" stroke="#DCF0E7" stroke-width="2"/>
+          <rect x="48" y="40" width="124" height="104" rx="38" fill="url(#botFace)"/>
+          <ellipse cx="86" cy="56" rx="34" ry="11" fill="#FFFFFF" opacity=".10"/>
+
+          <!-- 眼睛（发光弧） -->
+          <g class="bot-eyes">
+            <path class="bot-eye" d="M72 88 q13 -15 26 0" fill="none" stroke="#7DEBFF" stroke-width="8" stroke-linecap="round"/>
+            <path class="bot-eye" d="M122 88 q13 -15 26 0" fill="none" stroke="#7DEBFF" stroke-width="8" stroke-linecap="round"/>
+          </g>
+          <!-- 嘴 -->
+          <path class="bot-mouth" d="M100 112 q10 10 20 0" fill="none" stroke="#7DEBFF" stroke-width="6" stroke-linecap="round"/>
+
+          <!-- 头顶小芽 -->
+          <g class="bot-sprout">
+            <path d="M110 22 q1 -14 0 -18" fill="none" stroke="#5FBF7C" stroke-width="4" stroke-linecap="round"/>
+            <path d="M110 10 q-14 -4 -18 -14 q14 -1 18 14 z" fill="#6FD08C"/>
+            <path d="M110 10 q14 -4 18 -14 q-14 -1 -18 14 z" fill="#8FE0A6"/>
+          </g>
+        </svg>
         <div class="sp-wave"><i></i><i></i><i></i></div>
       </div>
 
