@@ -1355,7 +1355,7 @@ body{ background:#EAF3EE; }
 }
 
 /* Toast：滑入 + 底部进度条 */
-.toast{ animation:toastIn .42s cubic-bezier(.22,.9,.28,1) both; }
+.toast.show{ animation:toastIn .42s cubic-bezier(.22,.9,.28,1) both; }
 @keyframes toastIn{
   from{ opacity:0; transform:translateY(18px) scale(.94) }
   to{ opacity:1; transform:none }
