@@ -1,5 +1,7 @@
 <view class="wrap" wx:if="{{dish}}">
 
+  <image wx:if="{{dish.photo}}" class="heroimg" src="{{dish.photo}}" mode="aspectFill" />
+
   <view class="card hero">
     <view class="hem">{{dish.emoji}}</view>
     <view class="hname">{{dish.name}}</view>

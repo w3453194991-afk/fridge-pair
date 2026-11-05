@@ -1,5 +1,7 @@
 const G = require('../../lib/shim.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
+let P = {};
+try { P = require('../../lib/photos.js') || {}; } catch (e) { P = {}; }
 
 Page({
   data: { dish: null, can: false, states: [], steps: [] },
@@ -20,7 +22,8 @@ Page({
         id: d.id, name: d.name, emoji: d.emoji, minutes: d.minutes,
         level: d.level, cuisine: (d.cuisine || []).join(' / '),
         tags: (d.tags || []).join(' · '),
-        seasonings: d.seasonings || []
+        seasonings: d.seasonings || [],
+        photo: P[d.id] ? ('/img/' + d.id + '.jpg') : ''
       },
       steps: d.steps.map((s, i) => ({ no: i + 1, heat: s.heat, text: s.text })),
       prep: d.prep || [],

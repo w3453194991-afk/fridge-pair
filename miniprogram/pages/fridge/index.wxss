@@ -1,15 +1,37 @@
 .hero {
   background: linear-gradient(170deg, #FFFFFF, #F2FCF7);
-  border-radius: 36rpx;
+  border: 1rpx solid #E7F3EC;
+  border-radius: 40rpx;
+  padding: 30rpx 30rpx 26rpx;
+  box-shadow: 0 12rpx 34rpx -22rpx rgba(18, 120, 90, .45);
 }
 .eyebrow { font-size: 24rpx; font-weight: 800; color: #12A576; letter-spacing: 1rpx; }
-.big { font-size: 76rpx; font-weight: 800; line-height: 1.1; letter-spacing: -2rpx; }
-.big .unit { font-size: 24rpx; font-weight: 700; color: #7C8B87; margin-left: 12rpx; letter-spacing: 0; }
+.h1 { font-size: 40rpx; font-weight: 800; margin-top: 6rpx; }
 .fam {
   font-size: 24rpx; font-weight: 700; color: #0E7A5A;
   background: #EAFBF2; border: 1rpx solid #CBEFE0;
   padding: 10rpx 20rpx; border-radius: 22rpx;
 }
+
+.ringwrap {
+  position: relative; width: 300rpx; height: 300rpx;
+  margin: 24rpx auto 18rpx;
+}
+.ringcv { width: 300rpx; height: 300rpx; }
+.ringc {
+  position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.ringn { font-size: 76rpx; font-weight: 800; line-height: 1; letter-spacing: -2rpx; }
+.ringl { font-size: 22rpx; color: #7C8B87; font-weight: 700; margin-top: 8rpx; }
+
+.fresh {
+  margin: 0 auto; width: fit-content; text-align: center;
+  font-size: 22rpx; font-weight: 800;
+  padding: 12rpx 26rpx; border-radius: 30rpx;
+}
+.fresh.ok { color: #0E8F63; background: #E6FAF1; }
+.fresh.warn { color: #6D28D9; background: #F3EBFF; }
 
 .stats { display: flex; margin-top: 26rpx; }
 .st {
@@ -29,17 +51,50 @@
 
 .alert {
   display: flex; align-items: center; justify-content: space-between;
-  margin-top: 24rpx; padding: 20rpx 22rpx; border-radius: 22rpx;
+  margin-top: 22rpx; padding: 20rpx 22rpx; border-radius: 22rpx;
   background: linear-gradient(100deg, #F7F1FF, #FDF7FF);
   border: 1rpx solid #EADFFF;
-  font-size: 24rpx; font-weight: 700; color: #4B3A6B;
+  font-size: 23rpx; font-weight: 700; color: #4B3A6B;
 }
 .alert .go { color: #6D28D9; font-weight: 800; }
 
-.ops { margin: 8rpx 0 18rpx; }
-.op { flex: 1; }
+/* AI 卡 */
+.ai {
+  margin-top: 22rpx; border-radius: 34rpx; padding: 26rpx 28rpx 24rpx;
+  background: linear-gradient(126deg, #37D9A4, #14B98A 55%, #0E9E8C);
+  box-shadow: 0 16rpx 34rpx -18rpx rgba(16, 150, 120, .8);
+  color: #fff;
+}
+.aitag { font-size: 22rpx; font-weight: 800; opacity: .95; }
+.aiswap { font-size: 21rpx; opacity: .9; }
+.aipair { font-size: 42rpx; font-weight: 900; margin: 16rpx 0 10rpx; letter-spacing: 1rpx; }
+.aiwhy { font-size: 22rpx; line-height: 1.6; opacity: .95; }
+.airow { margin-top: 20rpx; }
+.aitags text {
+  font-size: 19rpx; font-weight: 700;
+  background: rgba(255, 255, 255, .22); border-radius: 10rpx;
+  padding: 6rpx 14rpx; margin-right: 10rpx;
+}
+.aigo {
+  font-size: 23rpx; font-weight: 800; color: #0E8F63;
+  background: #fff; border-radius: 24rpx; padding: 10rpx 24rpx;
+}
 
-.filters { white-space: nowrap; margin-bottom: 6rpx; }
+/* 今日菜单 */
+.menucard { padding: 10rpx 24rpx; }
+.meal { display: flex; align-items: center; padding: 18rpx 0; border-top: 1rpx solid #F2F7F4; }
+.meal:first-child { border-top: 0; }
+.slot {
+  width: 52rpx; height: 44rpx; border-radius: 12rpx; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 21rpx; font-weight: 800; color: #0E8F63; background: #E6FAF1;
+  margin-right: 18rpx;
+}
+.mnames { flex: 1; font-size: 25rpx; line-height: 1.6; }
+.gen { margin-top: 18rpx; height: 80rpx; font-size: 27rpx; }
+.more { font-size: 22rpx; color: #12A576; font-weight: 700; margin-left: auto; }
+
+.shoot { margin: 22rpx 0 6rpx; }
 
 .food {
   display: flex; align-items: center;
@@ -70,9 +125,3 @@
 .errbox { background: #FFF6F6; border-color: #F6D6D6; }
 .errt { font-size: 30rpx; font-weight: 800; color: #B91C1C; margin-bottom: 12rpx; }
 .errd { font-size: 24rpx; color: #8A4B4B; line-height: 1.7; word-break: break-all; }
-
-.dbg {
-  font-size: 22rpx; color: #0E8F63; background: #E6FAF1;
-  border: 1rpx solid #CBEFE0; border-radius: 16rpx;
-  padding: 12rpx 18rpx; margin-bottom: 18rpx;
-}

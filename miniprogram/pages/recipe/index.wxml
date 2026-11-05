@@ -1,8 +1,8 @@
 <view class="wrap">
 
   <view class="chips tabs">
-    <view class="{{fitCls}}" data-tab="fit" bindtap="onTab">用我的食材做 {{fitCount}}</view>
-    <view class="{{allCls}}" data-tab="all" bindtap="onTab">全部菜谱 {{allCount}}</view>
+    <view class="{{fitCls}}" data-tab="fit" bindtap="onTab">能做的 {{fitCount}}</view>
+    <view class="{{allCls}}" data-tab="all" bindtap="onTab">全部 {{allCount}}</view>
   </view>
 
   <input
@@ -13,23 +13,23 @@
     confirm-type="search"
   />
 
-  <view wx:if="{{list.length}}">
+  <view wx:if="{{list.length}}" class="cardgrid">
     <view
       wx:for="{{list}}"
       wx:key="id"
-      class="dish"
+      class="dcard"
       data-id="{{item.id}}"
       bindtap="onDish"
     >
-      <view class="dem">{{item.emoji}}</view>
-      <view class="dbd">
-        <view class="dnm">{{item.name}}<text wx:if="{{item.ok}}" class="ok">可做</text></view>
-        <view class="dds">{{item.sub}}</view>
-        <view class="dmt">
-          <text>{{item.m1}}</text>
-          <text>{{item.m2}}</text>
-          <text>{{item.m3}}</text>
-        </view>
+      <view class="dcoverwrap">
+        <image wx:if="{{item.photo}}" class="dcover" src="{{item.photo}}" mode="aspectFill" />
+        <view wx:else class="dcover fallback">{{item.emoji}}</view>
+        <view wx:if="{{item.ok}}" class="dbadge">可做</view>
+      </view>
+      <view class="dbody">
+        <view class="dname">{{item.name}}</view>
+        <view class="dsub">{{item.sub}}</view>
+        <view class="dmeta"><text>{{item.m1}}</text><text>{{item.m2}}</text></view>
       </view>
     </view>
   </view>

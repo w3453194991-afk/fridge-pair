@@ -1,5 +1,7 @@
 const G = require('../../lib/shim.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
+let P = {};
+try { P = require('../../lib/photos.js') || {}; } catch (e) { P = {}; }
 
 Page({
   data: {
@@ -29,7 +31,7 @@ Page({
       }
     }
 
-    const rows = list.slice(0, 80).map(d => {
+    const rows = list.slice(0, 90).map(d => {
       const ok = E.ingredientState(d, foods).every(s => s.ok);
       return {
         id: d.id,
@@ -37,9 +39,9 @@ Page({
         emoji: d.emoji,
         sub: d.ingredients.map(i => i.name).join(' + '),
         ok: ok,
-        m1: '⏱ ' + d.minutes + ' 分钟',
-        m2: d.level,
-        m3: (d.cuisine && d.cuisine[0]) || '家常'
+        photo: P[d.id] ? ('/img/' + d.id + '.jpg') : '',
+        m1: d.minutes + ' 分钟',
+        m2: d.level
       };
     });
 
