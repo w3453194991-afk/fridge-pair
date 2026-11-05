@@ -36,3 +36,17 @@
 }
 
 .mt { margin-top: 18rpx; }
+
+.iname { font-size: 27rpx; font-weight: 600; }
+.speakall {
+  margin-left: auto; font-size: 21rpx; font-weight: 800; color: #0E8F63;
+  background: #EAFBF2; border: 1rpx solid #CBEFE0; border-radius: 18rpx; padding: 8rpx 20rpx;
+}
+.steptools { display: flex; margin-top: 10rpx; }
+.tool {
+  font-size: 20rpx; font-weight: 700; color: #54786A;
+  background: #F3FAF6; border: 1rpx solid #E4F1EA; border-radius: 14rpx;
+  padding: 8rpx 18rpx; margin-right: 12rpx;
+}
+.btn-hover { opacity: .85; transform: scale(.99); }
+.bottomspace { height: 60rpx; }

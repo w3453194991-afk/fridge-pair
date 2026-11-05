@@ -9,12 +9,12 @@
     <view class="htags">{{dish.tags}}</view>
   </view>
 
-  <view class="sec"><view class="bar"></view><view class="t">食材用量</view></view>
+  <view class="sec"><view class="bar2"></view><view class="t">食材用量</view></view>
   <view class="card">
     <view wx:for="{{states}}" wx:key="name" class="line row between">
-      <text>{{item.name}}</text>
+      <text class="iname">{{item.name}}</text>
       <view class="row">
-        <text class="need">{{item.need}}</text>
+        <text class="need">{{item.amount}}</text>
         <text class="{{item.pillCls}}">{{item.pillText}}</text>
       </view>
     </view>
@@ -23,7 +23,10 @@
     </view>
   </view>
 
-  <view class="sec"><view class="bar"></view><view class="t">预处理</view></view>
+  <view class="sec">
+    <view class="bar2"></view><view class="t">预处理</view>
+    <view class="speakall" bindtap="onSpeakAll">🔊 朗读全部</view>
+  </view>
   <view class="card">
     <view wx:for="{{prep}}" wx:key="*this" class="step">
       <view class="no ghost">{{index + 1}}</view>
@@ -31,20 +34,25 @@
     </view>
   </view>
 
-  <view class="sec"><view class="bar"></view><view class="t">分步做法</view><view class="n">{{steps.length}} 步</view></view>
+  <view class="sec"><view class="bar2"></view><view class="t">分步做法</view><view class="n">{{steps.length}} 步</view></view>
   <view class="card">
     <view wx:for="{{steps}}" wx:key="no" class="step">
       <view class="no">{{item.no}}</view>
       <view class="tx">
         <text wx:if="{{item.heat}}" class="heat">{{item.heat}}</text>
         {{item.text}}
+        <view class="steptools">
+          <view class="tool" data-i="{{index}}" catchtap="onSpeakStep">🔊 朗读</view>
+        </view>
       </view>
     </view>
   </view>
 
   <view class="btns">
-    <view class="btn primary" bindtap="onCook">开始做菜 · 更新库存</view>
-    <view class="btn ghost mt" bindtap="onVideo">▶ 看视频教程</view>
+    <view class="btn primary" bindtap="onCook" hover-class="btn-hover">开始做菜 · 更新库存</view>
+    <view class="btn ghost mt" bindtap="onVideo" hover-class="btn-hover">▶ 看视频教程</view>
+    <view wx:if="{{speaking}}" class="btn ghost mt" bindtap="onStop">⏹ 停止朗读</view>
   </view>
 
+  <view class="bottomspace"></view>
 </view>
