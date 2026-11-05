@@ -23,3 +23,8 @@
 .about { text-align: center; font-size: 21rpx; color: #9AA6A1; margin-top: 20rpx; }
 
 .dgo { color: #C9D6D1; font-size: 32rpx; }
+
+.logout {
+  margin-top: 30rpx; text-align: center; font-size: 25rpx; font-weight: 700; color: #B91C1C;
+  background: #FFF5F5; border: 1rpx solid #FADADA; border-radius: 24rpx; padding: 24rpx 0;
+}

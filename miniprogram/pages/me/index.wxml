@@ -68,4 +68,6 @@
 
   <view class="about" bindtap="onAbout">冰箱对对碰 · 小程序版</view>
 
+  <view class="logout" bindtap="onLogout">退出登录</view>
+
 </view>

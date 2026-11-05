@@ -51,6 +51,18 @@ Page({
     wx.navigateTo({ url: '/pages/nearby/index' });
   },
 
+  onLogout() {
+    wx.showModal({
+      title: '退出登录',
+      content: '退出后需要重新登录才能继续使用。',
+      success: (res) => {
+        if (!res.confirm) return;
+        try { S.logout(); S.save(); } catch (e) {}
+        wx.reLaunch({ url: '/pages/login/index' });
+      }
+    });
+  },
+
   onTravel() {
     S.travel(3);
     this.render();

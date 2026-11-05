@@ -24,11 +24,8 @@ App({
       if (!G.DD_DATA || !G.DD_ENGINE || !S) {
         throw new Error('核心未挂载: ' + [!!G.DD_DATA, !!G.DD_ENGINE, !!S].join(','));
       }
+      // 只加载，不自动登录 —— 登录页负责创建家庭档案
       S.load();
-      if (!S.state.family.loggedIn) {
-        S.demoFamily();
-        S.save();
-      }
       G.__ready = true;
     } catch (e) {
       wx.showModal({

@@ -14,7 +14,10 @@ Page({
   onLoad() {
     this.timers = [];
     const goto = () => {
-      wx.switchTab({ url: '/pages/fridge/index' });
+      try { S.load(); } catch (e) {}
+      const logged = S.state && S.state.family && S.state.family.loggedIn;
+      if (logged) wx.switchTab({ url: '/pages/fridge/index' });
+      else wx.redirectTo({ url: '/pages/login/index' });
     };
 
     // 开机阶段 1.6s，随后进入机器人
@@ -34,7 +37,6 @@ Page({
   speak() {
     try {
       const st = S.state;
-      if (!S.state.family.loggedIn) { S.demoFamily(); S.save(); }
       const urgent = E.urgentList(st.foods).slice(0, 3);
       const names = urgent.map(f => f.name).join('、');
       const l1 = urgent.length
@@ -74,8 +76,18 @@ Page({
     tick();
   },
 
+  next() {
+    let logged = false;
+    try {
+      S.load();
+      logged = !!(S.state && S.state.family && S.state.family.loggedIn);
+    } catch (e) {}
+    if (logged) wx.switchTab({ url: '/pages/fridge/index' });
+    else wx.redirectTo({ url: '/pages/login/index' });
+  },
+
   onSkip() {
-    wx.switchTab({ url: '/pages/fridge/index' });
+    this.next();
   },
 
   onGo() {
@@ -86,6 +98,6 @@ Page({
         S.save();
       } catch (e) {}
     }
-    wx.switchTab({ url: '/pages/fridge/index' });
+    this.next();
   }
 });
