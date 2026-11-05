@@ -17,8 +17,4 @@
 
 .h2 { font-size: 30rpx; font-weight: 800; }
 .h3 { font-size: 21rpx; color: #8B9A96; margin-top: 8rpx; line-height: 1.6; }
-.amap {
-  background: linear-gradient(135deg, #3AA0FF, #1677FF) !important;
-  color: #fff !important; border: none !important;
-}
 .hint { font-size: 20rpx; color: #9AA6A1; line-height: 1.7; margin-top: 14rpx; }

@@ -212,31 +212,6 @@ Page({
     });
   },
 
-  /* 用高德地图打开（小程序不能直接唤 App，走链接） */
-  onAmap() {
-    const lat = this.data.lat;
-    const lng = this.data.lng;
-    let url = '';
-    if (lat && lng) {
-      url = 'https://uri.amap.com/marker?position=' + lng + ',' + lat +
-        '&name=' + encodeURIComponent('我的位置') + '&coordinate=gaode&callnative=1';
-    } else {
-      url = 'https://uri.amap.com/search?keyword=' + encodeURIComponent('超市') +
-        '&callnative=1';
-    }
-    wx.setClipboardData({
-      data: url,
-      success: () => {
-        wx.showModal({
-          title: '高德链接已复制',
-          content: '小程序不能直接唤起高德 App，需要这样打开：\n\n1) 粘贴到手机浏览器地址栏\n2) 或粘贴到微信「文件传输助手」，点链接\n\n打开后会提示「用高德地图打开」。\n\n' + (lat ? '已包含你的定位。' : '（还没定位，将搜索「超市」）'),
-          showCancel: false,
-          confirmText: '知道了'
-        });
-      }
-    });
-  },
-
   /* 直接用当前坐标打开微信内置地图（可导航） */
   onWechatMap() {
     const lat = this.data.lat;

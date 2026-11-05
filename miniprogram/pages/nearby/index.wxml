@@ -33,12 +33,6 @@
     <view class="btn ghost mt" bindtap="onTencentScheme">复制腾讯地图 App 链接</view>
   </view>
 
-  <view class="card">
-    <view class="h2">想用高德？</view>
-    <view class="h3">小程序不能直接唤起高德 App，只能复制链接后在浏览器打开。</view>
-    <view class="btn amap mt" bindtap="onAmap">📍 复制高德地图链接</view>
-  </view>
-
   <view class="btn ghost" bindtap="onCopy">复制「超市 生鲜」去地图 App 搜</view>
 
 </view>
