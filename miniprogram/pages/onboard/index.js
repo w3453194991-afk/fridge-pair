@@ -36,7 +36,13 @@ Page({
     this.setData({
       members: members,
       allergens: (D.ALLERGENS || []).map(a => ({ name: a, on: avoid.indexOf(a) >= 0 })),
-      condList: (D.CONDITIONS || []).map(c => ({ name: c, on: conds.indexOf(c) >= 0 })),
+      condList: (D.CONDITIONS || []).map(c => ({
+        key: c.key,
+        icon: c.emoji || '🩺',
+        name: c.key,
+        note: c.note || '',
+        on: conds.indexOf(c.key) >= 0
+      })),
       systems: (D.MEAL_SYSTEMS || []).map(s => ({
         key: s.key,
         label: s.emoji + ' ' + s.name,

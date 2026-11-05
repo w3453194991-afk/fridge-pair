@@ -51,3 +51,21 @@ page { background: #F4FBF7; }
 .bottom { display: flex; }
 .bottom .btn { flex: 1; margin-right: 16rpx; }
 .bottom .btn:last-child { margin-right: 0; flex: 1.6; }
+
+.condlist { margin-top: 28rpx; }
+.conditem {
+  display: flex; align-items: center;
+  background: #fff; border: 1rpx solid #E7EFEA; border-radius: 24rpx;
+  padding: 20rpx 22rpx; margin-bottom: 14rpx;
+}
+.conditem.on { border-color: #8FE0BE; background: #F3FBF7; }
+.condicon { font-size: 38rpx; margin-right: 18rpx; }
+.condbody { flex: 1; }
+.condname { font-size: 27rpx; font-weight: 800; }
+.condnote { font-size: 20rpx; color: #8B9A96; margin-top: 4rpx; }
+.condck {
+  width: 40rpx; height: 40rpx; border-radius: 12rpx; flex: none;
+  border: 2rpx solid #CBDBD4; text-align: center; line-height: 36rpx;
+  font-size: 24rpx; color: #fff;
+}
+.conditem.on .condck { background: #12A576; border-color: #12A576; }

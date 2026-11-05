@@ -54,14 +54,21 @@
   <block wx:if="{{step == 2}}">
     <view class="title">有需要注意的健康情况吗？</view>
     <view class="sub">会用来调整油盐和食材，仅供参考</view>
-    <view class="chips">
+    <view class="condlist">
       <view
         wx:for="{{condList}}"
-        wx:key="name"
-        class="{{item.on ? 'chip on' : 'chip'}}"
+        wx:key="key"
+        class="conditem {{item.on ? 'on' : ''}}"
         data-i="{{index}}"
         bindtap="toggleCond"
-      >{{item.name}}</view>
+      >
+        <view class="condicon">{{item.icon}}</view>
+        <view class="condbody">
+          <view class="condname">{{item.name}}</view>
+          <view class="condnote">{{item.note}}</view>
+        </view>
+        <view class="condck">{{item.on ? '✓' : ''}}</view>
+      </view>
     </view>
 
     <view class="title2">平时爱吃什么口味？</view>
