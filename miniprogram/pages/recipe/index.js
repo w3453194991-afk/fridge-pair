@@ -1,7 +1,16 @@
 const G = require('../../lib/shim.js');
+const privacy = require('../../lib/privacy.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 let P = {};
 try { P = require('../../lib/photos.js') || {}; } catch (e) { P = {}; }
+
+/* 只接受来自本地临时文件、云文件或包内路径的图片，挡掉历史坏数据 */
+function validPhoto(p) {
+  if (!p || typeof p !== 'string') return false;
+  if (p.indexOf('store/') === 0) return false;             // 坏数据（缺 scheme）
+  if (p.indexOf('../') === 0) return false;
+  return /^(wxfile:|http:\/\/tmp|https:\/\/|cloud:\/\/|\/|data:image)/.test(p);
+}
 
 Page({
   data: {
@@ -98,7 +107,8 @@ Page({
 
     const allRows = list.slice(0, 120).map(d => {
       const ok = E.ingredientState(d, foods).every(s => s.ok);
-      const mine = S.getDishPhoto(d.id);
+      const raw = S.getDishPhoto(d.id);
+      const mine = validPhoto(raw) ? raw : '';
       return {
         id: d.id,
         name: d.name,
@@ -178,25 +188,35 @@ Page({
   onCover(e) {
     const id = e.currentTarget.dataset.id;
     const self = this;
-    wx.chooseMedia({
-      count: 1,
-      mediaType: ['image'],
-      sourceType: ['camera', 'album'],
-      success: (res) => {
-        const tmp = res.tempFiles[0].tempFilePath;
-        try {
-          wx.getFileSystemManager().saveFile({
-            tempFilePath: tmp,
-            success: (r) => {
-              S.setDishPhoto(id, r.savedFilePath);
-              wx.showToast({ title: '已设为封面', icon: 'none' });
-              self.render();
-            },
-            fail: () => { S.setDishPhoto(id, tmp); self.render(); }
-          });
-        } catch (err) { S.setDishPhoto(id, tmp); self.render(); }
-      },
-      fail: () => {}
+    privacy.ensure(() => {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['camera', 'album'],
+        camera: 'back',
+        success: (res) => {
+          const tmp = res.tempFiles[0].tempFilePath;
+          const commit = (p) => {
+            if (!validPhoto(p)) {
+              wx.showToast({ title: '照片保存失败，换一张试试', icon: 'none' });
+              return;
+            }
+            S.setDishPhoto(id, p);
+            wx.showToast({ title: '已设为封面', icon: 'none' });
+            self.render();
+          };
+          try {
+            wx.getFileSystemManager().saveFile({
+              tempFilePath: tmp,
+              success: (r) => commit(r.savedFilePath),
+              fail: () => commit(tmp)
+            });
+          } catch (err) {
+            commit(tmp);
+          }
+        },
+        fail: () => {}
+      });
     });
   },
 

@@ -1,5 +1,10 @@
 const G = require('../../lib/shim.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
+function validPhoto(p) {
+  if (!p || typeof p !== 'string') return false;
+  if (p.indexOf('store/') === 0) return false;
+  return /^(wxfile:|http:\/\/tmp|https:\/\/|cloud:\/\/|\/|data:image)/.test(p);
+}
 let P = {};
 try { P = require('../../lib/photos.js') || {}; } catch (e) { P = {}; }
 
@@ -36,7 +41,7 @@ Page({
         id: d.id, name: d.name, emoji: d.emoji, minutes: d.minutes,
         level: d.level, cuisine: (d.cuisine || []).join(' / '),
         tags: (d.tags || []).join(' · '), seasonings: d.seasonings || [],
-        photo: P[d.id] ? ('/img/' + d.id + '.jpg') : ''
+        photo: (P[d.id] && !validPhoto(S.getDishPhoto(d.id))) ? ('/img/' + d.id + '.jpg') : (validPhoto(S.getDishPhoto(d.id)) ? S.getDishPhoto(d.id) : '')
       },
       steps: (d.steps || []).map((s, i) => ({ no: i + 1, heat: s.heat, text: s.text })),
       prep: d.prep || [],
