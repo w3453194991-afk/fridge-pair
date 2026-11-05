@@ -1,6 +1,7 @@
 /* 由 tools/build-mp.mjs 自动生成，请勿直接修改 */
-const window = require('./shim.js');
-const localStorage = window.localStorage;
+const __shim = require('./shim.js') || {};
+const window = __shim.localStorage ? __shim : (function () { return {}; })();
+const localStorage = __shim.localStorage || { getItem: function () { return null; }, setItem: function () {}, removeItem: function () {} };
 /* ============================================================
    冰箱对对碰 · 状态与持久化
    ============================================================ */
