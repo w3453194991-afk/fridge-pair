@@ -43,9 +43,57 @@
   </view>
 
   <view class="btns">
-    <view class="btn primary" bindtap="onCook" hover-class="btn-hover">开始做菜 · 更新库存</view>
+    <view class="btn primary" bindtap="onCook" hover-class="btn-hover">开始做菜 · 拍照记录</view>
     <view class="btn ghost mt" bindtap="onVideo" hover-class="btn-hover">▶ 看视频教程</view>
   </view>
 
   <view class="bottomspace"></view>
+
+  <!-- 扫描中 -->
+  <view wx:if="{{cookStep == 'scan'}}" class="cookmask">
+    <image class="scanimg" src="{{photo}}" mode="aspectFill" />
+    <view class="scanline"></view>
+    <view class="scantip">🤖 正在识别剩余食材…</view>
+  </view>
+
+  <!-- 识别结果 -->
+  <view wx:if="{{cookStep == 'result'}}" class="cookmask">
+    <view class="cookpanel">
+      <image class="cookphoto" src="{{photo}}" mode="aspectFill" />
+      <view class="cooktitle">{{dish.name}} · 做完了</view>
+      <view class="cooksub">按照照片估算的剩余量，可手动微调</view>
+
+      <scroll-view scroll-y class="cooklist">
+        <view wx:for="{{items}}" wx:key="name" class="cookitem">
+          <view class="ci-top">
+            <text class="ci-n">{{item.emoji}} {{item.name}}</text>
+            <text class="ci-left">剩 {{item.leftTxt}}</text>
+          </view>
+          <slider
+            value="{{item.ratio}}"
+            min="0"
+            max="100"
+            step="5"
+            activeColor="#12A576"
+            backgroundColor="#EAF3EE"
+            block-size="20"
+            data-i="{{item.idx}}"
+            bindchanging="onRatio"
+            bindchange="onRatio"
+          />
+          <view class="ci-scale">
+            <text>用光</text>
+            <text>原 {{item.haveTxt}}</text>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="cookbtns">
+        <view class="btn ghost" bindtap="onRetake">重拍</view>
+        <view class="btn primary" bindtap="onConfirmCook">确认并更新库存</view>
+      </view>
+      <view class="cookcancel" bindtap="onCancelCook">先不更新</view>
+    </view>
+  </view>
+
 </view>

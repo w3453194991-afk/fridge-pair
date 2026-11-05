@@ -91,3 +91,44 @@
   background: #EAFBF2; border-radius: 22rpx; padding: 12rpx 28rpx;
 }
 .rd-hint { font-size: 20rpx; color: #9AA6A1; margin-top: 16rpx; }
+
+/* ---------- 做菜三步：拍照 / 识别 / 结果 ---------- */
+.cookmask {
+  position: fixed; left: 0; right: 0; top: 0; bottom: 0; z-index: 210;
+  background: rgba(6, 24, 18, .92);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.scanimg { width: 520rpx; height: 520rpx; border-radius: 28rpx; opacity: .9; }
+.scanline {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  width: 520rpx; height: 6rpx; border-radius: 4rpx;
+  background: linear-gradient(90deg, transparent, #7DEBFF, transparent);
+  box-shadow: 0 0 24rpx #7DEBFF;
+  animation: scanmove 1.4s ease-in-out infinite;
+}
+@keyframes scanmove {
+  0% { top: 44%; opacity: .2; }
+  50% { top: 72%; opacity: 1; }
+  100% { top: 44%; opacity: .2; }
+}
+.scantip { position: absolute; bottom: 28%; color: #9BF3FF; font-size: 26rpx; font-weight: 700; }
+
+.cookpanel {
+  width: 640rpx; max-height: 88vh; background: #fff; border-radius: 34rpx;
+  padding: 26rpx; display: flex; flex-direction: column;
+}
+.cookphoto { width: 100%; height: 260rpx; border-radius: 22rpx; }
+.cooktitle { font-size: 32rpx; font-weight: 800; margin-top: 18rpx; }
+.cooksub { font-size: 21rpx; color: #8B9A96; margin-top: 6rpx; }
+.cooklist { flex: 1; margin-top: 16rpx; max-height: 46vh; }
+.cookitem { padding: 16rpx 0; border-top: 1rpx solid #F2F7F4; }
+.cookitem:first-child { border-top: 0; }
+.ci-top { display: flex; align-items: center; justify-content: space-between; }
+.ci-n { font-size: 26rpx; font-weight: 700; }
+.ci-left { font-size: 24rpx; font-weight: 800; color: #12A576; }
+.ci-scale { display: flex; justify-content: space-between; font-size: 19rpx; color: #9AA6A1; margin-top: -6rpx; }
+
+.cookbtns { display: flex; margin-top: 20rpx; }
+.cookbtns .btn { flex: 1; margin-right: 16rpx; }
+.cookbtns .btn:last-child { margin-right: 0; }
+.cookcancel { text-align: center; font-size: 22rpx; color: #9AA6A1; margin-top: 18rpx; }
