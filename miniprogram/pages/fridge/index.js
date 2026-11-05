@@ -8,19 +8,27 @@ Page({
     counts: { g: 0, y: 0, p: 0, b: 0 },
     foods: [],
     cats: [],
-    urgent: [],
+    urgentText: '',
+    hasUrgent: false,
     name: '我',
     members: 0,
     total: 0,
-    err: ''
+    err: '',
+    dbgCore: ''
+  },
+
+  onLoad() {
+    const ok = [!!D, !!E, !!S].join('/');
+    console.log('[mp] 核心加载 data/engine/store =', ok, '| 食材', D ? D.FOOD_DB.length : 0);
+    this.setData({ dbgCore: ok });
   },
 
   onShow() {
     try {
-      if (!D || !E || !S) throw new Error('核心未加载：data/engine/store 有一个为空');
+      if (!D || !E || !S) throw new Error('核心未加载');
       this.refresh();
     } catch (e) {
-      this.setData({ err: String(e && e.message || e) });
+      this.setData({ err: String((e && e.message) || e) });
     }
   },
 
@@ -39,32 +47,51 @@ Page({
       list = list.filter(f => f.cat === filter);
     }
 
-    list = list.map(f => {
+    const foods = list.map(f => {
       const t = E.tier(f);
       return {
         id: f.id,
         name: f.name,
         emoji: f.emoji,
         qty: E.fmtQty(f.qty) + ' ' + f.unit,
-        tier: t,
-        tierWord: WORDS[t],
+        cls: 'food ' + t,
+        pillCls: 'pill ' + t,
+        dayCls: t,
+        tierWord: WORDS[t] || '',
         day: E.dayText(f)
       };
     });
 
-    // 分类 chips
     const catSet = [];
     st.foods.forEach(f => { if (f.cat && catSet.indexOf(f.cat) < 0) catSet.push(f.cat); });
-    const cats = [{ key: 'all', label: '全部', n: st.foods.length }]
-      .concat([{ key: 'p', label: '临期', n: c.p }, { key: 'b', label: '过期', n: c.b }])
-      .concat(catSet.map(k => ({ key: k, label: k, n: st.foods.filter(f => f.cat === k).length })));
+
+    const cats = [
+      { key: 'all', label: '全部 ' + st.foods.length, cls: 'chip' },
+      { key: 'p', label: '临期 ' + c.p, cls: 'chip' },
+      { key: 'b', label: '过期 ' + c.b, cls: 'chip' }
+    ].concat(catSet.map(k => ({
+      key: k,
+      label: k + ' ' + st.foods.filter(f => f.cat === k).length,
+      cls: 'chip'
+    })));
+
+    cats.forEach(x => {
+      if (x.key === filter) x.cls = 'chip on';
+    });
+
+    const urgent = E.urgentList(st.foods).slice(0, 3);
+    let urgentText = '';
+    if (urgent.length) {
+      urgentText = '⚡ ' + urgent.length + ' 种临期：' + urgent.map(f => f.name).join('、') + '，优先吃掉';
+    }
 
     this.setData({
       counts: c,
-      foods: list,
+      foods: foods,
       cats: cats,
       total: st.foods.length,
-      urgent: E.urgentList(st.foods).slice(0, 3).map(f => f.name),
+      hasUrgent: urgent.length > 0,
+      urgentText: urgentText,
       name: st.family.name || '我',
       members: (st.family.members || []).length
     });
@@ -76,18 +103,13 @@ Page({
 
   onFood(e) {
     const id = e.currentTarget.dataset.id;
-    const f = S.get(id);
-    if (!f) return;
+    S.get(id);
     wx.showActionSheet({
-      itemList: ['吃掉 1 份', '丢掉', '取消'],
+      itemList: ['吃掉 1 份', '丢掉'],
       success: (res) => {
-        if (res.tapIndex === 0) {
-          S.consume(id, 1);
-          wx.showToast({ title: '已吃掉一份', icon: 'none' });
-        } else if (res.tapIndex === 1) {
-          S.trash(id);
-          wx.showToast({ title: '已丢弃', icon: 'none' });
-        } else return;
+        if (res.tapIndex === 0) S.consume(id, 1);
+        else S.trash(id);
+        wx.showToast({ title: res.tapIndex === 0 ? '已吃掉一份' : '已丢弃', icon: 'none' });
         this.refresh();
       }
     });
@@ -103,12 +125,11 @@ Page({
       mediaType: ['image'],
       sourceType: ['camera', 'album'],
       success: () => {
-        // 演示版：用预设场景模拟识别结果
         const scenes = D.PHOTO_SCENES || [];
         const scene = scenes[Math.floor(Math.random() * scenes.length)];
         if (!scene) return;
         scene.items.forEach(it => S.add(it.name, it.qty, it.shelf));
-        wx.showToast({ title: '识别到 ' + scene.items.length + ' 件，已入库', icon: 'none' });
+        wx.showToast({ title: '识别到 ' + scene.items.length + ' 件', icon: 'none' });
         this.refresh();
       },
       fail: () => {}

@@ -70,3 +70,9 @@
 .errbox { background: #FFF6F6; border-color: #F6D6D6; }
 .errt { font-size: 30rpx; font-weight: 800; color: #B91C1C; margin-bottom: 12rpx; }
 .errd { font-size: 24rpx; color: #8A4B4B; line-height: 1.7; word-break: break-all; }
+
+.dbg {
+  font-size: 22rpx; color: #0E8F63; background: #E6FAF1;
+  border: 1rpx solid #CBEFE0; border-radius: 16rpx;
+  padding: 12rpx 18rpx; margin-bottom: 18rpx;
+}

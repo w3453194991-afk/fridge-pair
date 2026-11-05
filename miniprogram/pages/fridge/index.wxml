@@ -1,19 +1,19 @@
 <view class="wrap">
 
+  <view class="dbg">✅ 小程序已启动 · 数据：{{total}} 件 · {{dbgCore}}</view>
+
   <view wx:if="{{err}}" class="card errbox">
     <view class="errt">⚠️ 页面初始化失败</view>
     <view class="errd">{{err}}</view>
-    <view class="errd">请把这段文字发给开发者</view>
   </view>
 
-  <!-- 顶部总览 -->
   <view class="card hero">
     <view class="row between">
       <view>
-        <view class="eyebrow">{{name}}的冰箱</view>
+        <view class="eyebrow">我的冰箱</view>
         <view class="big">{{total}}<text class="unit">种食材在库</text></view>
       </view>
-      <view class="fam">👨‍👩‍👧 {{members}} 人</view>
+      <view class="fam">{{members}} 人</view>
     </view>
 
     <view class="stats">
@@ -39,36 +39,29 @@
       </view>
     </view>
 
-    <view wx:if="{{urgent.length}}" class="alert" bindtap="onUrgent">
-      <text>⚡ {{urgent.length}} 种临期：{{urgent[0]}}、{{urgent[1]}} 等，优先吃掉</text>
+    <view wx:if="{{hasUrgent}}" class="alert" bindtap="onUrgent">
+      <text>{{urgentText}}</text>
       <text class="go">去看看 ›</text>
     </view>
   </view>
 
-  <!-- 操作 -->
-  <view class="row between ops">
-    <view class="btn primary op" bindtap="onShoot">📷 拍照入库</view>
+  <view class="btn primary op" bindtap="onShoot">📷 拍照入库</view>
+
+  <view class="chips">
+    <view
+      wx:for="{{cats}}"
+      wx:key="key"
+      class="{{item.cls}}"
+      data-key="{{item.key}}"
+      bindtap="onFilter"
+    >{{item.label}}</view>
   </view>
 
-  <!-- 筛选 -->
-  <scroll-view scroll-x class="filters">
-    <view class="chips">
-      <view
-        wx:for="{{cats}}"
-        wx:key="key"
-        class="chip {{filter === item.key ? 'on' : ''}}"
-        data-key="{{item.key}}"
-        bindtap="onFilter"
-      >{{item.label}} {{item.n}}</view>
-    </view>
-  </scroll-view>
-
-  <!-- 列表 -->
   <view wx:if="{{foods.length}}">
     <view
       wx:for="{{foods}}"
       wx:key="id"
-      class="food {{item.tier}}"
+      class="{{item.cls}}"
       data-id="{{item.id}}"
       bindtap="onFood"
     >
@@ -78,11 +71,12 @@
         <view class="fqty">{{item.qty}}</view>
       </view>
       <view class="fright">
-        <view class="pill {{item.tier}}">{{item.tierWord}}</view>
-        <view class="fday {{item.tier}}">{{item.day}}</view>
+        <view class="{{item.pillCls}}">{{item.tierWord}}</view>
+        <view class="fday {{item.dayCls}}">{{item.day}}</view>
       </view>
     </view>
   </view>
+
   <view wx:else class="empty">
     <view class="e">🧺</view>
     <view>这里空空的</view>
