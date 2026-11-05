@@ -22,39 +22,18 @@ Page({
     this.analyze();
   },
 
-  /* 优先走中转服务，失败回退本地演示 */
+  /* 优先走云函数 → HTTP 中转 → 本地演示 */
   analyze() {
     const self = this;
     this.setData({ scanning: true, sourceText: '' });
 
-    if (!CONFIG.USE_REMOTE || !CONFIG.API_BASE || !this.data.photo) {
-      setTimeout(() => self.localBuild('演示识别（未连服务）'), 1100);
+    if (!this.data.photo) {
+      setTimeout(() => self.localBuild('演示识别'), 900);
       return;
     }
 
     let fs = null;
     try { fs = wx.getFileSystemManager(); } catch (e) { fs = null; }
-
-    const send = (base64) => {
-      wx.request({
-        url: CONFIG.API_BASE + '/recognize',
-        method: 'POST',
-        timeout: CONFIG.TIMEOUT || 15000,
-        header: { 'content-type': 'application/json' },
-        data: { image: base64 },
-        success: (res) => {
-          const d = (res && res.data) || {};
-          const list = Array.isArray(d.items) ? d.items : [];
-          if (!list.length) { self.localBuild('识别无结果，已回退'); return; }
-          self.applyResult(list, d.source === 'baidu' ? '百度 AI 识别' : '服务端识别');
-        },
-        fail: (err) => {
-          console.warn('[scan] 请求失败', err && err.errMsg);
-          self.localBuild('服务未连接，已回退演示');
-        }
-      });
-    };
-
     if (!fs) {
       this.localBuild('环境不支持读图，已回退');
       return;
@@ -63,8 +42,58 @@ Page({
     fs.readFile({
       filePath: this.data.photo,
       encoding: 'base64',
-      success: (r) => send(r.data),
-      fail: () => this.localBuild('读图失败，已回退')
+      success: (r) => self.recognize(r.data),
+      fail: () => self.localBuild('读图失败，已回退')
+    });
+  },
+
+  recognize(base64) {
+    const self = this;
+
+    /* ① 云函数 */
+    if (CONFIG.USE_CLOUD && CONFIG.CLOUD_ENV && wx.cloud) {
+      wx.cloud.callFunction({
+        name: 'recognize',
+        data: { image: base64 },
+        success: (res) => {
+          const d = (res && res.result) || {};
+          const list = Array.isArray(d.items) ? d.items : [];
+          if (!list.length) { self.httpOrLocal(base64, '云函数无结果，已回退'); return; }
+          self.applyResult(list, d.source === 'baidu' ? '百度 AI 识别（云函数）' : '云函数演示识别');
+        },
+        fail: (err) => {
+          console.warn('[scan] 云函数失败', err && err.errMsg);
+          self.httpOrLocal(base64, null);
+        }
+      });
+      return;
+    }
+
+    this.httpOrLocal(base64, null);
+  },
+
+  httpOrLocal(base64, fallbackLabel) {
+    const self = this;
+    if (!CONFIG.USE_REMOTE || !CONFIG.API_BASE) {
+      this.localBuild(fallbackLabel || '演示识别（未连服务）');
+      return;
+    }
+    wx.request({
+      url: CONFIG.API_BASE.replace(/\/$/, '') + '/recognize',
+      method: 'POST',
+      timeout: CONFIG.TIMEOUT || 15000,
+      header: { 'content-type': 'application/json' },
+      data: { image: base64 },
+      success: (res) => {
+        const d = (res && res.data) || {};
+        const list = Array.isArray(d.items) ? d.items : [];
+        if (!list.length) { self.localBuild(fallbackLabel || '识别无结果，已回退'); return; }
+        self.applyResult(list, d.source === 'baidu' ? '百度 AI 识别' : '服务端识别');
+      },
+      fail: (err) => {
+        console.warn('[scan] 请求失败', err && err.errMsg);
+        self.localBuild('服务未连接，已回退演示');
+      }
     });
   },
 

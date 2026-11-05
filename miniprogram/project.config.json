@@ -34,5 +34,6 @@
     "ignore": [],
     "include": []
   },
-  "editorSetting": {}
+  "editorSetting": {},
+  "cloudfunctionRoot": "cloudfunctions/"
 }

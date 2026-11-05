@@ -1,0 +1,9 @@
+{
+  "name": "recognize",
+  "version": "1.0.0",
+  "description": "食材识别云函数（转发百度 AI）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

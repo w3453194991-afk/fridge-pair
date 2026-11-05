@@ -18,6 +18,9 @@ try {
 
 const S = G.DD_STORE;
 
+let CFG = {};
+try { CFG = require('./config.js') || {}; } catch (e) { CFG = {}; }
+
 App({
   onLaunch() {
     try {
@@ -26,6 +29,17 @@ App({
       }
       // 只加载，不自动登录 —— 登录页负责创建家庭档案
       S.load();
+
+      // 云开发（可选）：配了环境 ID 才初始化
+      if (CFG && CFG.CLOUD_ENV && wx.cloud) {
+        try {
+          wx.cloud.init({ env: CFG.CLOUD_ENV, traceUser: true });
+          console.log('[cloud] 已初始化环境', CFG.CLOUD_ENV);
+        } catch (e) {
+          console.warn('[cloud] 初始化失败', e && e.message);
+        }
+      }
+
       G.__ready = true;
     } catch (e) {
       wx.showModal({
