@@ -454,7 +454,7 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
   function videoPage(bvid) { return 'https://www.bilibili.com/video/' + bvid; }
   function videoSearch(platformKey, keyword) {
     const p = D.PLATFORM_MAP[platformKey];
-    return p ? p.search(keyword + ' 做法') : '#';
+    return p ? p.search(keyword) : '#';
   }
 
   /* ============================================================

@@ -9,7 +9,6 @@
     "pages/chat/index",
     "pages/nearby/index",
     "pages/video/index",
-    "pages/player/index",
     "pages/party/index"
   ],
   "window": {

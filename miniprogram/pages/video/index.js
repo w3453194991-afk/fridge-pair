@@ -1,75 +1,66 @@
 const G = require('../../lib/shim.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
-let P = {};
-try { P = require('../../lib/photos.js') || {}; } catch (e) { P = {}; }
+
+const HOT = ['番茄炒蛋', '红烧肉', '可乐鸡翅', '糖醋排骨', '宫保鸡丁', '麻婆豆腐',
+  '水煮鱼', '鱼香肉丝', '清蒸鲈鱼', '蒜蓉西兰花', '酸辣土豆丝', '地三鲜'];
 
 Page({
   data: {
-    list: [],
     q: '',
-    platforms: []
+    platforms: [],
+    hot: []
   },
 
   onLoad(opt) {
-    const list = [];
-    Object.keys(D.VIDEOS || {}).forEach(id => {
-      const d = D.DISHES.filter(x => x.id === id)[0];
-      if (!d) return;
-      (D.VIDEOS[id] || []).forEach((v, i) => {
-        list.push({
-          key: id + '_' + i,
-          dishId: id,
-          name: d.name,
-          emoji: d.emoji,
-          minutes: d.minutes,
-          title: v.title || (d.name + ' 做法'),
-          bvid: v.bvid,
-          photo: P[id] ? ('/img/' + id + '.jpg') : ''
-        });
-      });
-    });
-
-    const platforms = (D.PLATFORMS || []).map(p => ({
-      key: p.key,
-      label: p.icon + ' ' + p.name,
-      cls: 'chip'
-    }));
-
+    const q = opt && opt.q ? decodeURIComponent(opt.q) : '';
     this.setData({
-      list: list,
-      platforms: platforms,
-      q: opt && opt.q ? decodeURIComponent(opt.q) : ''
+      q: q || '番茄炒蛋',
+      platforms: (D.PLATFORMS || []).map(p => ({
+        key: p.key,
+        label: p.icon + ' ' + p.name,
+        color: p.color || '#12A576'
+      })),
+      hot: HOT
     });
   },
 
-  onPlay(e) {
-    const bvid = e.currentTarget.dataset.bvid;
-    wx.navigateTo({ url: '/pages/player/index?bvid=' + bvid });
-  },
-
-  onCopy(e) {
-    const bvid = e.currentTarget.dataset.bvid;
-    let url = '';
-    try { url = E.videoPage(bvid); } catch (err) { url = 'https://www.bilibili.com/video/' + bvid; }
-    wx.setClipboardData({
-      data: url,
-      success: () => wx.showToast({ title: '链接已复制', icon: 'none' })
-    });
-  },
-
-  onQ(e) {
+  onInput(e) {
     this.setData({ q: e.detail.value });
+  },
+
+  onHot(e) {
+    this.setData({ q: e.currentTarget.dataset.n });
   },
 
   onPlatform(e) {
     const key = e.currentTarget.dataset.key;
-    const q = (this.data.q || '').trim() || '番茄炒蛋';
+    const q = (this.data.q || '').trim();
+    if (!q) { wx.showToast({ title: '先输入菜名', icon: 'none' }); return; }
     let url = '';
     try { url = E.videoSearch(key, q); } catch (err) { url = ''; }
-    if (!url) return;
+    if (!url || url === '#') { wx.showToast({ title: '链接生成失败', icon: 'none' }); return; }
+
     wx.setClipboardData({
       data: url,
-      success: () => wx.showToast({ title: '搜索链接已复制', icon: 'none' })
+      success: () => {
+        wx.showModal({
+          title: '搜索链接已复制',
+          content: '搜索词：' + q + '\n\n打开浏览器或对应 App，粘贴到地址栏即可看到教程视频。',
+          showCancel: false,
+          confirmText: '知道了'
+        });
+      }
     });
+  },
+
+  onOpenAll() {
+    const q = (this.data.q || '').trim();
+    if (!q) return;
+    const lines = (this.data.platforms || []).map(p => {
+      let u = '';
+      try { u = E.videoSearch(p.key, q); } catch (e) {}
+      return p.label + '：' + u;
+    }).join('\n');
+    wx.setClipboardData({ data: lines, success: () => wx.showToast({ title: '三个平台链接都复制了', icon: 'none' }) });
   }
 });

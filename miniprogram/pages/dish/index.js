@@ -9,15 +9,7 @@ Page({
     states: [],
     prep: [],
     steps: [],
-    can: false,
-    /* 朗读模式 */
-    readMode: false,
-    readIdx: 0,
-    readText: '',
-    readNo: '',
-    readTotal: 0,
-    playing: false,
-    speed: 4
+    can: false
   },
 
   onLoad(q) {
@@ -45,106 +37,13 @@ Page({
         seasonings: d.seasonings || [],
         photo: P[d.id] ? ('/img/' + d.id + '.jpg') : ''
       },
-      steps: (d.steps || []).map((s, i) => ({
-        no: i + 1,
-        heat: s.heat,
-        text: s.text
-      })),
+      steps: (d.steps || []).map((s, i) => ({ no: i + 1, heat: s.heat, text: s.text })),
       prep: d.prep || [],
       states: states,
       can: states.every(s => s.ok)
     });
   },
 
-  /* ---------- 朗读模式（不依赖插件） ---------- */
-  buildLines() {
-    const lines = [];
-    (this.data.prep || []).forEach((p, i) => {
-      lines.push({ tag: '备料 ' + (i + 1), text: p });
-    });
-    (this.data.steps || []).forEach(s => {
-      lines.push({ tag: '第 ' + s.no + ' 步' + (s.heat ? ' · ' + s.heat : ''), text: s.text });
-    });
-    return lines;
-  },
-
-  openRead(startAt) {
-    const lines = this.buildLines();
-    if (!lines.length) return;
-    this.lines = lines;
-    this.gotoLine(startAt || 0, false);
-    this.setData({ readMode: true });
-  },
-
-  gotoLine(i, play) {
-    const lines = this.lines || [];
-    if (!lines.length) return;
-    const idx = Math.max(0, Math.min(lines.length - 1, i));
-    const l = lines[idx];
-    this.setData({
-      readIdx: idx,
-      readNo: l.tag,
-      readText: l.text,
-      readTotal: lines.length,
-      playing: !!play
-    });
-    try { wx.vibrateShort({ type: 'light' }); } catch (e) {}
-    this.tick();
-  },
-
-  tick() {
-    if (this.timer) { clearTimeout(this.timer); this.timer = null; }
-    if (!this.data.playing) return;
-    const ms = (this.data.speed || 4) * 1000;
-    this.timer = setTimeout(() => {
-      const next = this.data.readIdx + 1;
-      if (next >= (this.lines || []).length) {
-        this.setData({ playing: false });
-        try { wx.vibrateShort({ type: 'heavy' }); } catch (e) {}
-        return;
-      }
-      this.gotoLine(next, true);
-    }, ms);
-  },
-
-  onRead() {
-    this.openRead(0);
-  },
-
-  onReadStep(e) {
-    const i = parseInt(e.currentTarget.dataset.i, 10);
-    this.openRead(i);
-  },
-
-  onReadPrev() {
-    this.gotoLine(this.data.readIdx - 1, this.data.playing);
-  },
-
-  onReadNext() {
-    this.gotoLine(this.data.readIdx + 1, this.data.playing);
-  },
-
-  onReadPlay() {
-    if (this.data.playing) {
-      this.setData({ playing: false });
-      if (this.timer) clearTimeout(this.timer);
-      return;
-    }
-    this.setData({ playing: true }, () => this.tick());
-  },
-
-  onSpeed() {
-    const order = [3, 5, 8];
-    const cur = order.indexOf(this.data.speed);
-    this.setData({ speed: order[(cur + 1) % order.length] }, () => this.tick());
-  },
-
-  onReadClose() {
-    if (this.timer) clearTimeout(this.timer);
-    this.setData({ readMode: false, playing: false });
-  },
-
-  /* ---------- 做菜 / 视频 ---------- */
   onCook() {
     try {
       const d = D.DISHES.filter(x => x.id === this.data.dish.id)[0];
@@ -171,17 +70,6 @@ Page({
   },
 
   onVideo() {
-    try {
-      const d = this.data.dish;
-      if (!d) return;
-      const vids = (D.VIDEOS || {})[d.id];
-      if (vids && vids.length) {
-        wx.navigateTo({ url: '/pages/player/index?bvid=' + vids[0].bvid });
-      } else {
-        wx.navigateTo({ url: '/pages/video/index?q=' + encodeURIComponent(d.name) });
-      }
-    } catch (err) {
-      wx.showToast({ title: '打开失败', icon: 'none' });
-    }
+    wx.navigateTo({ url: '/pages/video/index?q=' + encodeURIComponent(this.data.dish.name) });
   }
 });
