@@ -1,24 +1,85 @@
-.hero { background: linear-gradient(170deg, #FFFFFF, #F2FCF7); border-radius: 36rpx; }
-.t1 { font-size: 34rpx; font-weight: 800; }
-.t2 { font-size: 24rpx; color: #7C8B87; margin-top: 8rpx; }
-.sys {
-  font-size: 22rpx; font-weight: 800; color: #0E8F63;
-  background: #E6FAF1; border-radius: 12rpx; padding: 8rpx 16rpx;
-}
-.stripe { font-size: 22rpx; color: #7C8B87; margin-top: 16rpx; }
-.gen { margin-top: 22rpx; }
+.pagehead { padding: 6rpx 4rpx 20rpx; }
+.ph-t { font-size: 44rpx; font-weight: 800; }
+.ph-s { font-size: 23rpx; color: #8B9A96; margin-top: 8rpx; }
 
-.nut { padding: 24rpx; }
-.ntt { font-size: 30rpx; font-weight: 800; }
-.nts { font-size: 21rpx; color: #9AA6A1; font-weight: 400; margin-left: 12rpx; }
-.nb { margin-top: 20rpx; }
-.nbt { margin-bottom: 8rpx; }
-.nbl { font-size: 24rpx; color: #5E7D71; font-weight: 700; }
-.ntag { font-size: 18rpx; font-weight: 800; border-radius: 8rpx; padding: 3rpx 10rpx; margin-right: 10rpx; }
-.nbv { font-size: 24rpx; font-weight: 800; color: #12232B; }
-.nbu { font-size: 20rpx; color: #8B9A96; font-weight: 600; }
-.nbar { height: 12rpx; background: #F1ECE4; border-radius: 8rpx; overflow: hidden; }
-.nfill { height: 100%; border-radius: 8rpx; }
+.ct { font-size: 30rpx; font-weight: 800; }
+.editbtn {
+  font-size: 21rpx; font-weight: 700; color: #5E7D71;
+  background: #F5FAF7; border: 1rpx solid #E7EFEA;
+  border-radius: 20rpx; padding: 8rpx 20rpx;
+}
+.mchips { display: flex; flex-wrap: wrap; margin-top: 16rpx; }
+.mchip {
+  font-size: 21rpx; color: #33473F; background: #F5FAF7;
+  border: 1rpx solid #EAF3EE; border-radius: 18rpx;
+  padding: 8rpx 18rpx; margin: 0 12rpx 12rpx 0;
+}
+.warnline { font-size: 21rpx; color: #B45309; margin-top: 4rpx; }
+.healthbtn {
+  margin-top: 18rpx; text-align: center; font-size: 24rpx; font-weight: 800; color: #0E8F63;
+  background: #F3FBF7; border: 1rpx solid #DFF0E7; border-radius: 22rpx; padding: 18rpx 0;
+}
+
+.sysdesc { padding: 22rpx 24rpx; }
+.sd-t { font-size: 26rpx; font-weight: 800; }
+.sd-d { font-size: 22rpx; color: #7C8B87; margin-top: 8rpx; line-height: 1.6; }
+.sd-s { font-size: 21rpx; color: #8B9A96; margin-top: 8rpx; line-height: 1.6; }
+
+.aicard {
+  margin-top: 24rpx; border-radius: 34rpx; padding: 28rpx;
+  background: linear-gradient(120deg, #8E7BFF 0%, #6E8BFF 55%, #5ED3C8 100%);
+  box-shadow: 0 18rpx 36rpx -20rpx rgba(105, 110, 245, .8);
+  color: #fff;
+}
+.aitag {
+  font-size: 21rpx; font-weight: 800;
+  background: rgba(255, 255, 255, .22); border-radius: 20rpx; padding: 6rpx 18rpx;
+}
+.aidays { font-size: 22rpx; opacity: .9; }
+.aititle { font-size: 40rpx; font-weight: 900; margin-top: 20rpx; letter-spacing: 1rpx; }
+.aisub { font-size: 22rpx; opacity: .92; margin-top: 10rpx; }
+.aibtn {
+  margin-top: 24rpx; width: fit-content;
+  font-size: 25rpx; font-weight: 800; color: #4B5BD6;
+  background: #fff; border-radius: 30rpx; padding: 14rpx 32rpx;
+}
+
+.pitems { padding: 6rpx 24rpx; }
+.pitem {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22rpx 0; border-top: 1rpx solid #F2F7F4;
+}
+.pitem:first-child { border-top: 0; }
+.pl { font-size: 27rpx; font-weight: 700; }
+.pr { font-size: 22rpx; color: #7C8B87; }
+
+.pt { font-size: 28rpx; font-weight: 800; }
+.pd { font-size: 22rpx; color: #7C8B87; line-height: 1.7; margin: 12rpx 0 20rpx; }
+
+.nearby { margin-left: auto; font-size: 21rpx; color: #12A576; font-weight: 700; }
+
+.cartitem {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20rpx 0; border-top: 1rpx solid #F2F7F4;
+}
+.cartitem:first-child { border-top: 0; }
+.ci-l { display: flex; align-items: center; }
+.ci-e { font-size: 32rpx; margin-right: 16rpx; }
+.ci-n { font-size: 28rpx; font-weight: 700; }
+.ci-r { display: flex; align-items: center; }
+.ci-q { font-size: 22rpx; color: #8B9A96; margin-right: 18rpx; }
+.bought {
+  font-size: 21rpx; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, #2FD79E, #12A576);
+  border-radius: 18rpx; padding: 10rpx 22rpx;
+}
+.carttotal { margin-top: 18rpx; padding-top: 18rpx; border-top: 1rpx dashed #E4EFE9; font-size: 23rpx; color: #5E7D71; }
+.ct-val { font-size: 30rpx; font-weight: 800; color: #12A576; }
+.linkbtn { font-size: 21rpx; color: #9AA6A1; margin-right: 18rpx; }
+.buyall {
+  font-size: 21rpx; font-weight: 800; color: #0E8F63;
+  background: #EAFBF2; border-radius: 18rpx; padding: 10rpx 22rpx;
+}
 
 .day { padding: 24rpx; }
 .dlabel { font-size: 30rpx; font-weight: 800; margin-bottom: 12rpx; }
@@ -33,27 +94,15 @@
   font-size: 18rpx; font-weight: 800; color: #B91C1C;
   background: #FEE2E2; border-radius: 8rpx; padding: 4rpx 10rpx;
 }
-.tt { font-size: 28rpx; font-weight: 800; }
-.n { font-size: 22rpx; color: #12A576; margin-left: 8rpx; }
-.copybtn {
-  font-size: 22rpx; font-weight: 800; color: #0E8F63;
-  background: #E6FAF1; border-radius: 14rpx; padding: 8rpx 20rpx;
-}
-.shop { display: flex; align-items: center; padding: 16rpx 0; border-top: 1rpx solid #F2F7F4; }
-.semo { font-size: 32rpx; margin-right: 16rpx; }
-.sname { flex: 1; font-size: 27rpx; font-weight: 600; }
-.stimes { font-size: 22rpx; color: #8B9A96; }
 
-.partycard {
-  display: flex; align-items: center; justify-content: space-between;
-  background: linear-gradient(120deg, #FFF6EE, #FFFFFF);
-  border: 1rpx solid #FBE3CF; border-radius: 28rpx;
-  padding: 24rpx 26rpx; margin: 6rpx 0 22rpx;
-}
-.pc-t { font-size: 28rpx; font-weight: 800; color: #B45309; }
-.pc-s { font-size: 21rpx; color: #9A7B5F; margin-top: 6rpx; }
-.pc-go { font-size: 38rpx; color: #D9B18F; }
-.sqty { font-size: 21rpx; color: #7C8B87; margin-right: 16rpx; }
-.sprice { font-size: 24rpx; color: #12A576; font-weight: 800; min-width: 110rpx; text-align: right; }
-.total { margin-top: 16rpx; padding-top: 16rpx; border-top: 1rpx dashed #E4EFE9; font-size: 24rpx; color: #5E7D71; }
-.tt-val { font-size: 30rpx; font-weight: 800; color: #12A576; }
+.nut { padding: 24rpx; }
+.ntt { font-size: 30rpx; font-weight: 800; }
+.nts { font-size: 21rpx; color: #9AA6A1; font-weight: 400; margin-left: 12rpx; }
+.nb { margin-top: 20rpx; }
+.nbt { margin-bottom: 8rpx; }
+.nbl { font-size: 24rpx; color: #5E7D71; font-weight: 700; }
+.ntag { font-size: 18rpx; font-weight: 800; border-radius: 8rpx; padding: 3rpx 10rpx; margin-right: 10rpx; }
+.nbv { font-size: 24rpx; font-weight: 800; color: #12232B; }
+.nbu { font-size: 20rpx; color: #8B9A96; font-weight: 600; }
+.nbar { height: 12rpx; background: #F1ECE4; border-radius: 8rpx; overflow: hidden; }
+.nfill { height: 100%; border-radius: 8rpx; }

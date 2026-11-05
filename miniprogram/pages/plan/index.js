@@ -1,18 +1,31 @@
 const G = require('../../lib/shim.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 
+const RULE = {
+  '老人': '补钙 · 少盐 · 炖软烂',
+  '幼儿': '少盐 · 切小块 · 易嚼',
+  '成人': '控油 · 多蔬菜 · 控糖'
+};
+const ICON = { '老人': '👵', '幼儿': '👶', '成人': '👨' };
+
 Page({
   data: {
+    famName: '',
+    memberChips: [],
+    avoidText: '',
+    condText: '',
     systems: [],
     sysName: '',
-    stripe: '',
+    sysDesc: '',
+    sysStripe: '',
+    advice: [],
+    hasMenu: false,
     days: [],
-    has: false,
     nutBars: [],
     todayLabel: '',
-    shopList: [],
-    shopCount: 0,
-    shopTotal: '0.0'
+    cart: [],
+    cartCount: 0,
+    cartTotal: '0.0'
   },
 
   onShow() {
@@ -22,8 +35,20 @@ Page({
 
   render() {
     const st = S.state;
-    const sysKey = st.family.system || 'cn';
+    const fam = st.family;
+    const sysKey = fam.system || 'cn';
     const sys = D.SYSTEM_MAP[sysKey] || D.MEAL_SYSTEMS[0];
+
+    const memberChips = (fam.members || []).map(m => ({
+      icon: m.role === '幼儿' ? '👶' : m.role === '老人' ? '👵' : '👨',
+      text: m.role + ' ' + m.age + ' 岁'
+    }));
+
+    const advice = (fam.members || []).map(m => ({
+      icon: ICON[m.role] || '👨',
+      label: m.role + ' ' + m.age + ' 岁',
+      rule: RULE[m.role] || RULE['成人']
+    }));
 
     const systems = D.MEAL_SYSTEMS.map(s => ({
       key: s.key,
@@ -31,6 +56,7 @@ Page({
       cls: s.key === sysKey ? 'chip on' : 'chip'
     }));
 
+    // 菜单
     const week = st.week || [];
     const days = week.map(d => {
       const meals = [];
@@ -46,6 +72,7 @@ Page({
       return { label: d.label, meals: meals };
     });
 
+    // 营养条
     let nutBars = [];
     let todayLabel = '';
     if (week.length) {
@@ -56,7 +83,7 @@ Page({
         const dishes = m.ids.map(id => D.DISHES.filter(x => x.id === id)[0]).filter(Boolean);
         try {
           const totals = E.dayNutrition(dishes);
-          const target = E.perMealTarget(st.family);
+          const target = E.perMealTarget(fam);
           nutBars = E.nutritionBars(totals, target).map(b => {
             const over = b.pct > 130;
             const good = b.pct >= 90 && b.pct <= 130;
@@ -75,9 +102,68 @@ Page({
       }
     }
 
-    // 采购清单：逐道菜算真实缺料（带数量与价格）
+    // 采购清单（购物车）
+    const cart = (st.cart || []).map((c, i) => {
+      const meta = E.foodMeta(c.name);
+      const cost = (c.qty || 0) * (meta.price || 0);
+      return {
+        idx: i,
+        name: c.name,
+        emoji: c.emoji || meta.emoji,
+        qty: E.fmtQty(c.qty) + ' ' + (c.unit || meta.unit),
+        cost: cost.toFixed(1)
+      };
+    });
+    const cartTotal = cart.reduce((s, x) => s + parseFloat(x.cost), 0).toFixed(1);
+
+    this.setData({
+      famName: fam.name || '我',
+      memberChips: memberChips,
+      avoidText: (fam.avoid || []).length ? fam.avoid.join(' · ') : '',
+      condText: (fam.conditions || []).length ? fam.conditions.join(' · ') : '',
+      systems: systems,
+      sysName: sys ? sys.name : '中式',
+      sysDesc: sys ? (sys.desc || '') : '',
+      sysStripe: sys ? ('早：' + (sys.slots['早'] || []).join(' + ') + '　午：' + (sys.slots['午'] || []).join(' + ') + '　晚：' + (sys.slots['晚'] || []).join(' + ')) : '',
+      advice: advice,
+      hasMenu: days.length > 0,
+      days: days,
+      nutBars: nutBars,
+      todayLabel: todayLabel,
+      cart: cart,
+      cartCount: cart.length,
+      cartTotal: cartTotal
+    });
+  },
+
+  onEditFam() {
+    wx.switchTab({ url: '/pages/me/index' });
+  },
+
+  onHealth() {
+    wx.showModal({
+      title: '健康档案',
+      content: '过敏原：' + (this.data.avoidText || '未设置') + '\n疾病史：' + (this.data.condText || '未设置') + '\n\n在「我的」里可以修改',
+      showCancel: false
+    });
+  },
+
+  onSystem(e) {
+    const key = e.currentTarget.dataset.key;
+    S.state.family.system = key;
+    S.state.week = null;
+    S.save();
+    this.render();
+    wx.showToast({ title: '已切换：' + (D.SYSTEM_MAP[key] ? D.SYSTEM_MAP[key].name : ''), icon: 'none' });
+  },
+
+  onGenerate() {
+    const st = S.state;
+    st.week = E.planWeek(st);
+
+    // 生成采购清单：逐道菜算缺料
     const miss = {};
-    week.forEach(d => {
+    st.week.forEach(d => {
       Object.keys(d.meals || {}).forEach(k => {
         const m = d.meals[k];
         (m.ids || []).forEach(id => {
@@ -86,74 +172,49 @@ Page({
           E.ingredientState(dish, st.foods).forEach(s => {
             if (s.ok) return;
             const need = (dish.ingredients.filter(i => i.name === s.name)[0] || {}).qty || 0;
-            if (!miss[s.name]) {
-              const meta = E.foodMeta(s.name);
-              miss[s.name] = { qty: 0, unit: meta.unit, price: meta.price || 0, emoji: meta.emoji, times: 0 };
-            }
-            miss[s.name].qty += need;
-            miss[s.name].times += 1;
+            miss[s.name] = (miss[s.name] || 0) + need;
           });
         });
       });
     });
-    let shopTotal = 0;
-    const shopList = Object.keys(miss).map(n => {
-      const it = miss[n];
-      const cost = it.qty * it.price;
-      shopTotal += cost;
-      return {
-        name: n,
-        emoji: it.emoji,
-        qty: E.fmtQty(it.qty) + ' ' + it.unit,
-        cost: cost.toFixed(1),
-        times: it.times
-      };
-    }).sort((a, b) => parseFloat(b.cost) - parseFloat(a.cost));
-
-    this.setData({
-      systems: systems,
-      sysName: sys ? sys.name : '中式',
-      stripe: sys ? ('早：' + (sys.slots['早'] || []).join(' + ')) : '',
-      days: days,
-      has: days.length > 0,
-      nutBars: nutBars,
-      todayLabel: todayLabel,
-      shopList: shopList,
-      shopCount: shopList.length,
-      shopTotal: shopTotal.toFixed(1)
+    st.cart = Object.keys(miss).map(n => {
+      const meta = E.foodMeta(n);
+      return { name: n, emoji: meta.emoji, unit: meta.unit, qty: Math.round(miss[n] * 10) / 10 };
     });
+    S.save();
+    this.render();
+    wx.showToast({ title: '已生成 7 天菜单', icon: 'none' });
   },
 
   onParty() {
     wx.navigateTo({ url: '/pages/party/index' });
   },
 
-  onSystem(e) {
-    const key = e.currentTarget.dataset.key;
-    S.state.family.system = key;
-    S.state.week = E.planWeek(S.state);
-    S.save();
-    this.render();
-    wx.showToast({ title: '已切换并重排', icon: 'none' });
+  onNearby() {
+    wx.navigateTo({ url: '/pages/nearby/index' });
   },
 
-  onGenerate() {
-    S.state.week = E.planWeek(S.state);
+  onBought(e) {
+    const i = parseInt(e.currentTarget.dataset.i, 10);
+    const st = S.state;
+    const c = st.cart[i];
+    if (!c) return;
+    S.add(c.name, Math.max(c.qty, 1), 7);
+    st.cart.splice(i, 1);
     S.save();
     this.render();
-    wx.showToast({ title: '已生成 7 天菜单', icon: 'none' });
+    wx.showToast({ title: '已入库', icon: 'none' });
   },
 
   onBuyAll() {
-    if (!this.data.shopList.length) {
-      wx.showToast({ title: '没有缺料', icon: 'none' });
-      return;
-    }
-    const text = this.data.shopList.map(i => i.name + ' ' + i.qty + ' ¥' + i.cost).join('\n')
-      + '\n合计 ¥' + this.data.shopTotal;
-    wx.setClipboardData({
-      data: text,
-      success: () => wx.showToast({ title: '采购清单已复制', icon: 'none' })
-    });
+    if (!S.state.cart.length) return;
+    S.buyCart();
+    this.render();
+    wx.showToast({ title: '全部已入库', icon: 'none' });
+  },
+
+  onClearCart() {
+    S.clearCart();
+    this.render();
   }
 });
