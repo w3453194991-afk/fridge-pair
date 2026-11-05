@@ -1,4 +1,6 @@
-/* 由 tools/build-mp.mjs 从 js/engine.js 自动复制，请勿在此直接修改 */
+/* 由 tools/build-mp.mjs 自动生成，请勿直接修改 */
+const window = require('./shim.js');
+const localStorage = window.localStorage;
 /* ============================================================
    冰箱对对碰 · 业务引擎
    四色分级 / 相生相克 / 可做菜谱 / 一周配餐 / 聚餐补货

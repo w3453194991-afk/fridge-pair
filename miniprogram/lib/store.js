@@ -1,4 +1,6 @@
-/* 由 tools/build-mp.mjs 从 js/store.js 自动复制，请勿在此直接修改 */
+/* 由 tools/build-mp.mjs 自动生成，请勿直接修改 */
+const window = require('./shim.js');
+const localStorage = window.localStorage;
 /* ============================================================
    冰箱对对碰 · 状态与持久化
    ============================================================ */

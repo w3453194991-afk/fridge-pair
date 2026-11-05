@@ -1,6 +1,5 @@
-const D = globalThis.DD_DATA;
-const E = globalThis.DD_ENGINE;
-const S = globalThis.DD_STORE;
+const G = require('../../lib/shim.js');
+const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 const WORDS = { g: '充足', y: '正常', p: '临期', b: '过期' };
 
 Page({
@@ -12,10 +11,18 @@ Page({
     urgent: [],
     name: '我',
     members: 0,
-    total: 0
+    total: 0,
+    err: ''
   },
 
-  onShow() { this.refresh(); },
+  onShow() {
+    try {
+      if (!D || !E || !S) throw new Error('核心未加载：data/engine/store 有一个为空');
+      this.refresh();
+    } catch (e) {
+      this.setData({ err: String(e && e.message || e) });
+    }
+  },
 
   refresh() {
     const st = S.state;

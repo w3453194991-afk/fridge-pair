@@ -1,6 +1,5 @@
-const D = globalThis.DD_DATA;
-const E = globalThis.DD_ENGINE;
-const S = globalThis.DD_STORE;
+const G = require('../../lib/shim.js');
+const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 
 Page({
   data: { fam: null, members: [], avoid: [], conditions: [], stats: {}, health: 0, total: 0 },

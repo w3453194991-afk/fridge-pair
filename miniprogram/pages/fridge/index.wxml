@@ -1,5 +1,11 @@
 <view class="wrap">
 
+  <view wx:if="{{err}}" class="card errbox">
+    <view class="errt">⚠️ 页面初始化失败</view>
+    <view class="errd">{{err}}</view>
+    <view class="errd">请把这段文字发给开发者</view>
+  </view>
+
   <!-- 顶部总览 -->
   <view class="card hero">
     <view class="row between">

@@ -66,3 +66,7 @@
 .fqty { font-size: 22rpx; color: #8B9A96; margin-top: 6rpx; }
 .fright { text-align: right; }
 .fday { font-size: 22rpx; font-weight: 700; margin-top: 8rpx; }
+
+.errbox { background: #FFF6F6; border-color: #F6D6D6; }
+.errt { font-size: 30rpx; font-weight: 800; color: #B91C1C; margin-bottom: 12rpx; }
+.errd { font-size: 24rpx; color: #8A4B4B; line-height: 1.7; word-break: break-all; }
