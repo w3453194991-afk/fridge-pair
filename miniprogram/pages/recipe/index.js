@@ -15,7 +15,9 @@ Page({
   },
 
   onShow() {
-    if (this.getTabBar && this.getTabBar()) this.getTabBar().setSel(1); this.refresh(); },
+    if (this.getTabBar && this.getTabBar()) this.getTabBar().setSel(1);
+    this.refresh();
+  },
 
   refresh() {
     const foods = S.state.foods;
@@ -32,15 +34,26 @@ Page({
       }
     }
 
+    const pinned = S.state.pinned || [];
+    list = list.slice().sort((a, b) => {
+      const pa = pinned.indexOf(a.id) >= 0 ? 1 : 0;
+      const pb = pinned.indexOf(b.id) >= 0 ? 1 : 0;
+      return pb - pa;
+    });
+
     const rows = list.slice(0, 90).map(d => {
       const ok = E.ingredientState(d, foods).every(s => s.ok);
+      const mine = S.getDishPhoto(d.id);
+      const isPin = pinned.indexOf(d.id) >= 0;
       return {
         id: d.id,
         name: d.name,
         emoji: d.emoji,
         sub: d.ingredients.map(i => i.name).join(' + '),
         ok: ok,
-        photo: P[d.id] ? ('/img/' + d.id + '.jpg') : '',
+        pinCls: isPin ? 'icobtn on' : 'icobtn',
+        photo: mine || (P[d.id] ? ('/img/' + d.id + '.jpg') : ''),
+        mineTag: mine ? '我的实拍' : '',
         m1: d.minutes + ' 分钟',
         m2: d.level
       };
@@ -63,7 +76,54 @@ Page({
     this.setData({ q: e.detail.value, tab: 'all' }, () => this.refresh());
   },
 
+  onClear() {
+    this.setData({ q: '' }, () => this.refresh());
+  },
+
   onDish(e) {
     wx.navigateTo({ url: '/pages/dish/index?id=' + e.currentTarget.dataset.id });
+  },
+
+  onPin(e) {
+    const id = e.currentTarget.dataset.id;
+    S.togglePin(id);
+    const on = (S.state.pinned || []).indexOf(id) >= 0;
+    wx.showToast({ title: on ? '已置顶' : '已取消置顶', icon: 'none' });
+    this.refresh();
+  },
+
+  onCover(e) {
+    const id = e.currentTarget.dataset.id;
+    const self = this;
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['camera', 'album'],
+      success: (res) => {
+        const tmp = res.tempFiles[0].tempFilePath;
+        try {
+          wx.getFileSystemManager().saveFile({
+            tempFilePath: tmp,
+            success: (r) => {
+              S.setDishPhoto(id, r.savedFilePath);
+              wx.showToast({ title: '已设为封面', icon: 'none' });
+              self.refresh();
+            },
+            fail: () => {
+              S.setDishPhoto(id, tmp);
+              self.refresh();
+            }
+          });
+        } catch (err) {
+          S.setDishPhoto(id, tmp);
+          self.refresh();
+        }
+      },
+      fail: () => {}
+    });
+  },
+
+  onVideo() {
+    wx.navigateTo({ url: '/pages/video/index' });
   }
 });

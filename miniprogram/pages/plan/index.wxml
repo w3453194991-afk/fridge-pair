@@ -4,12 +4,36 @@
     <view class="row between">
       <view>
         <view class="t1">为你家生成的菜单</view>
-        <view class="t2">{{has ? '已排好 7 天 · ' + system : '还没排，点下面生成'}}</view>
+        <view class="t2">{{has ? ('已排好 7 天 · ' + sysName) : '还没排，点下面生成'}}</view>
       </view>
-      <view class="sys">{{system}}</view>
+      <view class="sys">{{sysName}}</view>
     </view>
-    <view class="btn primary gen" bindtap="onGenerate">
-      {{has ? '重新生成一周' : '生成一周菜单'}}
+    <view class="stripe">{{stripe}}</view>
+    <view class="btn primary gen" bindtap="onGenerate">{{has ? '重新生成一周' : '生成一周菜单'}}</view>
+  </view>
+
+  <view class="sec"><view class="bar2"></view><view class="t">餐饮体系</view></view>
+  <view class="chips">
+    <view
+      wx:for="{{systems}}"
+      wx:key="key"
+      class="{{item.cls}}"
+      data-key="{{item.key}}"
+      bindtap="onSystem"
+    >{{item.label}}</view>
+  </view>
+
+  <view wx:if="{{nutBars.length}}" class="card nut">
+    <view class="ntt">这一餐的营养<text class="nts">{{todayLabel}} · 每人份</text></view>
+    <view wx:for="{{nutBars}}" wx:key="label" class="nb">
+      <view class="row between nbt">
+        <text class="nbl">{{item.label}}</text>
+        <view class="row">
+          <text class="ntag" style="color:{{item.color}};background:{{item.color}}1A">{{item.tag}}</text>
+          <text class="nbv">{{item.got}}<text class="nbu">/{{item.need}}{{item.unit}}</text></text>
+        </view>
+      </view>
+      <view class="nbar"><view class="nfill" style="width:{{item.pct}}%;background:{{item.color}}"></view></view>
     </view>
   </view>
 
@@ -18,7 +42,7 @@
     <view wx:for="{{item.meals}}" wx:for-item="meal" wx:key="slot" class="meal">
       <view class="slot">{{meal.slot}}</view>
       <view class="mnames">{{meal.names}}</view>
-      <view wx:if="{{meal.missing}}" class="miss">补料</view>
+      <view wx:if="{{meal.miss}}" class="miss">补料</view>
     </view>
   </view>
 
@@ -26,6 +50,18 @@
     <view class="e">🍽</view>
     <view>还没有菜单</view>
     <view class="muted">点上面的按钮，按家庭档案自动排</view>
+  </view>
+
+  <view wx:if="{{shopCount}}" class="card">
+    <view class="row between">
+      <view class="tt">🛒 采购清单 <text class="n">{{shopCount}}</text></view>
+      <view class="copybtn" bindtap="onBuyAll">复制</view>
+    </view>
+    <view wx:for="{{shopList}}" wx:key="name" class="shop">
+      <text class="semo">{{item.emoji}}</text>
+      <text class="sname">{{item.name}}</text>
+      <text class="stimes">×{{item.times}}</text>
+    </view>
   </view>
 
 </view>

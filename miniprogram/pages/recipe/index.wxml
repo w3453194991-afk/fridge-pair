@@ -1,17 +1,22 @@
 <view class="wrap">
 
+  <view class="searchbar">
+    <text class="mag">🔍</text>
+    <input
+      class="sinput"
+      placeholder="搜菜名或食材，如：番茄"
+      value="{{q}}"
+      bindinput="onSearch"
+      confirm-type="search"
+    />
+    <text wx:if="{{q}}" class="clear" bindtap="onClear">✕</text>
+  </view>
+
   <view class="chips tabs">
     <view class="{{fitCls}}" data-tab="fit" bindtap="onTab">能做的 {{fitCount}}</view>
     <view class="{{allCls}}" data-tab="all" bindtap="onTab">全部 {{allCount}}</view>
+    <view class="chip vbtn" bindtap="onVideo">▶ 视频做菜</view>
   </view>
-
-  <input
-    class="search"
-    placeholder="搜菜名或食材，如：番茄"
-    value="{{q}}"
-    bindinput="onSearch"
-    confirm-type="search"
-  />
 
   <view wx:if="{{list.length}}" class="cardgrid">
     <view
@@ -24,7 +29,14 @@
       <view class="dcoverwrap">
         <image wx:if="{{item.photo}}" class="dcover" src="{{item.photo}}" mode="aspectFill" />
         <view wx:else class="dcover fallback">{{item.emoji}}</view>
+
         <view wx:if="{{item.ok}}" class="dbadge">可做</view>
+        <view wx:if="{{item.mineTag}}" class="dmine">{{item.mineTag}}</view>
+
+        <view class="icorow">
+          <view class="{{item.pinCls}}" data-id="{{item.id}}" catchtap="onPin">📌</view>
+          <view class="icobtn cam" data-id="{{item.id}}" catchtap="onCover">📷</view>
+        </view>
       </view>
       <view class="dbody">
         <view class="dname">{{item.name}}</view>

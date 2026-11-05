@@ -1,0 +1,8 @@
+<web-view wx:if="{{url}}" src="{{url}}"></web-view>
+
+<view wx:else class="wrap">
+  <view class="card">
+    <view class="t">没有视频地址</view>
+    <view class="muted">请从「视频做菜」里重新选择</view>
+  </view>
+</view>

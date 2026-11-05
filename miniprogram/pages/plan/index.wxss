@@ -1,26 +1,45 @@
-.hero { background: linear-gradient(170deg, #FFFFFF, #F2FCF7); }
+.hero { background: linear-gradient(170deg, #FFFFFF, #F2FCF7); border-radius: 36rpx; }
 .t1 { font-size: 34rpx; font-weight: 800; }
 .t2 { font-size: 24rpx; color: #7C8B87; margin-top: 8rpx; }
 .sys {
   font-size: 22rpx; font-weight: 800; color: #0E8F63;
   background: #E6FAF1; border-radius: 12rpx; padding: 8rpx 16rpx;
 }
-.gen { margin-top: 26rpx; }
+.stripe { font-size: 22rpx; color: #7C8B87; margin-top: 16rpx; }
+.gen { margin-top: 22rpx; }
+
+.nut { padding: 24rpx; }
+.ntt { font-size: 30rpx; font-weight: 800; }
+.nts { font-size: 21rpx; color: #9AA6A1; font-weight: 400; margin-left: 12rpx; }
+.nb { margin-top: 20rpx; }
+.nbt { margin-bottom: 8rpx; }
+.nbl { font-size: 24rpx; color: #5E7D71; font-weight: 700; }
+.ntag { font-size: 18rpx; font-weight: 800; border-radius: 8rpx; padding: 3rpx 10rpx; margin-right: 10rpx; }
+.nbv { font-size: 24rpx; font-weight: 800; color: #12232B; }
+.nbu { font-size: 20rpx; color: #8B9A96; font-weight: 600; }
+.nbar { height: 12rpx; background: #F1ECE4; border-radius: 8rpx; overflow: hidden; }
+.nfill { height: 100%; border-radius: 8rpx; }
 
 .day { padding: 24rpx; }
 .dlabel { font-size: 30rpx; font-weight: 800; margin-bottom: 12rpx; }
-.meal {
-  display: flex; align-items: center;
-  padding: 14rpx 0; border-top: 1rpx solid #F2F7F4;
-}
+.meal { display: flex; align-items: center; padding: 14rpx 0; border-top: 1rpx solid #F2F7F4; }
 .slot {
   width: 52rpx; height: 44rpx; border-radius: 12rpx; flex: none;
   display: flex; align-items: center; justify-content: center;
-  font-size: 22rpx; font-weight: 800; color: #0E8F63; background: #E6FAF1;
-  margin-right: 18rpx;
+  font-size: 22rpx; font-weight: 800; color: #0E8F63; background: #E6FAF1; margin-right: 18rpx;
 }
 .mnames { flex: 1; font-size: 26rpx; line-height: 1.6; }
 .miss {
   font-size: 18rpx; font-weight: 800; color: #B91C1C;
   background: #FEE2E2; border-radius: 8rpx; padding: 4rpx 10rpx;
 }
+.tt { font-size: 28rpx; font-weight: 800; }
+.n { font-size: 22rpx; color: #12A576; margin-left: 8rpx; }
+.copybtn {
+  font-size: 22rpx; font-weight: 800; color: #0E8F63;
+  background: #E6FAF1; border-radius: 14rpx; padding: 8rpx 20rpx;
+}
+.shop { display: flex; align-items: center; padding: 16rpx 0; border-top: 1rpx solid #F2F7F4; }
+.semo { font-size: 32rpx; margin-right: 16rpx; }
+.sname { flex: 1; font-size: 27rpx; font-weight: 600; }
+.stimes { font-size: 22rpx; color: #8B9A96; }

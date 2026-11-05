@@ -1,0 +1,41 @@
+.t1 { font-size: 34rpx; font-weight: 800; }
+.t2 { font-size: 23rpx; color: #7C8B87; margin-top: 10rpx; line-height: 1.6; }
+
+.vcard {
+  background: #fff; border: 1rpx solid #EDF3F0; border-radius: 28rpx;
+  overflow: hidden; margin-bottom: 22rpx;
+  box-shadow: 0 6rpx 20rpx -16rpx rgba(20, 60, 45, .6);
+}
+.vcoverwrap { position: relative; width: 100%; height: 280rpx; background: #EAF7F1; }
+.vcover { width: 100%; height: 280rpx; display: block; }
+.vcover.fallback {
+  display: flex; align-items: center; justify-content: center; font-size: 90rpx;
+  background: linear-gradient(150deg, #EAFBF3, #D6F2E5 60%, #C9EEDD);
+}
+.vplay {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 96rpx; height: 96rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 38rpx; color: #12A576; background: rgba(255, 255, 255, .92);
+  box-shadow: 0 8rpx 22rpx rgba(0, 40, 30, .2);
+}
+.vbody { padding: 20rpx 24rpx 24rpx; }
+.vname { font-size: 29rpx; font-weight: 800; }
+.vmin { font-size: 20rpx; color: #8B9A96; font-weight: 600; margin-left: 12rpx; }
+.vtitle { font-size: 22rpx; color: #5E7D71; margin-top: 8rpx; line-height: 1.5; }
+.vacts { display: flex; margin-top: 18rpx; }
+.vbtn {
+  flex: 1; height: 72rpx; border-radius: 20rpx; margin-right: 14rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 25rpx; font-weight: 800;
+}
+.vbtn:last-child { margin-right: 0; }
+.vbtn.primary { color: #fff; background: linear-gradient(135deg, #2FD79E, #12A576); }
+.vbtn.ghost { color: #4E6B61; background: #F5FAF7; border: 1rpx solid #E7EFEA; }
+
+.q {
+  background: #F5FAF7; border-radius: 20rpx; height: 80rpx;
+  padding: 0 22rpx; font-size: 25rpx; margin-bottom: 18rpx;
+}
+.tiny { font-size: 21rpx; color: #9AA6A1; line-height: 1.7; margin-top: 14rpx; }
+.center { text-align: center; margin-top: 24rpx; }

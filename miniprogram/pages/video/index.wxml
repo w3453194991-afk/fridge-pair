@@ -1,0 +1,43 @@
+<view class="wrap">
+
+  <view class="card">
+    <view class="t1">🎬 视频做菜</view>
+    <view class="t2">站内教程可以直接看；没有的菜，复制搜索链接去对应平台。</view>
+  </view>
+
+  <view class="sec"><view class="bar2"></view><view class="t">已收录教程</view><view class="n">{{list.length}}</view></view>
+
+  <view wx:for="{{list}}" wx:key="key" class="vcard">
+    <view class="vcoverwrap">
+      <image wx:if="{{item.photo}}" class="vcover" src="{{item.photo}}" mode="aspectFill" />
+      <view wx:else class="vcover fallback">{{item.emoji}}</view>
+      <view class="vplay" data-bvid="{{item.bvid}}" bindtap="onPlay">▶</view>
+    </view>
+    <view class="vbody">
+      <view class="vname">{{item.name}}<text class="vmin">{{item.minutes}} 分钟</text></view>
+      <view class="vtitle">{{item.title}}</view>
+      <view class="vacts">
+        <view class="vbtn primary" data-bvid="{{item.bvid}}" bindtap="onPlay">播放</view>
+        <view class="vbtn ghost" data-bvid="{{item.bvid}}" bindtap="onCopy">复制链接</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="sec"><view class="bar2"></view><view class="t">按菜名搜教程</view></view>
+  <view class="card">
+    <input class="q" placeholder="输入菜名，如：鱼香肉丝" value="{{q}}" bindinput="onQ" />
+    <view class="chips">
+      <view
+        wx:for="{{platforms}}"
+        wx:key="key"
+        class="{{item.cls}}"
+        data-key="{{item.key}}"
+        bindtap="onPlatform"
+      >{{item.label}}</view>
+    </view>
+    <view class="tiny">点击平台会复制搜索链接，粘贴到 App 里即可看。</view>
+  </view>
+
+  <view class="tiny center">播放页需要在小程序后台配置业务域名；开发阶段可在开发者工具里勾选「不校验合法域名」预览。</view>
+
+</view>

@@ -7,7 +7,9 @@
     "pages/me/index",
     "pages/dish/index",
     "pages/chat/index",
-    "pages/nearby/index"
+    "pages/nearby/index",
+    "pages/video/index",
+    "pages/player/index"
   ],
   "window": {
     "navigationBarTitleText": "冰箱对对碰",
