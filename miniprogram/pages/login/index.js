@@ -1,5 +1,6 @@
 const G = require('../../lib/shim.js');
 const S = G.DD_STORE;
+const SYNC = require('../../lib/sync.js');
 let CFG = {};
 try { CFG = require('../../config.js') || {}; } catch (e) {}
 
@@ -81,8 +82,21 @@ Page({
       this.setData({ loading: false, tip: '保存失败：' + ((e && e.message) || e) });
       return;
     }
-    wx.showToast({ title: '登录成功', icon: 'success' });
-    setTimeout(() => wx.reLaunch({ url: '/pages/splash/index' }), 500);
+
+    // 接管保存 + 拉云端数据；失败也不阻塞进入
+    const go = () => {
+      wx.showToast({ title: '登录成功', icon: 'success' });
+      setTimeout(() => wx.reLaunch({ url: '/pages/splash/index' }), 400);
+    };
+    try {
+      if (CFG && CFG.CLOUD_ENV) {
+        SYNC.attach(S);
+        SYNC.pull(S).then(() => go(), () => go());
+        setTimeout(go, 2500);        // 网络慢也不卡住
+        return;
+      }
+    } catch (e) {}
+    go();
   },
 
   /* 开发/体验版专用：跳过登录 */
