@@ -4,11 +4,11 @@
    识别有三条路，按优先级自动降级：
 
    ① 云函数（推荐，真机可用）
-      填 CLOUD_ENV = 你的云开发环境 ID（如 'fridge-1a2b3c'）
+      填 CLOUD_ENV = 你的云开发环境 ID（如 'fridge-prod-1a2b3c'）
       不需要域名、不需要备案
 
    ② 公网 HTTP 中转服务
-      填 API_BASE = 'https://你的域名/recognize'
+      填 API_BASE = 'https://你的域名'
       注意：小程序只允许已备案的 https 域名，境外免费平台在真机上会被拦
 
    ③ 本地演示
@@ -19,9 +19,15 @@ module.exports = {
   CLOUD_ENV: '',
 
   /* HTTP 中转服务地址（为空则不启用）；开发者工具可填 http://127.0.0.1:8787 */
-  API_BASE: 'http://127.0.0.1:8787',
+  API_BASE: '',
 
   USE_CLOUD: true,
-  USE_REMOTE: true,
-  TIMEOUT: 15000
+  USE_REMOTE: false,
+  TIMEOUT: 15000,
+
+  /* 每个用户每天最多识别几次（防刷、控成本；0 表示不限制） */
+  DAILY_SCAN_LIMIT: 20,
+
+  /* 每个用户每天最多调用 AI 对话几次 */
+  DAILY_CHAT_LIMIT: 50
 };

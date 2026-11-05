@@ -6,6 +6,24 @@ try { CONFIG = require('../../config.js') || CONFIG; } catch (e) {}
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function inDb(name) { return (D.FOOD_DB || []).some(f => f.name === name); }
 
+/* 每日调用次数限制（防刷 / 控成本） */
+function dayKey() {
+  const d = new Date();
+  return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+}
+function todayCount(name) {
+  try {
+    const raw = wx.getStorageSync('ddm.quota.' + name);
+    if (!raw || raw.day !== dayKey()) return 0;
+    return raw.n || 0;
+  } catch (e) { return 0; }
+}
+function bumpCount(name) {
+  try {
+    wx.setStorageSync('ddm.quota.' + name, { day: dayKey(), n: todayCount(name) + 1 });
+  } catch (e) {}
+}
+
 Page({
   data: {
     photo: '',
@@ -19,6 +37,19 @@ Page({
 
   onLoad(q) {
     this.setData({ photo: (q && q.photo) || '' });
+
+    const limit = Number(CONFIG.DAILY_SCAN_LIMIT) || 0;
+    if (limit > 0 && todayCount('scan') >= limit) {
+      wx.showModal({
+        title: '今天的识别次数用完了',
+        content: '每天最多识别 ' + limit + ' 次（防止滥用）。明天再来，或者手动添加食材。',
+        showCancel: false,
+        success: () => wx.switchTab({ url: '/pages/fridge/index' })
+      });
+      return;
+    }
+    bumpCount('scan');
+
     this.analyze();
   },
 
