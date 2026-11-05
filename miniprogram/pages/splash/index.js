@@ -14,21 +14,26 @@ Page({
 
   onLoad() {
     this.timers = [];
-    const goto = () => {
+    this.leaving = false;
+
+    this.goto = () => {
+      if (this.leaving) return;
+      this.leaving = true;
+      this.timers.forEach(clearTimeout);
       try { S.load(); } catch (e) {}
       const logged = S.state && S.state.family && S.state.family.loggedIn;
       if (logged) wx.switchTab({ url: '/pages/fridge/index' });
       else wx.redirectTo({ url: '/pages/login/index' });
     };
 
-    // 开机阶段 1.6s，随后进入机器人
+    // 开机阶段 1.65s，随后进入机器人
     this.timers.push(setTimeout(() => {
       this.setData({ phase: 1, canSkip: true });
       this.speak();
     }, 1650));
 
-    // 兜底：3.4s 后自动进入
-    this.timers.push(setTimeout(goto, 3400));
+    // 硬兜底：万一打字卡住，15s 后也要进得去（正常由台词说完触发）
+    this.timers.push(setTimeout(this.goto, 15000));
   },
 
   onUnload() {
@@ -38,17 +43,27 @@ Page({
   speak() {
     try {
       const st = S.state;
-      const urgent = E.urgentList(st.foods).slice(0, 3);
+      const foods = st.foods || [];
+      const urgent = E.urgentList(foods).slice(0, 3);
       const names = urgent.map(f => f.name).join('、');
-      const l1 = urgent.length
-        ? ('嘀嘀——发现 ' + urgent.length + ' 件临期食材！')
-        : '嘀嘀——冰箱状态满分！';
-      const l2 = urgent.length
-        ? (names + ' 快到期了，快吃掉！快吃掉！')
-        : '今天想吃点什么？我帮你搭配。';
-      const l3 = urgent.length ? '点下面按钮，我帮你排今天的菜' : '进来看看吧';
+
+      let l1, l2, l3;
+      if (!foods.length) {
+        l1 = '嘀嘀——冰箱还是空的！';
+        l2 = '先拍一张照片，我帮你把食材记进去。';
+        l3 = '点一下中间的相机就行';
+      } else if (urgent.length) {
+        l1 = '嘀嘀——发现 ' + urgent.length + ' 件临期食材！';
+        l2 = names + ' 快到期了，快吃掉！快吃掉！';
+        l3 = '点下面按钮，我帮你排今天的菜';
+      } else {
+        l1 = '嘀嘀——冰箱状态满分！';
+        l2 = '今天想吃点什么？我帮你搭配。';
+        l3 = '进来看看吧';
+      }
 
       this.setData({
+        isEmpty: !foods.length,
         hasUrgent: urgent.length > 0,
         urgentN: urgent.length,
         line1: '', line2: '', line3: ''
@@ -56,8 +71,9 @@ Page({
       this.typeLine('line1', l1, 60, () => {
         this.typeLine('line2', l2, 55, () => {
           this.typeLine('line3', l3, 50, () => {
-            // 机器人说完再显示按钮
+            // 机器人说完、按钮出现，再停留 2.6 秒自动进首页
             this.setData({ typed: true });
+            this.timers.push(setTimeout(() => this.goto(), 2600));
           });
         });
       });

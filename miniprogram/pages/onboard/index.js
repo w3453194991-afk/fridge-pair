@@ -155,6 +155,7 @@ Page({
       // 保留登录态
       S.state.family.loggedIn = true;
       if (oldFam.openid) S.state.family.openid = oldFam.openid;
+      S.state.family.onboarded = true;
       // 新用户从空冰箱开始
       if (!Array.isArray(st.foods) || !S.state.family.__hadData) {
         S.state.foods = S.state.foods || [];
@@ -186,6 +187,7 @@ Page({
       S.saveFamily(fam);
       S.state.family.loggedIn = true;
       if (oldFam.openid) S.state.family.openid = oldFam.openid;
+      S.state.family.onboarded = true;
       S.save();
     } catch (e) {}
     wx.reLaunch({ url: '/pages/splash/index' });

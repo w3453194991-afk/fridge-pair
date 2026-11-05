@@ -1,0 +1,44 @@
+<view class="wrap addpage">
+
+  <view class="searchbar">
+    <text class="mag">🔍</text>
+    <input class="sinput" placeholder="搜食材，如：番茄、菠菜" value="{{q}}" bindinput="onSearch" confirm-type="search" />
+    <text wx:if="{{q}}" class="clear" bindtap="onClear">✕</text>
+  </view>
+
+  <view class="chips cats">
+    <view
+      wx:for="{{cats}}"
+      wx:key="key"
+      class="{{item.cls}}"
+      data-key="{{item.key}}"
+      bindtap="onCat"
+    >{{item.label}}</view>
+  </view>
+
+  <view wx:if="{{list.length}}" class="list">
+    <view wx:for="{{list}}" wx:key="name" class="row">
+      <view class="emo">{{item.emoji}}</view>
+      <view class="mid">
+        <view class="nm">{{item.name}}</view>
+        <view class="sub">{{item.cat}}<text wx:if="{{item.have}}"> · 冰箱已有 {{item.have}}</text></view>
+      </view>
+      <view class="stepper">
+        <view class="qb" data-name="{{item.name}}" data-d="-1" bindtap="onQty">−</view>
+        <text class="qn">{{item.qty}}</text>
+        <view class="qb" data-name="{{item.name}}" data-d="1" bindtap="onQty">+</view>
+      </view>
+      <view class="addbtn" data-name="{{item.name}}" bindtap="onAdd">添加</view>
+    </view>
+  </view>
+
+  <view wx:else class="empty">
+    <view class="e">🔍</view>
+    <view>没找到这个食材</view>
+    <view class="muted">换个词试试，比如"土豆"</view>
+  </view>
+
+  <view class="bottomspace"></view>
+  <view class="bottom" bindtap="onDone">完成，回冰箱</view>
+
+</view>

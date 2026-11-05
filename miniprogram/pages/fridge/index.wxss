@@ -134,3 +134,12 @@
 }
 .quick:first-child { margin-right: 16rpx; }
 .quick:active { transform: scale(.97); }
+
+.actionrow { margin: 22rpx 0 0; }
+.addbig {
+  height: 92rpx; border-radius: 26rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28rpx; font-weight: 800; color: #0E8F63;
+  background: #EAFBF2; border: 1rpx dashed #8FE0BE;
+}
+.addbig:active { transform: scale(.99); }

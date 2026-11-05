@@ -56,7 +56,7 @@
     </view>
 
     <view wx:if="{{typed}}" class="acts">
-      <view class="btn" bindtap="onGo">{{hasUrgent ? '⚡ 帮我安排临期菜单' : '🍳 生成今天的菜单'}}</view>
+      <view class="btn" bindtap="onGo">{{isEmpty ? '📷 去拍照入库' : (hasUrgent ? '⚡ 帮我安排临期菜单' : '🍳 生成今天的菜单')}}</view>
       <view class="btn ghost" bindtap="onSkip">我自己逛逛</view>
     </view>
     <view wx:else class="actspace"></view>

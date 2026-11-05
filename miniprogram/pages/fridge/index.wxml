@@ -78,6 +78,9 @@
   </view>
 
   <!-- 操作 -->
+  <view class="actionrow">
+    <view class="addbig" bindtap="onAddFood">＋ 手动添加食材</view>
+  </view>
   <view class="quickrow">
     <view class="quick" bindtap="onNearby">🧭 附近超市</view>
     <view class="quick" bindtap="onChat">🤖 问冰箱</view>

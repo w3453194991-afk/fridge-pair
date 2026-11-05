@@ -98,7 +98,7 @@ Page({
       const f = S.state.family || {};
       wx.showToast({ title: '登录成功', icon: 'success' });
       setTimeout(() => {
-        if (!f.registered || !(f.members || []).length) {
+        if (!f.onboarded) {
           wx.reLaunch({ url: '/pages/onboard/index' });
         } else {
           wx.reLaunch({ url: '/pages/splash/index' });

@@ -13,7 +13,8 @@
     "pages/chat/index",
     "pages/nearby/index",
     "pages/video/index",
-    "pages/party/index"
+    "pages/party/index",
+    "pages/addfood/index"
   ],
   "window": {
     "navigationBarTitleText": "冰箱对对碰",

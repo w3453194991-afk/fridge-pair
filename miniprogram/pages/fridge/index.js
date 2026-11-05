@@ -50,6 +50,10 @@ Page({
     wx.navigateTo({ url: '/pages/nearby/index' });
   },
 
+  onAddFood() {
+    wx.navigateTo({ url: '/pages/addfood/index' });
+  },
+
   refresh() {
     try {
       const st = S.state;
