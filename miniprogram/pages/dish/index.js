@@ -33,14 +33,15 @@ Page({
   },
 
   onVideo() {
-    const name = (this.data.dish && this.data.dish.name) || '';
-    let url = '';
-    try { url = E.videoSearch('bili', name); } catch (e) { url = ''; }
-    if (!url) url = 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(name);
-    wx.setClipboardData({
-      data: url,
-      success: () => wx.showToast({ title: '视频链接已复制', icon: 'none' })
-    });
+    const d = this.data.dish;
+    if (!d) return;
+    // 有收录的教程就直接播；没有就去视频页搜
+    const vids = (G.DD_DATA.VIDEOS || {})[d.id];
+    if (vids && vids.length) {
+      wx.navigateTo({ url: '/pages/player/index?bvid=' + vids[0].bvid });
+    } else {
+      wx.navigateTo({ url: '/pages/video/index?q=' + encodeURIComponent(d.name) });
+    }
   },
 
   onCook() {

@@ -10,7 +10,7 @@ Page({
     platforms: []
   },
 
-  onLoad() {
+  onLoad(opt) {
     const list = [];
     Object.keys(D.VIDEOS || {}).forEach(id => {
       const d = D.DISHES.filter(x => x.id === id)[0];
@@ -35,7 +35,11 @@ Page({
       cls: 'chip'
     }));
 
-    this.setData({ list: list, platforms: platforms });
+    this.setData({
+      list: list,
+      platforms: platforms,
+      q: opt && opt.q ? decodeURIComponent(opt.q) : ''
+    });
   },
 
   onPlay(e) {

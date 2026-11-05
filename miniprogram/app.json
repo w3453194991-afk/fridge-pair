@@ -9,7 +9,8 @@
     "pages/chat/index",
     "pages/nearby/index",
     "pages/video/index",
-    "pages/player/index"
+    "pages/player/index",
+    "pages/party/index"
   ],
   "window": {
     "navigationBarTitleText": "冰箱对对碰",
@@ -25,10 +26,22 @@
     "backgroundColor": "#FFFFFF",
     "borderStyle": "white",
     "list": [
-      { "pagePath": "pages/fridge/index", "text": "冰箱" },
-      { "pagePath": "pages/recipe/index", "text": "菜谱" },
-      { "pagePath": "pages/plan/index", "text": "配餐" },
-      { "pagePath": "pages/me/index", "text": "我的" }
+      {
+        "pagePath": "pages/fridge/index",
+        "text": "冰箱"
+      },
+      {
+        "pagePath": "pages/recipe/index",
+        "text": "菜谱"
+      },
+      {
+        "pagePath": "pages/plan/index",
+        "text": "配餐"
+      },
+      {
+        "pagePath": "pages/me/index",
+        "text": "我的"
+      }
     ]
   },
   "permission": {
@@ -36,7 +49,10 @@
       "desc": "用于查找离你家最近的超市"
     }
   },
-  "requiredPrivateInfos": ["getLocation", "chooseLocation"],
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation"
+  ],
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }

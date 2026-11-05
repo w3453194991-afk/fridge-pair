@@ -1,0 +1,44 @@
+.hero { background: linear-gradient(170deg, #FFFFFF, #F2FCF7); border-radius: 36rpx; }
+.t1 { font-size: 36rpx; font-weight: 800; }
+.t2 { font-size: 23rpx; color: #7C8B87; margin-top: 10rpx; line-height: 1.6; }
+
+.field { padding: 20rpx 0; border-bottom: 1rpx solid #F2F7F4; }
+.lab { font-size: 27rpx; font-weight: 700; color: #33473F; }
+.lab2 { font-size: 27rpx; font-weight: 700; margin: 22rpx 0 12rpx; }
+.inp {
+  width: 320rpx; text-align: right; font-size: 26rpx;
+  background: #F5FAF7; border-radius: 16rpx; padding: 12rpx 20rpx;
+}
+.stepper { display: flex; align-items: center; }
+.step {
+  width: 62rpx; height: 62rpx; border-radius: 18rpx; text-align: center; line-height: 62rpx;
+  background: #EAFBF2; color: #0E8F63; font-size: 34rpx; font-weight: 800;
+}
+.num { min-width: 80rpx; text-align: center; font-size: 32rpx; font-weight: 800; }
+.gen { margin-top: 26rpx; }
+
+.sum { background: linear-gradient(120deg, #EFFBF4, #FFFFFF); }
+.stitle { font-size: 29rpx; font-weight: 800; }
+.cost { font-size: 32rpx; font-weight: 800; color: #12A576; }
+.warn { font-size: 22rpx; color: #B91C1C; margin-top: 12rpx; }
+.warn2 { font-size: 22rpx; color: #B45309; margin-top: 8rpx; }
+
+.dish {
+  display: flex; align-items: center; background: #fff;
+  border: 1rpx solid #EDF3F0; border-radius: 26rpx; padding: 20rpx 22rpx; margin-bottom: 16rpx;
+}
+.dem {
+  width: 80rpx; height: 80rpx; border-radius: 24rpx; font-size: 38rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: #F6FBF8; border: 1rpx solid #EDF3F0; margin-right: 18rpx;
+}
+.dbd { flex: 1; min-width: 0; }
+.dnm { font-size: 28rpx; font-weight: 800; }
+.dds { font-size: 21rpx; color: #8B9A96; margin-top: 4rpx; }
+.dprice { font-size: 26rpx; font-weight: 800; color: #12A576; }
+
+.tt { font-size: 28rpx; font-weight: 800; margin-bottom: 8rpx; }
+.shop { display: flex; align-items: center; padding: 14rpx 0; border-top: 1rpx solid #F2F7F4; }
+.semo { font-size: 28rpx; margin-right: 14rpx; }
+.sname { flex: 1; font-size: 26rpx; }
+.sprice { font-size: 24rpx; color: #12A576; font-weight: 700; }

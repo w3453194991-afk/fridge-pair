@@ -11,7 +11,8 @@ Page({
     nutBars: [],
     todayLabel: '',
     shopList: [],
-    shopCount: 0
+    shopCount: 0,
+    shopTotal: '0.0'
   },
 
   onShow() {
@@ -74,7 +75,7 @@ Page({
       }
     }
 
-    // 采购清单：逐道菜算真实缺料
+    // 采购清单：逐道菜算真实缺料（带数量与价格）
     const miss = {};
     week.forEach(d => {
       Object.keys(d.meals || {}).forEach(k => {
@@ -83,15 +84,31 @@ Page({
           const dish = D.DISHES.filter(x => x.id === id)[0];
           if (!dish) return;
           E.ingredientState(dish, st.foods).forEach(s => {
-            if (!s.ok) miss[s.name] = (miss[s.name] || 0) + 1;
+            if (s.ok) return;
+            const need = (dish.ingredients.filter(i => i.name === s.name)[0] || {}).qty || 0;
+            if (!miss[s.name]) {
+              const meta = E.foodMeta(s.name);
+              miss[s.name] = { qty: 0, unit: meta.unit, price: meta.price || 0, emoji: meta.emoji, times: 0 };
+            }
+            miss[s.name].qty += need;
+            miss[s.name].times += 1;
           });
         });
       });
     });
+    let shopTotal = 0;
     const shopList = Object.keys(miss).map(n => {
-      const meta = E.foodMeta(n);
-      return { name: n, emoji: meta.emoji, times: miss[n] };
-    }).sort((a, b) => b.times - a.times);
+      const it = miss[n];
+      const cost = it.qty * it.price;
+      shopTotal += cost;
+      return {
+        name: n,
+        emoji: it.emoji,
+        qty: E.fmtQty(it.qty) + ' ' + it.unit,
+        cost: cost.toFixed(1),
+        times: it.times
+      };
+    }).sort((a, b) => parseFloat(b.cost) - parseFloat(a.cost));
 
     this.setData({
       systems: systems,
@@ -102,8 +119,13 @@ Page({
       nutBars: nutBars,
       todayLabel: todayLabel,
       shopList: shopList,
-      shopCount: shopList.length
+      shopCount: shopList.length,
+      shopTotal: shopTotal.toFixed(1)
     });
+  },
+
+  onParty() {
+    wx.navigateTo({ url: '/pages/party/index' });
   },
 
   onSystem(e) {
@@ -127,7 +149,8 @@ Page({
       wx.showToast({ title: '没有缺料', icon: 'none' });
       return;
     }
-    const text = this.data.shopList.map(i => i.name + ' ×' + i.times).join('\n');
+    const text = this.data.shopList.map(i => i.name + ' ' + i.qty + ' ¥' + i.cost).join('\n')
+      + '\n合计 ¥' + this.data.shopTotal;
     wx.setClipboardData({
       data: text,
       success: () => wx.showToast({ title: '采购清单已复制', icon: 'none' })

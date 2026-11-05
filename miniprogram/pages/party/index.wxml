@@ -1,0 +1,72 @@
+<view class="wrap">
+
+  <view class="card hero">
+    <view class="t1">🎉 聚餐规划</view>
+    <view class="t2">按人数和菜系排一桌，自动算成本、控制预算。</view>
+
+    <view class="row between field">
+      <text class="lab">人数</text>
+      <view class="stepper">
+        <view class="step" bindtap="onMinus">−</view>
+        <view class="num">{{people}}</view>
+        <view class="step" bindtap="onPlus">+</view>
+      </view>
+    </view>
+
+    <view class="row between field">
+      <text class="lab">预算（可选）</text>
+      <input class="inp" type="digit" placeholder="如 300" value="{{budget}}" bindinput="onBudget" />
+    </view>
+
+    <view class="row between field">
+      <text class="lab">想吃的菜（可选）</text>
+      <input class="inp" placeholder="如 水煮鱼、糖醋排骨" value="{{wish}}" bindinput="onWish" />
+    </view>
+
+    <view class="lab2">菜系</view>
+    <view class="chips">
+      <view
+        wx:for="{{cuisines}}"
+        wx:key="key"
+        class="{{item.cls}}"
+        data-key="{{item.key}}"
+        bindtap="onCuisine"
+      >{{item.key}}</view>
+    </view>
+
+    <view class="btn primary gen" bindtap="onGen">生成这桌菜</view>
+  </view>
+
+  <view wx:if="{{result}}">
+    <view class="card sum">
+      <view class="row between">
+        <text class="stitle">{{dateText}} · {{people}} 人</text>
+        <text class="cost">约 ¥{{total}}</text>
+      </view>
+      <view wx:if="{{over}}" class="warn">超出预算，建议减一两道</view>
+      <view wx:if="{{droppedText}}" class="warn2">{{droppedText}}</view>
+    </view>
+
+    <view class="sec"><view class="bar2"></view><view class="t">菜单</view><view class="n">{{dishes.length}} 道</view></view>
+    <view wx:for="{{dishes}}" wx:key="id" class="dish" data-id="{{item.id}}" bindtap="onDish">
+      <view class="dem">{{item.emoji}}</view>
+      <view class="dbd">
+        <view class="dnm">{{item.name}}</view>
+        <view class="dds">{{item.sub}}</view>
+      </view>
+      <view class="dprice">¥{{item.cost}}</view>
+    </view>
+
+    <view wx:if="{{missing.length}}" class="card">
+      <view class="tt">🛒 需要补购</view>
+      <view wx:for="{{missing}}" wx:key="name" class="shop">
+        <text class="semo">{{item.emoji}}</text>
+        <text class="sname">{{item.name}}</text>
+        <text class="sprice">¥{{item.cost}}</text>
+      </view>
+    </view>
+
+    <view class="btn ghost" bindtap="onCopy">复制这桌菜单</view>
+  </view>
+
+</view>
