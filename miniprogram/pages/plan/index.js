@@ -74,11 +74,18 @@ Page({
       }
     }
 
+    // 采购清单：逐道菜算真实缺料
     const miss = {};
     week.forEach(d => {
       Object.keys(d.meals || {}).forEach(k => {
         const m = d.meals[k];
-        ((m && m.missing) || []).forEach(n => { miss[n] = (miss[n] || 0) + 1; });
+        (m.ids || []).forEach(id => {
+          const dish = D.DISHES.filter(x => x.id === id)[0];
+          if (!dish) return;
+          E.ingredientState(dish, st.foods).forEach(s => {
+            if (!s.ok) miss[s.name] = (miss[s.name] || 0) + 1;
+          });
+        });
       });
     });
     const shopList = Object.keys(miss).map(n => {

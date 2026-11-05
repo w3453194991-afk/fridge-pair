@@ -15,13 +15,20 @@ Page({
     try {
       const missing = {};
       const week = S.state.week || [];
-      week.slice(0, 2).forEach(day => {
+      week.slice(0, 3).forEach(day => {
         Object.keys(day.meals || {}).forEach(k => {
-          (day.meals[k].missing || []).forEach(n => { missing[n] = (missing[n] || 0) + 1; });
+          const m = day.meals[k];
+          (m.ids || []).forEach(id => {
+            const dish = D.DISHES.filter(x => x.id === id)[0];
+            if (!dish) return;
+            E.ingredientState(dish, S.state.foods).forEach(s => {
+              if (!s.ok) missing[s.name] = (missing[s.name] || 0) + 1;
+            });
+          });
         });
       });
-      const list = Object.keys(missing).sort((a, b) => missing[b] - missing[a]).slice(0, 4);
-      this.setData({ advice: list.length ? ('本周缺：' + list.join('、')) : '本周食材基本够用' });
+      const list = Object.keys(missing).sort((a, b) => missing[b] - missing[a]).slice(0, 5);
+      this.setData({ advice: list.length ? ('最近要买：' + list.join('、')) : '本周食材基本够用' });
     } catch (e) {}
   },
 

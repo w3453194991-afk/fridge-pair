@@ -93,9 +93,9 @@ Page({
         const sug = E.topSuggestion(st.foods, this.data.aiIdx || 0);
         if (sug) {
           ai = {
-            a: sug.a, b: sug.b,
+            a: sug.a || '', b: sug.b || '',
             why: sug.dish ? (sug.title + ' · ' + (sug.dish.ingredients || []).map(i => i.name).join(' + ')) : (sug.desc || ''),
-            id: sug.dish ? sug.dish.id : '',
+            id: (sug.dish && sug.dish.id) || '',
             has: true
           };
         }
