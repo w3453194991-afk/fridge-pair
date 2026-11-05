@@ -232,13 +232,10 @@ Page({
       count: 1,
       mediaType: ['image'],
       sourceType: ['camera', 'album'],
-      success: () => {
-        const scenes = D.PHOTO_SCENES || [];
-        const scene = scenes[Math.floor(Math.random() * scenes.length)];
-        if (!scene) return;
-        scene.items.forEach(it => S.add(it.name, it.qty, it.shelf));
-        wx.showToast({ title: '识别到 ' + scene.items.length + ' 件', icon: 'none' });
-        this.refresh();
+      camera: 'back',
+      success: (res) => {
+        const path = res.tempFiles[0].tempFilePath;
+        wx.navigateTo({ url: '/pages/scan/index?photo=' + encodeURIComponent(path) });
       },
       fail: () => {}
     });

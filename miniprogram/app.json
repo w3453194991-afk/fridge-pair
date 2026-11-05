@@ -3,6 +3,7 @@
   "pages": [
     "pages/login/index",
     "pages/splash/index",
+    "pages/scan/index",
     "pages/fridge/index",
     "pages/recipe/index",
     "pages/plan/index",

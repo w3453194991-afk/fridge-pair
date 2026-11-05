@@ -30,20 +30,16 @@ Component({
     },
 
     shoot() {
-      const S = G.DD_STORE;
-      const D = G.DD_DATA;
       wx.chooseMedia({
         count: 1,
         mediaType: ['image'],
         sourceType: ['camera', 'album'],
-        success: () => {
-          const scenes = D.PHOTO_SCENES || [];
-          const scene = scenes[Math.floor(Math.random() * scenes.length)];
-          if (scene) {
-            scene.items.forEach(it => S.add(it.name, it.qty, it.shelf));
-          }
-          wx.showToast({ title: scene ? ('识别到 ' + scene.items.length + ' 件，已入库') : '已拍照', icon: 'none' });
-          wx.switchTab({ url: '/pages/fridge/index' });
+        camera: 'back',
+        success: (res) => {
+          const path = res.tempFiles[0].tempFilePath;
+          wx.navigateTo({
+            url: '/pages/scan/index?photo=' + encodeURIComponent(path)
+          });
         },
         fail: () => {}
       });

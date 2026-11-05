@@ -1,0 +1,38 @@
+<view class="scanpage">
+
+  <view class="photo-wrap">
+    <image wx:if="{{photo}}" class="photo" src="{{photo}}" mode="aspectFill" />
+    <view wx:else class="photo empty">📷</view>
+    <view wx:if="{{scanning}}" class="scanline"></view>
+    <view wx:if="{{scanning}}" class="scanmask-tip">🤖 识别中…</view>
+  </view>
+
+  <view wx:if="{{!scanning}}" class="panel">
+    <view class="ptitle">识别结果 <text class="pcount">{{checkedCount}}/{{items.length}} 已选</text></view>
+    <view class="psub">演示版按场景库给候选，勾选你实际放进去的东西</view>
+
+    <scroll-view scroll-y class="list">
+      <view wx:for="{{items}}" wx:key="name" class="item" data-i="{{item.idx}}" bindtap="onToggle">
+        <view class="ck {{item.checked ? 'on' : ''}}">{{item.checked ? '✓' : ''}}</view>
+        <view class="emo">{{item.emoji}}</view>
+        <view class="mid">
+          <view class="nm">{{item.name}}</view>
+          <view class="cf">置信度 {{item.conf}}%</view>
+        </view>
+        <view class="qty">
+          <view class="qb" data-i="{{item.idx}}" data-d="-1" catchtap="onQty">−</view>
+          <text class="qn">{{item.qty}}</text>
+          <view class="qb" data-i="{{item.idx}}" data-d="1" catchtap="onQty">+</view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="actions">
+      <view class="btn ghost" bindtap="onRetake">重拍</view>
+      <view class="btn ghost" bindtap="onRescan">换一批</view>
+      <view class="btn primary" bindtap="onConfirm">确认入库</view>
+    </view>
+    <view class="cancel" bindtap="onCancel">返回冰箱</view>
+  </view>
+
+</view>
