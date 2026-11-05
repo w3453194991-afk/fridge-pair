@@ -132,3 +132,8 @@
   background: linear-gradient(180deg, #3FDCA4, #12A576);
   box-shadow: 0 2rpx 8rpx -2rpx rgba(18, 165, 118, .9);
 }
+
+.cuiScroll { width: 100%; white-space: nowrap; margin: 6rpx 0 14rpx; }
+.cuiRow { display: inline-flex; }
+.cuiRow .chip { margin-right: 12rpx; font-size: 22rpx; padding: 12rpx 22rpx; flex: none; }
+.filterline { font-size: 22rpx; color: #12A576; font-weight: 700; margin: 0 0 14rpx 4rpx; }

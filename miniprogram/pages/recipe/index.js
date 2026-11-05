@@ -14,7 +14,10 @@ Page({
     pairRows: [],
     total: 0,
     cuisineCount: 0,
-    fitCount: 0
+    fitCount: 0,
+    cuisine: 'all',
+    cuisineChips: [],
+    filterTitle: ''
   },
 
   onShow() {
@@ -56,8 +59,31 @@ Page({
     const fitRows = cookable.slice(0, 30).map(d => row(d));
     const nearRows = near.map(n => row(n.dish, n));
 
-    // 全部：两列卡
+    // 全部：按菜系筛选 + 两列卡
+    const FOREIGN = ['西餐', '日韩', '东南亚'];
+    const allCuisines = {};
+    D.DISHES.forEach(d => { (d.cuisine || []).forEach(c => { allCuisines[c] = (allCuisines[c] || 0) + 1; }); });
+
+    const foreignN = D.DISHES.filter(d => (d.cuisine || []).some(c => FOREIGN.indexOf(c) >= 0)).length;
+    const chipDefs = [{ key: 'all', label: '全部 ' + D.DISHES.length }];
+    if (foreignN) chipDefs.push({ key: '@foreign', label: '🌍 外国菜 ' + foreignN });
+    Object.keys(allCuisines)
+      .sort((a, b) => allCuisines[b] - allCuisines[a])
+      .forEach(c => chipDefs.push({ key: c, label: c + ' ' + allCuisines[c] }));
+
+    const curCuisine = this.data.cuisine || 'all';
+    const cuisineChips = chipDefs.map(c => ({
+      key: c.key,
+      label: c.label,
+      cls: c.key === curCuisine ? 'chip on' : 'chip'
+    }));
+
     let list = D.DISHES.slice();
+    if (curCuisine === '@foreign') {
+      list = list.filter(d => (d.cuisine || []).some(c => FOREIGN.indexOf(c) >= 0));
+    } else if (curCuisine !== 'all') {
+      list = list.filter(d => (d.cuisine || []).indexOf(curCuisine) >= 0);
+    }
     const q = (this.data.q || '').trim();
     if (q) list = list.filter(d => d.name.indexOf(q) >= 0 || d.ingredients.some(i => i.name.indexOf(q) >= 0));
     list = list.slice().sort((a, b) => {
@@ -65,7 +91,12 @@ Page({
       const pb = pinned.indexOf(b.id) >= 0 ? 1 : 0;
       return pb - pa;
     });
-    const allRows = list.slice(0, 90).map(d => {
+
+    const filterTitle = curCuisine === 'all'
+      ? ''
+      : (curCuisine === '@foreign' ? '外国菜' : curCuisine) + ' · ' + list.length + ' 道';
+
+    const allRows = list.slice(0, 120).map(d => {
       const ok = E.ingredientState(d, foods).every(s => s.ok);
       const mine = S.getDishPhoto(d.id);
       return {
@@ -78,7 +109,8 @@ Page({
         photo: mine || (P[d.id] ? ('/img/' + d.id + '.jpg') : ''),
         mineTag: mine ? '我的实拍' : '',
         m1: d.minutes + ' 分钟',
-        m2: d.level
+        m2: d.level,
+        cuisineText: (d.cuisine || []).join(' · ')
       };
     });
 
@@ -104,9 +136,15 @@ Page({
       allRows: allRows,
       pairRows: pairRows,
       total: D.DISHES.length,
-      cuisineCount: Object.keys(cuisines).length,
-      fitCount: cookable.length
+      cuisineCount: Object.keys(allCuisines).length,
+      fitCount: cookable.length,
+      cuisineChips: cuisineChips,
+      filterTitle: filterTitle
     });
+  },
+
+  onCuisine(e) {
+    this.setData({ cuisine: e.currentTarget.dataset.key }, () => this.render());
   },
 
   onTab(e) {

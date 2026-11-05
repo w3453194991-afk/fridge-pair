@@ -70,6 +70,20 @@
       <view class="addchip" bindtap="onAdd">＋ 添加菜谱</view>
     </view>
 
+    <scroll-view scroll-x class="cuiScroll" enable-flex>
+      <view class="cuiRow">
+        <view
+          wx:for="{{cuisineChips}}"
+          wx:key="key"
+          class="{{item.cls}}"
+          data-key="{{item.key}}"
+          bindtap="onCuisine"
+        >{{item.label}}</view>
+      </view>
+    </scroll-view>
+
+    <view wx:if="{{filterTitle}}" class="filterline">{{filterTitle}}</view>
+
     <view wx:if="{{allRows.length}}" class="cardgrid">
       <view wx:for="{{allRows}}" wx:key="id" class="dcard" data-id="{{item.id}}" bindtap="onDish">
         <view class="dcoverwrap">
@@ -85,7 +99,7 @@
         <view class="dbody">
           <view class="dname">{{item.name}}</view>
           <view class="dsub">{{item.sub}}</view>
-          <view class="dmeta"><text>{{item.m1}}</text><text>{{item.m2}}</text></view>
+          <view class="dmeta"><text>{{item.m1}}</text><text>{{item.m2}}</text><text wx:if="{{item.cuisineText}}">{{item.cuisineText}}</text></view>
         </view>
       </view>
     </view>
