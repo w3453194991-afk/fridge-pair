@@ -47,6 +47,27 @@ Page({
     wx.navigateTo({ url: '/pages/chat/index' });
   },
 
+  onEditName() {
+    const cur = (S.state.family && S.state.family.name) || '';
+    wx.showModal({
+      title: '改个称呼',
+      editable: true,
+      placeholderText: '比如：林妈妈',
+      content: cur === '我' ? '' : cur,
+      success: (res) => {
+        if (!res.confirm) return;
+        const v = String(res.content || '').trim();
+        if (!v) return;
+        try {
+          S.state.family.name = v;
+          S.save();
+        } catch (e) {}
+        this.render();
+        wx.showToast({ title: '已更新', icon: 'none' });
+      }
+    });
+  },
+
   onNearby() {
     wx.navigateTo({ url: '/pages/nearby/index' });
   },

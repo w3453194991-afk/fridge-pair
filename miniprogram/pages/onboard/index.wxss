@@ -69,3 +69,14 @@ page { background: #F4FBF7; }
   font-size: 24rpx; color: #fff;
 }
 .conditem.on .condck { background: #12A576; border-color: #12A576; }
+
+.namebox {
+  display: flex; align-items: center; margin-top: 26rpx;
+  background: #fff; border: 2rpx solid #CBEFE0; border-radius: 24rpx;
+  padding: 0 24rpx; height: 100rpx;
+}
+.nameinput { flex: 1; font-size: 32rpx; font-weight: 700; }
+.ph { color: #C3CFC9; font-weight: 400; }
+.namesuffix { font-size: 26rpx; color: #7C8B87; margin-left: 10rpx; }
+.namehint { font-size: 20rpx; color: #9AA6A1; margin-top: 10rpx; }
+.divider { height: 1rpx; background: #E9F2ED; margin: 36rpx 0 10rpx; }

@@ -28,3 +28,8 @@
   margin-top: 30rpx; text-align: center; font-size: 25rpx; font-weight: 700; color: #B91C1C;
   background: #FFF5F5; border: 1rpx solid #FADADA; border-radius: 24rpx; padding: 24rpx 0;
 }
+
+.editname {
+  font-size: 19rpx; font-weight: 600; color: #12A576;
+  background: #EAFBF2; border-radius: 10rpx; padding: 3rpx 12rpx; margin-left: 14rpx;
+}

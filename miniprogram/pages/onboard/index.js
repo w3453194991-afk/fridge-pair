@@ -7,6 +7,7 @@ const ROLE_ICON = { '成人': '👨', '老人': '👵', '幼儿': '👶' };
 Page({
   data: {
     step: 0,
+    famName: '',
     members: [{ role: '成人', age: 30, icon: '👨' }],
     allergens: [],
     condList: [],
@@ -34,6 +35,7 @@ Page({
     const system = fam.system || 'cn';
 
     this.setData({
+      famName: (fam.name && fam.name !== '我') ? fam.name : '',
       members: members,
       allergens: (D.ALLERGENS || []).map(a => ({ name: a, on: avoid.indexOf(a) >= 0 })),
       condList: (D.CONDITIONS || []).map(c => ({
@@ -55,6 +57,10 @@ Page({
   },
 
   /* ---------- 第 1 步：成员 ---------- */
+  onName(e) {
+    this.setData({ famName: e.detail.value });
+  },
+
   addMember() {
     if (this.data.members.length >= 8) return;
     const members = this.data.members.slice();
@@ -143,7 +149,7 @@ Page({
     const fam = {
       openid: oldFam.openid || '',
       phone: oldFam.phone || '',
-      name: '我',
+      name: (this.data.famName || '').trim() || '我',
       members: this.data.members.map((m, i) => ({
         name: i === 0 ? '我' : ('家人' + (i + 1)),
         role: m.role,

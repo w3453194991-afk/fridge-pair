@@ -1,9 +1,9 @@
 <view class="wrap tabpad">
 
-  <view class="card acct">
+  <view class="card acct" bindtap="onEditName">
     <view class="av">🧑‍🍳</view>
     <view class="in">
-      <view class="nm">{{famName}}</view>
+      <view class="nm">{{famName}}<text class="editname">修改</text></view>
       <view class="sub">{{memberCount}} 位家人 · 冰箱 {{total}} 件</view>
     </view>
   </view>

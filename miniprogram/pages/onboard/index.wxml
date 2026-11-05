@@ -11,7 +11,25 @@
 
   <!-- 第 1 步：几口人 -->
   <block wx:if="{{step == 0}}">
-    <view class="title">你家有几口人？</view>
+    <view class="title">先认识一下</view>
+    <view class="sub">怎么称呼你？会显示在首页和"我的"里</view>
+
+    <view class="namebox">
+      <input
+        class="nameinput"
+        placeholder="比如：林妈妈、小明、张先生"
+        placeholder-class="ph"
+        maxlength="12"
+        value="{{famName}}"
+        bindinput="onName"
+      />
+      <text class="namesuffix">的家</text>
+    </view>
+    <view class="namehint">留空默认叫「我」</view>
+
+    <view class="divider"></view>
+
+    <view class="title2">你家有几口人？</view>
     <view class="sub">按每个人的年龄安排菜量和口味</view>
 
     <view class="members">
