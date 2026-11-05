@@ -7,3 +7,10 @@
 .sname { font-size: 28rpx; font-weight: 700; }
 .saddr { font-size: 22rpx; color: #8B9A96; margin-top: 6rpx; }
 .tiny { font-size: 21rpx; color: #9AA6A1; line-height: 1.7; margin-top: 26rpx; }
+
+.status { font-size: 22rpx; color: #12A576; margin-top: 14rpx; }
+.mt { margin-top: 18rpx; }
+.sgo { font-size: 21rpx; font-weight: 800; color: #12A576; margin-top: 6rpx; }
+.note { background: linear-gradient(120deg, #F7F1FF, #FDF7FF); border-color: #EADFFF; }
+.nt { font-size: 26rpx; font-weight: 800; color: #5B3FA8; }
+.nc { font-size: 22rpx; color: #7A6B96; line-height: 1.85; margin-top: 10rpx; }

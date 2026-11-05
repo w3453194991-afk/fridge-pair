@@ -1,10 +1,13 @@
-<view class="wrap">
+<view class="wrap tablewrap">
 
   <view class="card">
     <view class="t1">🧭 找最近的超市</view>
-    <view class="t2">定位后可以在地图上搜索超市、菜市场，直接看路线。</view>
-    <view class="btn primary mt" bindtap="onLocate">获取我的位置</view>
-    <view class="btn ghost mt" bindtap="onMap">在地图上找超市</view>
+    <view class="t2">授权定位后可以在微信地图里搜超市、菜市场，直接看路线。</view>
+
+    <view class="btn primary mt" bindtap="onLocate">① 获取我的位置</view>
+    <view class="btn ghost mt" bindtap="onMap">② 在地图上找超市</view>
+
+    <view wx:if="{{status}}" class="status">⏳ {{status}}</view>
     <view class="muted mt">{{city}}</view>
   </view>
 
@@ -18,14 +21,20 @@
     <view wx:for="{{shops}}" wx:key="name" class="shop" data-i="{{index}}" bindtap="onOpen">
       <view class="sname">{{item.name}}</view>
       <view class="saddr">{{item.addr}}</view>
+      <view class="sgo">导航 ›</view>
     </view>
   </view>
 
   <view class="btn ghost" bindtap="onCopy">复制「超市 生鲜」去地图 App 搜</view>
 
-  <view class="tiny">
-    小程序内查附近店铺需要地图密钥；这里用微信自带地图选点，
-    定位后会直接显示周边地点，点一下就能导航。
+  <view class="card note">
+    <view class="nt">打不开地图？</view>
+    <view class="nc">
+      ① 开发者工具不支持地图选点 → 用**真机预览**<br/>
+      ② 检查是否拒绝了位置权限 → 点下面按钮去开启<br/>
+      ③ 小程序后台需开通「按需打开位置接口」
+    </view>
+    <view class="btn ghost mt" bindtap="onPerm">打开权限设置</view>
   </view>
 
 </view>
