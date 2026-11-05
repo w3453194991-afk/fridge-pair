@@ -1,102 +1,99 @@
 const G = require('../../lib/shim.js');
 const S = G.DD_STORE;
+let CFG = {};
+try { CFG = require('../../config.js') || {}; } catch (e) {}
 
 Page({
   data: {
-    phone: '',
-    code: '',
-    sent: false,
-    left: 0,
+    loading: false,
     agreed: true,
     tip: '',
-    /* release（正式版）时隐藏演示入口 */
     isDemo: true,
-    envVersion: 'develop'
+    envVersion: 'develop',
+    cloudReady: false,
+    openid: ''
   },
 
   onLoad() {
-    this.timer = null;
     let env = 'develop';
     try {
       const info = wx.getAccountInfoSync();
       env = (info && info.miniProgram && info.miniProgram.envVersion) || 'develop';
-    } catch (e) {
-      env = 'develop';
-    }
-    // develop = 开发版, trial = 体验版, release = 正式版
-    this.setData({ isDemo: env !== 'release', envVersion: env });
+    } catch (e) {}
+    this.setData({
+      isDemo: env !== 'release',
+      envVersion: env,
+      cloudReady: !!(CFG && CFG.CLOUD_ENV)
+    });
   },
 
-  onUnload() {
-    if (this.timer) clearInterval(this.timer);
+  onAgree() {
+    this.setData({ agreed: !this.data.agreed });
   },
 
-  onPhone(e) {
-    this.setData({ phone: e.detail.value, tip: '' });
-  },
-
-  onCode(e) {
-    this.setData({ code: e.detail.value, tip: '' });
-  },
-
-  onSend() {
-    const p = (this.data.phone || '').trim();
-    if (!/^1\d{10}$/.test(p)) {
-      this.setData({ tip: '手机号要 11 位，以 1 开头' });
+  /* 微信一键登录：云函数拿 openid */
+  onWechatLogin() {
+    if (!this.data.agreed) {
+      this.setData({ tip: '请先勾选同意《用户协议》和《隐私政策》' });
       return;
     }
-    const tipText = this.data.isDemo
-      ? '验证码已发送（演示版随便填 6 位，如 123456）'
-      : '验证码已发送，请查收短信';
-    this.setData({ sent: true, left: 60, tip: tipText });
-    if (this.timer) clearInterval(this.timer);
-    this.timer = setInterval(() => {
-      const l = this.data.left - 1;
-      if (l <= 0) {
-        clearInterval(this.timer);
-        this.timer = null;
-        this.setData({ left: 0, sent: false });
-      } else {
-        this.setData({ left: l });
+    if (!CFG || !CFG.CLOUD_ENV) {
+      this.setData({ tip: '未配置云开发环境，请先在 config.js 填 CLOUD_ENV' });
+      return;
+    }
+
+    const self = this;
+    this.setData({ loading: true, tip: '' });
+
+    wx.cloud.callFunction({
+      name: 'login',
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (!d.openid) {
+          self.setData({ loading: false, tip: '登录失败：没拿到 openid' });
+          return;
+        }
+        self.finishLogin(d.openid);
+      },
+      fail: (err) => {
+        self.setData({
+          loading: false,
+          tip: '云函数调用失败：' + ((err && err.errMsg) || '未知')
+        });
       }
-    }, 1000);
+    });
   },
 
-  onSubmit() {
-    const p = (this.data.phone || '').trim();
-    const c = (this.data.code || '').trim();
-    if (!/^1\d{10}$/.test(p)) { this.setData({ tip: '手机号要 11 位' }); return; }
-    if (c.length < 4) { this.setData({ tip: '验证码至少 4 位' }); return; }
-
+  finishLogin(openid) {
     try {
       S.load();
-      S.login(p);
-      // 没有家庭档案就建一份默认的，避免登录后空冰箱
+      // 首次登录：建一份默认家庭档案
       if (!(S.state.family.members || []).length) {
         S.demoFamily();
-        S.state.family.phone = p;
-        S.state.family.loggedIn = true;
-        S.save();
       }
+      S.state.family.openid = openid;
+      S.state.family.loggedIn = true;
+      S.state.family.phone = S.state.family.phone || '';
+      S.state.family.loginAt = Date.now();
+      S.save();
+      this.setData({ openid: openid, loading: false });
     } catch (e) {
-      this.setData({ tip: '登录失败：' + ((e && e.message) || e) });
+      this.setData({ loading: false, tip: '保存失败：' + ((e && e.message) || e) });
       return;
     }
     wx.showToast({ title: '登录成功', icon: 'success' });
     setTimeout(() => wx.reLaunch({ url: '/pages/splash/index' }), 500);
   },
 
+  /* 开发/体验版专用：跳过登录 */
   onDemo() {
     try {
       S.load();
       S.demoFamily();
+      S.state.family.loggedIn = true;
       S.save();
     } catch (e) {}
     wx.showToast({ title: '已进入体验模式', icon: 'none' });
     setTimeout(() => wx.reLaunch({ url: '/pages/splash/index' }), 400);
-  },
-
-  onAgree() {
-    this.setData({ agreed: !this.data.agreed });
   }
 });

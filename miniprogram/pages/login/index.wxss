@@ -47,3 +47,14 @@ page { background: #F4FBF7; }
 .foot { text-align: center; margin-top: 40rpx; }
 .f1 { font-size: 21rpx; color: #9AA6A1; }
 .f2 { font-size: 21rpx; color: #B7C4BE; margin-top: 8rpx; }
+
+.cloudok {
+  font-size: 21rpx; color: #0E8F63; background: #EAFBF2;
+  border-radius: 16rpx; padding: 12rpx 18rpx; margin-bottom: 22rpx;
+}
+.cloudwarn {
+  font-size: 21rpx; color: #B45309; background: #FFF7E8;
+  border-radius: 16rpx; padding: 12rpx 18rpx; margin-bottom: 22rpx;
+}
+.login-btn.loading { opacity: .7; }
+.hint { font-size: 21rpx; color: #9AA6A1; line-height: 1.7; margin-top: 22rpx; text-align: center; }

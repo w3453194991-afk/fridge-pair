@@ -7,47 +7,30 @@
   </view>
 
   <view class="form">
-    <view class="field">
-      <text class="pre">+86</text>
-      <input
-        class="inp"
-        type="number"
-        maxlength="11"
-        placeholder="请输入手机号"
-        value="{{phone}}"
-        bindinput="onPhone"
-      />
-    </view>
-
-    <view class="field">
-      <text class="pre">🔑</text>
-      <input
-        class="inp"
-        type="number"
-        maxlength="6"
-        placeholder="验证码"
-        value="{{code}}"
-        bindinput="onCode"
-      />
-      <view class="sendbtn {{left > 0 ? 'off' : ''}}" bindtap="onSend">
-        {{left > 0 ? (left + 's') : '获取验证码'}}
-      </view>
-    </view>
-
-    <view wx:if="{{tip}}" class="tip">{{tip}}</view>
+    <view wx:if="{{cloudReady}}" class="cloudok">✓ 已连接云端，登录即可使用</view>
+    <view wx:else class="cloudwarn">⚠ 未配置云开发环境（config.js 的 CLOUD_ENV）</view>
 
     <view class="agree" bindtap="onAgree">
       <view class="box {{agreed ? 'on' : ''}}">{{agreed ? '✓' : ''}}</view>
       <text class="atxt">我已阅读并同意《用户协议》和《隐私政策》</text>
     </view>
 
-    <view class="btn primary login-btn" bindtap="onSubmit">登 录</view>
-    <view wx:if="{{isDemo}}" class="btn ghost mt" bindtap="onDemo">一键体验（不用注册）</view>
+    <view wx:if="{{tip}}" class="tip">{{tip}}</view>
+
+    <view class="btn primary login-btn {{loading ? 'loading' : ''}}" bindtap="onWechatLogin">
+      {{loading ? '登录中…' : '微信一键登录'}}
+    </view>
+
+    <view wx:if="{{isDemo}}" class="btn ghost mt" bindtap="onDemo">一键体验（开发版专用）</view>
+
+    <view class="hint">
+      登录后自动创建你的家庭档案，无需手机号、无需注册。
+    </view>
   </view>
 
   <view class="foot">
-    <view wx:if="{{isDemo}}" class="f1">{{envVersion == 'trial' ? '体验版' : '演示版'}}：验证码随便填 6 位即可</view>
-    <view class="f2">登录后可录入食材、生成菜单、拍照记录</view>
+    <view class="f1">我们只使用微信身份标识（openid）区分账号</view>
+    <view class="f2">菜品与营养建议仅供参考，不构成医疗建议</view>
   </view>
 
 </view>
