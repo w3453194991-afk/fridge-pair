@@ -2,24 +2,14 @@
 
   <view class="card">
     <view class="t1">🧭 找最近的超市</view>
-    <view class="t2">先定位，再用地图看周边超市、菜市场，选中就能导航。</view>
+    <view class="t2">一点打开地图，定位后就能看到周边超市、菜市场，选中直接导航。</view>
 
-    <view class="btn primary mt" bindtap="onLocate">① 获取我的位置</view>
-    <view class="btn ghost mt" bindtap="onMap">② 在地图上找超市</view>
+    <view class="btn primary mt" bindtap="onTencentMap">📍 打开腾讯地图</view>
+    <view class="btn ghost mt" bindtap="onMap">🗺 在地图上找超市</view>
+    <view class="btn ghost mt" bindtap="onLocate">🧭 只获取我的位置</view>
 
     <view wx:if="{{status}}" class="status">⏳ {{status}}</view>
     <view class="muted mt">{{city}}</view>
-  </view>
-
-  <view class="card">
-    <view class="h2">在高德地图里打开</view>
-    <view class="h3">小程序不能直接唤起高德 App，用链接是最稳的方式。</view>
-    <view class="btn amap mt" bindtap="onAmap">📍 复制高德地图链接</view>
-    <view class="btn ghost mt" bindtap="onWechatMap">🟢 用微信地图查看当前位置</view>
-    <view class="hint">
-      复制后在浏览器地址栏粘贴，或发给「文件传输助手」点开，
-      会提示「用高德地图打开」，直接就跳到高德了。
-    </view>
   </view>
 
   <view wx:if="{{advice}}" class="card tip">
@@ -36,16 +26,19 @@
     </view>
   </view>
 
-  <view class="btn ghost" bindtap="onCopy">复制「超市 生鲜」去高德搜</view>
-
-  <view class="card note">
-    <view class="nt">打不开地图？</view>
-    <view class="nc">
-      · 开发者工具不支持地图选点 → 用真机预览<br/>
-      · 检查位置权限是否被拒 → 点下面按钮开启<br/>
-      · 小程序后台需开通「按需打开位置接口」
-    </view>
-    <view class="btn ghost mt" bindtap="onPerm">打开权限设置</view>
+  <view class="card">
+    <view class="h2">想用腾讯地图 App？</view>
+    <view class="h3">小程序的「打开腾讯地图」用的是微信内置地图（就是腾讯地图的数据），
+    里面点「路线 / 导航」就能选腾讯地图 App。</view>
+    <view class="btn ghost mt" bindtap="onTencentScheme">复制腾讯地图 App 链接</view>
   </view>
+
+  <view class="card">
+    <view class="h2">想用高德？</view>
+    <view class="h3">小程序不能直接唤起高德 App，只能复制链接后在浏览器打开。</view>
+    <view class="btn amap mt" bindtap="onAmap">📍 复制高德地图链接</view>
+  </view>
+
+  <view class="btn ghost" bindtap="onCopy">复制「超市 生鲜」去地图 App 搜</view>
 
 </view>

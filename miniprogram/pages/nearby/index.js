@@ -144,6 +144,74 @@ Page({
     });
   },
 
+  /* 一点打开腾讯地图（微信内置地图就是腾讯地图） */
+  onTencentMap() {
+    const self = this;
+    const open = (lat, lng, name) => {
+      wx.openLocation({
+        latitude: lat,
+        longitude: lng,
+        name: name || '我的位置',
+        scale: 16,
+        fail: (err) => {
+          wx.showModal({
+            title: '打不开地图',
+            content: (err && err.errMsg) || '未知错误',
+            showCancel: false
+          });
+        }
+      });
+    };
+
+    if (this.data.lat && this.data.lng) {
+      return open(this.data.lat, this.data.lng);
+    }
+
+    this.setData({ status: '定位中…' });
+    wx.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        self.setData({
+          lat: res.latitude,
+          lng: res.longitude,
+          city: '已定位（' + res.latitude.toFixed(3) + ', ' + res.longitude.toFixed(3) + '）',
+          status: ''
+        });
+        open(res.latitude, res.longitude);
+      },
+      fail: (err) => {
+        self.setData({ status: '', city: '定位失败' });
+        wx.showModal({
+          title: '需要先定位',
+          content: (err && err.errMsg) + '\n\n请允许位置权限后再试，或先用「在地图上找超市」手动选点。',
+          showCancel: false
+        });
+      }
+    });
+  },
+
+  /* 复制腾讯地图 App 的 scheme，能在装了腾讯地图的手机上直接唤起 */
+  onTencentScheme() {
+    const lat = this.data.lat;
+    const lng = this.data.lng;
+    if (!lat || !lng) {
+      wx.showToast({ title: '请先获取位置', icon: 'none' });
+      return;
+    }
+    const url = 'qqmap://map/marker?marker=coord:' + lat + ',' + lng +
+      ';title:' + encodeURIComponent('我的位置') + '&referer=fridgepair';
+    wx.setClipboardData({
+      data: url,
+      success: () => {
+        wx.showModal({
+          title: '腾讯地图链接已复制',
+          content: '粘贴到手机浏览器打开，会直接唤起腾讯地图 App。\n\n（没装腾讯地图的话，用上面的「打开腾讯地图」即可）',
+          showCancel: false
+        });
+      }
+    });
+  },
+
   /* 用高德地图打开（小程序不能直接唤 App，走链接） */
   onAmap() {
     const lat = this.data.lat;
