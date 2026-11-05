@@ -13,14 +13,11 @@ Page({
     name: '我',
     members: 0,
     total: 0,
-    err: '',
-    dbgCore: ''
+    err: ''
   },
 
   onLoad() {
-    const ok = [!!D, !!E, !!S].join('/');
-    console.log('[mp] 核心加载 data/engine/store =', ok, '| 食材', D ? D.FOOD_DB.length : 0);
-    this.setData({ dbgCore: ok });
+    console.log('[mp] core', [!!D, !!E, !!S].join('/'));
   },
 
   onShow() {

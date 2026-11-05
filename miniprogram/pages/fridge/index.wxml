@@ -1,7 +1,5 @@
 <view class="wrap">
 
-  <view class="dbg">✅ 小程序已启动 · 数据：{{total}} 件 · {{dbgCore}}</view>
-
   <view wx:if="{{err}}" class="card errbox">
     <view class="errt">⚠️ 页面初始化失败</view>
     <view class="errd">{{err}}</view>
