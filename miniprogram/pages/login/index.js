@@ -8,11 +8,23 @@ Page({
     sent: false,
     left: 0,
     agreed: true,
-    tip: ''
+    tip: '',
+    /* release（正式版）时隐藏演示入口 */
+    isDemo: true,
+    envVersion: 'develop'
   },
 
   onLoad() {
     this.timer = null;
+    let env = 'develop';
+    try {
+      const info = wx.getAccountInfoSync();
+      env = (info && info.miniProgram && info.miniProgram.envVersion) || 'develop';
+    } catch (e) {
+      env = 'develop';
+    }
+    // develop = 开发版, trial = 体验版, release = 正式版
+    this.setData({ isDemo: env !== 'release', envVersion: env });
   },
 
   onUnload() {
@@ -33,7 +45,10 @@ Page({
       this.setData({ tip: '手机号要 11 位，以 1 开头' });
       return;
     }
-    this.setData({ sent: true, left: 60, tip: '验证码已发送（演示版随便填 6 位，如 123456）' });
+    const tipText = this.data.isDemo
+      ? '验证码已发送（演示版随便填 6 位，如 123456）'
+      : '验证码已发送，请查收短信';
+    this.setData({ sent: true, left: 60, tip: tipText });
     if (this.timer) clearInterval(this.timer);
     this.timer = setInterval(() => {
       const l = this.data.left - 1;

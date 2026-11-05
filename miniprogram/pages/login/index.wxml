@@ -42,11 +42,11 @@
     </view>
 
     <view class="btn primary login-btn" bindtap="onSubmit">登 录</view>
-    <view class="btn ghost mt" bindtap="onDemo">一键体验（不用注册）</view>
+    <view wx:if="{{isDemo}}" class="btn ghost mt" bindtap="onDemo">一键体验（不用注册）</view>
   </view>
 
   <view class="foot">
-    <view class="f1">演示版：验证码随便填 6 位即可</view>
+    <view wx:if="{{isDemo}}" class="f1">{{envVersion == 'trial' ? '体验版' : '演示版'}}：验证码随便填 6 位即可</view>
     <view class="f2">登录后可录入食材、生成菜单、拍照记录</view>
   </view>
 
