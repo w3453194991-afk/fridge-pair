@@ -1,4 +1,5 @@
 const G = require('../lib/shim.js');
+const privacy = require('../lib/privacy.js');
 
 Component({
   data: {
@@ -30,18 +31,20 @@ Component({
     },
 
     shoot() {
-      wx.chooseMedia({
-        count: 1,
-        mediaType: ['image'],
-        sourceType: ['camera', 'album'],
-        camera: 'back',
-        success: (res) => {
-          const path = res.tempFiles[0].tempFilePath;
-          wx.navigateTo({
-            url: '/pages/scan/index?photo=' + encodeURIComponent(path)
-          });
-        },
-        fail: () => {}
+      privacy.ensure(() => {
+        wx.chooseMedia({
+          count: 1,
+          mediaType: ['image'],
+          sourceType: ['camera', 'album'],
+          camera: 'back',
+          success: (res) => {
+            const path = res.tempFiles[0].tempFilePath;
+            wx.navigateTo({
+              url: '/pages/scan/index?photo=' + encodeURIComponent(path)
+            });
+          },
+          fail: () => {}
+        });
       });
     },
 

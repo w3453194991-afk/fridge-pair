@@ -1,4 +1,5 @@
 const G = require('../../lib/shim.js');
+const privacy = require('../../lib/privacy.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 let CONFIG = { API_BASE: '', USE_REMOTE: false, TIMEOUT: 15000 };
 try { CONFIG = require('../../config.js') || CONFIG; } catch (e) {}
@@ -206,16 +207,18 @@ Page({
 
   onRetake() {
     const self = this;
-    wx.chooseMedia({
-      count: 1,
-      mediaType: ['image'],
-      sourceType: ['camera', 'album'],
-      camera: 'back',
-      success: (res) => {
-        self.setData({ photo: res.tempFiles[0].tempFilePath });
-        self.analyze();
-      },
-      fail: () => {}
+    privacy.ensure(() => {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['camera', 'album'],
+        camera: 'back',
+        success: (res) => {
+          self.setData({ photo: res.tempFiles[0].tempFilePath });
+          self.analyze();
+        },
+        fail: () => {}
+      });
     });
   },
 

@@ -1,4 +1,5 @@
 const G = require('../../lib/shim.js');
+const privacy = require('../../lib/privacy.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 const WORDS = { g: '充足', y: '正常', p: '临期', b: '过期' };
 const COLORS = { g: '#35C77E', y: '#F5B301', p: '#9B6BF5', b: '#9AA3AF' };
@@ -228,16 +229,18 @@ Page({
   },
 
   onShoot() {
-    wx.chooseMedia({
-      count: 1,
-      mediaType: ['image'],
-      sourceType: ['camera', 'album'],
-      camera: 'back',
-      success: (res) => {
-        const path = res.tempFiles[0].tempFilePath;
-        wx.navigateTo({ url: '/pages/scan/index?photo=' + encodeURIComponent(path) });
-      },
-      fail: () => {}
+    privacy.ensure(() => {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['camera', 'album'],
+        camera: 'back',
+        success: (res) => {
+          const path = res.tempFiles[0].tempFilePath;
+          wx.navigateTo({ url: '/pages/scan/index?photo=' + encodeURIComponent(path) });
+        },
+        fail: () => {}
+      });
     });
   }
 });
