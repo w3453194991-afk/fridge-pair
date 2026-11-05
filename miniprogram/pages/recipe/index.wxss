@@ -113,3 +113,22 @@
 .ptag { font-size: 18rpx; font-weight: 800; color: #7C8B87; background: #F2F7F4; border-radius: 8rpx; padding: 3rpx 10rpx; }
 .ptag.ok { color: #0E8F63; background: #E6FAF1; }
 .pwhy { font-size: 22rpx; color: #7C8B87; margin-top: 8rpx; line-height: 1.6; }
+
+/* ---------- 置顶图钉：未置顶灰色，置顶后亮绿 ---------- */
+.pin-ic { position: relative; width: 26rpx; height: 28rpx; }
+.pin-ic::before {
+  content: ''; position: absolute; left: 2rpx; top: 0;
+  width: 22rpx; height: 17rpx; border-radius: 9rpx 9rpx 3rpx 3rpx;
+  background: #C9D6D1;
+}
+.pin-ic::after {
+  content: ''; position: absolute; left: 11rpx; top: 15rpx;
+  width: 4rpx; height: 13rpx; border-radius: 0 0 2rpx 2rpx;
+  background: #C9D6D1;
+}
+.rd-pin.on, .icobtn.on { background: #E6FAF1; border: 1rpx solid #CBEFE0; }
+.rd-pin.on .pin-ic::before, .rd-pin.on .pin-ic::after,
+.icobtn.on .pin-ic::before, .icobtn.on .pin-ic::after {
+  background: linear-gradient(180deg, #3FDCA4, #12A576);
+  box-shadow: 0 2rpx 8rpx -2rpx rgba(18, 165, 118, .9);
+}
