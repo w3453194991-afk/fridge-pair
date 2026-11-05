@@ -18,7 +18,9 @@ Page({
     tip: ''
   },
 
-  onLoad() {
+  onLoad(q) {
+    this.isEdit = !!(q && q.edit === '1');
+    if (this.isEdit) wx.setNavigationBarTitle({ title: '家庭档案' });
     const st = S.state || {};
     const fam = st.family || {};
 
@@ -179,11 +181,20 @@ Page({
     }
 
     wx.showToast({ title: '设置完成', icon: 'success' });
-    setTimeout(() => wx.reLaunch({ url: '/pages/splash/index' }), 500);
+    if (this.isEdit) {
+      setTimeout(() => wx.navigateBack(), 500);
+    } else {
+      setTimeout(() => wx.reLaunch({ url: '/pages/splash/index' }), 500);
+    }
   },
 
   onSkip() {
-    // 跳过也用默认档案，但保证 registered
+    // 编辑模式下跳过 = 直接返回，不改数据
+    if (this.isEdit) {
+      wx.navigateBack();
+      return;
+    }
+    // 首次进入跳过：用一份最小档案，保证 registered
     const oldFam = S.state.family || {};
     const fam = {
       openid: oldFam.openid || '',

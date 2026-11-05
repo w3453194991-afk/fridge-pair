@@ -47,6 +47,10 @@ Page({
     wx.navigateTo({ url: '/pages/chat/index' });
   },
 
+  onSettings() {
+    wx.navigateTo({ url: '/pages/settings/index' });
+  },
+
   onEditName() {
     const cur = (S.state.family && S.state.family.name) || '';
     wx.showModal({

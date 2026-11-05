@@ -1,0 +1,12 @@
+.line { padding: 26rpx 0; border-top: 1rpx solid #F2F7F4; }
+.line:first-child { border-top: 0; }
+.lab { font-size: 27rpx; font-weight: 600; color: #22332C; }
+.val { font-size: 25rpx; color: #6C7F78; }
+.val.small { font-size: 21rpx; max-width: 360rpx; text-align: right; }
+.mono { font-family: monospace; font-size: 22rpx; }
+.go { color: #C9D6D1; font-size: 30rpx; margin-left: 8rpx; }
+
+.logout {
+  margin-top: 40rpx; text-align: center; font-size: 26rpx; font-weight: 800; color: #B91C1C;
+  background: #FFF5F5; border: 1rpx solid #FADADA; border-radius: 24rpx; padding: 28rpx 0;
+}

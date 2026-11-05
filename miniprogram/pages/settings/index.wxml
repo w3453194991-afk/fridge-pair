@@ -1,0 +1,77 @@
+<view class="wrap">
+
+  <view class="sec"><view class="bar2"></view><view class="t">账号</view></view>
+  <view class="card">
+    <view class="row between line" bindtap="onEditName">
+      <text class="lab">称呼</text>
+      <text class="val">{{famName}}<text class="go">›</text></text>
+    </view>
+    <view class="row between line">
+      <text class="lab">登录方式</text>
+      <text class="val">微信（openid）</text>
+    </view>
+    <view class="row between line">
+      <text class="lab">账号 ID</text>
+      <text class="val mono">{{openidShort}}</text>
+    </view>
+  </view>
+
+  <view class="sec"><view class="bar2"></view><view class="t">家庭档案</view></view>
+  <view class="card">
+    <view class="row between line" bindtap="onFamily">
+      <text class="lab">成员 · 忌口 · 健康</text>
+      <text class="val">{{memberCount}} 位家人<text class="go">›</text></text>
+    </view>
+  </view>
+
+  <view class="sec"><view class="bar2"></view><view class="t">数据</view></view>
+  <view class="card">
+    <view class="row between line">
+      <text class="lab">云同步</text>
+      <text class="val">{{cloudMode}}</text>
+    </view>
+    <view class="row between line">
+      <text class="lab">同步状态</text>
+      <text class="val small">{{syncText}}</text>
+    </view>
+    <view class="row between line">
+      <text class="lab">冰箱食材</text>
+      <text class="val">{{foodCount}} 件</text>
+    </view>
+    <view class="row between line" bindtap="onManualSync">
+      <text class="lab">立即同步</text>
+      <text class="val">上传到云端<text class="go">›</text></text>
+    </view>
+  </view>
+
+  <view class="sec"><view class="bar2"></view><view class="t">识别</view></view>
+  <view class="card">
+    <view class="row between line">
+      <text class="lab">今日识别次数</text>
+      <text class="val">{{scanUsed}} / {{scanLimit > 0 ? scanLimit : '不限'}}</text>
+    </view>
+    <view class="row between line" bindtap="onResetQuota">
+      <text class="lab">重置今日次数</text>
+      <text class="val">开发者用<text class="go">›</text></text>
+    </view>
+  </view>
+
+  <view class="sec"><view class="bar2"></view><view class="t">通用</view></view>
+  <view class="card">
+    <view class="row between line" bindtap="onClearLocal">
+      <text class="lab">清除本地缓存</text>
+      <text class="val">保留云端<text class="go">›</text></text>
+    </view>
+    <view class="row between line" bindtap="onPrivacy">
+      <text class="lab">隐私说明</text>
+      <text class="go">›</text>
+    </view>
+    <view class="row between line" bindtap="onAbout">
+      <text class="lab">关于</text>
+      <text class="val">{{version}}<text class="go">›</text></text>
+    </view>
+  </view>
+
+  <view class="logout" bindtap="onLogout">退出登录</view>
+
+</view>

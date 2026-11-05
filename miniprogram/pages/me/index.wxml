@@ -52,6 +52,10 @@
       <text>🧭 附近超市</text>
       <text class="dgo">›</text>
     </view>
+    <view class="line2 row between" bindtap="onSettings">
+      <text>⚙️ 设置</text>
+      <text class="dgo">›</text>
+    </view>
   </view>
 
   <view class="sec"><view class="bar2"></view><view class="t">演示工具</view></view>
