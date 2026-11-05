@@ -1,6 +1,6 @@
 {
   "description": "冰箱对对碰 · 微信小程序",
-  "appid": "touristappid",
+  "appid": "wx4ca9bf3e72ea7459",
   "projectname": "fridge-pair-mp",
   "miniprogramRoot": "./",
   "compileType": "miniprogram",
@@ -11,6 +11,28 @@
     "enhance": true,
     "postcss": true,
     "minified": true,
-    "nodeModules": false
-  }
+    "nodeModules": false,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
 }
