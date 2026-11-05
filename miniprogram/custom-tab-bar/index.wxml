@@ -1,0 +1,26 @@
+<view class="bar">
+  <view class="{{c0}}" data-i="0" bindtap="go">
+    <view class="ic">🧊</view>
+    <view class="lb">冰箱</view>
+  </view>
+
+  <view class="{{c1}}" data-i="1" bindtap="go">
+    <view class="ic">📖</view>
+    <view class="lb">菜谱</view>
+  </view>
+
+  <view class="camwrap" bindtap="shoot">
+    <view class="cam">📷</view>
+    <view class="camlb">拍照入库</view>
+  </view>
+
+  <view class="{{c2}}" data-i="2" bindtap="go">
+    <view class="ic">🍽</view>
+    <view class="lb">配餐</view>
+  </view>
+
+  <view class="{{c3}}" data-i="3" bindtap="go">
+    <view class="ic">👤</view>
+    <view class="lb">我的</view>
+  </view>
+</view>

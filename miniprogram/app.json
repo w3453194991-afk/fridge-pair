@@ -1,10 +1,13 @@
 {
   "pages": [
+    "pages/splash/index",
     "pages/fridge/index",
     "pages/recipe/index",
-    "pages/dish/index",
     "pages/plan/index",
-    "pages/me/index"
+    "pages/me/index",
+    "pages/dish/index",
+    "pages/chat/index",
+    "pages/nearby/index"
   ],
   "window": {
     "navigationBarTitleText": "冰箱对对碰",
@@ -14,6 +17,7 @@
     "backgroundTextStyle": "dark"
   },
   "tabBar": {
+    "custom": true,
     "color": "#7C8B87",
     "selectedColor": "#12A576",
     "backgroundColor": "#FFFFFF",
@@ -25,6 +29,12 @@
       { "pagePath": "pages/me/index", "text": "我的" }
     ]
   },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于查找离你家最近的超市"
+    }
+  },
+  "requiredPrivateInfos": ["getLocation", "chooseLocation"],
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }

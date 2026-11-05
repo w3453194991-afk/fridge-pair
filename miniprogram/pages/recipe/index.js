@@ -14,7 +14,8 @@ Page({
     allCls: 'chip'
   },
 
-  onShow() { this.refresh(); },
+  onShow() {
+    if (this.getTabBar && this.getTabBar()) this.getTabBar().setSel(1); this.refresh(); },
 
   refresh() {
     const foods = S.state.foods;

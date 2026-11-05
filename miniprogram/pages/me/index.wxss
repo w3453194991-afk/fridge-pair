@@ -21,3 +21,5 @@
 .dgo { color: #C9D6D1; font-size: 32rpx; }
 
 .about { text-align: center; font-size: 21rpx; color: #9AA6A1; margin-top: 20rpx; }
+
+.dgo { color: #C9D6D1; font-size: 32rpx; }

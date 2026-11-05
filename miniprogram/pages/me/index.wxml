@@ -42,6 +42,18 @@
     </view>
   </view>
 
+  <view class="sec"><view class="bar2"></view><view class="t">更多</view></view>
+  <view class="card">
+    <view class="line2 row between" bindtap="onChat">
+      <text>🤖 问问冰箱（AI 助手）</text>
+      <text class="dgo">›</text>
+    </view>
+    <view class="line2 row between" bindtap="onNearby">
+      <text>🧭 附近超市</text>
+      <text class="dgo">›</text>
+    </view>
+  </view>
+
   <view class="sec"><view class="bar2"></view><view class="t">演示工具</view></view>
   <view class="card">
     <view class="line2 row between">

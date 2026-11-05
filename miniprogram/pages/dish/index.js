@@ -32,6 +32,17 @@ Page({
     });
   },
 
+  onVideo() {
+    const name = (this.data.dish && this.data.dish.name) || '';
+    let url = '';
+    try { url = E.videoSearch('bili', name); } catch (e) { url = ''; }
+    if (!url) url = 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(name);
+    wx.setClipboardData({
+      data: url,
+      success: () => wx.showToast({ title: '视频链接已复制', icon: 'none' })
+    });
+  },
+
   onCook() {
     if (!this.data.can) {
       wx.showToast({ title: '还差食材，先补料', icon: 'none' });

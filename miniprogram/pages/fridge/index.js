@@ -37,7 +37,16 @@ Page({
   },
 
   onShow() {
+    if (this.getTabBar && this.getTabBar()) this.getTabBar().setSel(0);
     if (this.ready) this.refresh();
+  },
+
+  onChat() {
+    wx.navigateTo({ url: '/pages/chat/index' });
+  },
+
+  onNearby() {
+    wx.navigateTo({ url: '/pages/nearby/index' });
   },
 
   refresh() {

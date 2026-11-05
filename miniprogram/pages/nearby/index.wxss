@@ -1,0 +1,9 @@
+.t1 { font-size: 34rpx; font-weight: 800; }
+.t2 { font-size: 24rpx; color: #7C8B87; margin-top: 10rpx; line-height: 1.6; }
+.mt { margin-top: 20rpx; }
+.tip { background: linear-gradient(120deg, #F7F1FF, #FDF7FF); border-color: #EADFFF; }
+.tt { font-size: 28rpx; font-weight: 800; margin-bottom: 10rpx; }
+.shop { padding: 18rpx 0; border-top: 1rpx solid #F2F7F4; }
+.sname { font-size: 28rpx; font-weight: 700; }
+.saddr { font-size: 22rpx; color: #8B9A96; margin-top: 6rpx; }
+.tiny { font-size: 21rpx; color: #9AA6A1; line-height: 1.7; margin-top: 26rpx; }

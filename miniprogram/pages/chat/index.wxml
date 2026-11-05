@@ -1,0 +1,31 @@
+<view class="chatpage">
+
+  <scroll-view scroll-y class="msgs" scroll-into-view="{{lastId}}" scroll-with-animation>
+    <view
+      wx:for="{{msgs}}"
+      wx:key="id"
+      id="{{item.id}}"
+      class="msg {{item.role}}"
+    >
+      <view class="bubble">{{item.text}}</view>
+    </view>
+    <view style="height:24rpx"></view>
+  </scroll-view>
+
+  <view class="chips">
+    <view wx:for="{{chips}}" wx:key="*this" class="chip" data-t="{{item}}" bindtap="onChip">{{item}}</view>
+  </view>
+
+  <view class="inputbar">
+    <input
+      class="inp"
+      value="{{draft}}"
+      placeholder="试试：我对海鲜过敏"
+      bindinput="onInput"
+      confirm-type="send"
+      bindconfirm="onSend"
+    />
+    <view class="send" bindtap="onSend">发送</view>
+  </view>
+
+</view>

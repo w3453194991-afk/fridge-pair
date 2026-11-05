@@ -14,7 +14,8 @@ Page({
     total: 0
   },
 
-  onShow() { this.render(); },
+  onShow() {
+    if (this.getTabBar && this.getTabBar()) this.getTabBar().setSel(3); this.render(); },
 
   render() {
     const st = S.state;
@@ -40,6 +41,14 @@ Page({
       health: health,
       total: total
     });
+  },
+
+  onChat() {
+    wx.navigateTo({ url: '/pages/chat/index' });
+  },
+
+  onNearby() {
+    wx.navigateTo({ url: '/pages/nearby/index' });
   },
 
   onTravel() {

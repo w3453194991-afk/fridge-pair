@@ -44,6 +44,7 @@
 
   <view class="btns">
     <view class="btn primary" bindtap="onCook">开始做菜 · 更新库存</view>
+    <view class="btn ghost mt" bindtap="onVideo">▶ 复制视频教程链接（B 站）</view>
   </view>
 
 </view>

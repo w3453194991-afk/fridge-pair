@@ -125,3 +125,12 @@
 .errbox { background: #FFF6F6; border-color: #F6D6D6; }
 .errt { font-size: 30rpx; font-weight: 800; color: #B91C1C; margin-bottom: 12rpx; }
 .errd { font-size: 24rpx; color: #8A4B4B; line-height: 1.7; word-break: break-all; }
+
+.quickrow { display: flex; margin: 22rpx 0 6rpx; }
+.quick {
+  flex: 1; text-align: center; padding: 20rpx 0; border-radius: 24rpx;
+  font-size: 25rpx; font-weight: 800; color: #0E8F63;
+  background: #EAFBF2; border: 1rpx solid #CBEFE0;
+}
+.quick:first-child { margin-right: 16rpx; }
+.quick:active { transform: scale(.97); }

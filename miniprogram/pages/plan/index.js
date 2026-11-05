@@ -4,7 +4,8 @@ const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 Page({
   data: { days: [], has: false, system: '中式' },
 
-  onShow() { this.render(); },
+  onShow() {
+    if (this.getTabBar && this.getTabBar()) this.getTabBar().setSel(2); this.render(); },
 
   render() {
     const st = S.state;

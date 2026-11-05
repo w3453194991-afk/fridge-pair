@@ -1,0 +1,64 @@
+<view class="splash">
+
+  <!-- 开机阶段 -->
+  <view wx:if="{{phase == 0}}" class="boot">
+    <view class="crt"></view>
+    <view class="fridge">
+      <view class="body">
+        <view class="door"></view>
+        <view class="handle h1"></view>
+        <view class="handle h2"></view>
+      </view>
+      <view class="leaf">🥬</view>
+    </view>
+    <view class="flash"></view>
+    <view class="ring r1"></view>
+    <view class="ring r2"></view>
+    <view class="ring r3"></view>
+    <view class="logo">冰箱<text class="lg2">对对碰</text></view>
+  </view>
+
+  <!-- 机器人开屏 -->
+  <view wx:else class="robotpage">
+    <view class="skip" bindtap="onSkip">跳过</view>
+
+    <view class="bot">
+      <view class="sprout">
+        <view class="stem"></view>
+        <view class="lf l"></view>
+        <view class="lf r"></view>
+      </view>
+      <view class="head">
+        <view class="band"></view>
+        <view class="cup l"></view>
+        <view class="cup r"></view>
+        <view class="screen">
+          <view class="gloss"></view>
+          <view class="eye l"></view>
+          <view class="eye r"></view>
+          <view class="mouth"></view>
+        </view>
+      </view>
+      <view class="torso">
+        <view class="apron">
+          <view class="chest">🥬</view>
+        </view>
+        <view class="arm l"></view>
+        <view class="arm r"></view>
+      </view>
+      <view class="hud"></view>
+    </view>
+
+    <view class="words">
+      <view wx:if="{{line1}}" class="ln">{{line1}}</view>
+      <view wx:if="{{line2}}" class="ln">{{line2}}</view>
+      <view wx:if="{{line3}}" class="ln ln3">{{line3}}</view>
+    </view>
+
+    <view class="acts">
+      <view class="btn" bindtap="onGo">{{hasUrgent ? '⚡ 帮我安排临期菜单' : '🍳 生成今天的菜单'}}</view>
+      <view class="btn ghost" bindtap="onSkip">我自己逛逛</view>
+    </view>
+  </view>
+
+</view>
