@@ -1,7 +1,10 @@
 const G = require('../../lib/shim.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
+let CONFIG = { API_BASE: '', USE_REMOTE: false, TIMEOUT: 15000 };
+try { CONFIG = require('../../config.js') || CONFIG; } catch (e) {}
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function inDb(name) { return (D.FOOD_DB || []).some(f => f.name === name); }
 
 Page({
   data: {
@@ -9,57 +12,114 @@ Page({
     scanning: true,
     items: [],
     checkedCount: 0,
-    round: 0
+    round: 0,
+    sourceText: '',
+    sourceCls: 'src'
   },
 
   onLoad(q) {
     this.setData({ photo: (q && q.photo) || '' });
-    this.skip = q && q.skip === '1';
-    if (this.skip) {
-      this.setData({ scanning: false });
-      this.build();
-    } else {
-      setTimeout(() => {
-        this.setData({ scanning: false });
-        this.build();
-      }, 1100);
-    }
+    this.analyze();
   },
 
-  /* 生成一批候选（演示识别：从场景库取一组，再混入干扰项） */
-  build() {
+  /* 优先走中转服务，失败回退本地演示 */
+  analyze() {
+    const self = this;
+    this.setData({ scanning: true, sourceText: '' });
+
+    if (!CONFIG.USE_REMOTE || !CONFIG.API_BASE || !this.data.photo) {
+      setTimeout(() => self.localBuild('演示识别（未连服务）'), 1100);
+      return;
+    }
+
+    let fs = null;
+    try { fs = wx.getFileSystemManager(); } catch (e) { fs = null; }
+
+    const send = (base64) => {
+      wx.request({
+        url: CONFIG.API_BASE + '/recognize',
+        method: 'POST',
+        timeout: CONFIG.TIMEOUT || 15000,
+        header: { 'content-type': 'application/json' },
+        data: { image: base64 },
+        success: (res) => {
+          const d = (res && res.data) || {};
+          const list = Array.isArray(d.items) ? d.items : [];
+          if (!list.length) { self.localBuild('识别无结果，已回退'); return; }
+          self.applyResult(list, d.source === 'baidu' ? '百度 AI 识别' : '服务端识别');
+        },
+        fail: (err) => {
+          console.warn('[scan] 请求失败', err && err.errMsg);
+          self.localBuild('服务未连接，已回退演示');
+        }
+      });
+    };
+
+    if (!fs) {
+      this.localBuild('环境不支持读图，已回退');
+      return;
+    }
+
+    fs.readFile({
+      filePath: this.data.photo,
+      encoding: 'base64',
+      success: (r) => send(r.data),
+      fail: () => this.localBuild('读图失败，已回退')
+    });
+  },
+
+  applyResult(list, sourceText) {
+    const items = list.slice(0, 8).map((x, i) => {
+      const name = String(x.name || '').trim();
+      const meta = E.foodMeta(name);
+      const score = typeof x.score === 'number' ? x.score : 0.6;
+      return {
+        idx: i,
+        name: name,
+        emoji: meta.emoji || '🍽',
+        unit: meta.unit || '份',
+        qty: 1,
+        shelf: meta.shelf || 7,
+        storage: meta.storage || '',
+        conf: Math.round(score * 100),
+        checked: score >= 0.7,
+        unknown: !inDb(name)
+      };
+    }).filter(x => x.name);
+
+    this.setData({
+      scanning: false,
+      items: items,
+      sourceText: sourceText,
+      round: this.data.round + 1
+    }, () => this.syncCount());
+  },
+
+  /* 本地演示：从场景库取一组 + 少量干扰项 */
+  localBuild(sourceText) {
     const scenes = D.PHOTO_SCENES || [];
     const pool = [];
     if (scenes.length) {
       const scene = pick(scenes);
       (scene.items || []).forEach(it => pool.push(it));
     }
-    // 再加几样"冰箱常见"的干扰项，模拟识别候选
     const extra = ['番茄', '鸡蛋', '牛奶', '菠菜', '土豆', '洋葱', '胡萝卜', '青椒', '豆腐', '苹果'];
     for (let i = 0; i < 3; i++) {
       const n = pick(extra);
-      if (!pool.some(p => p.name === n)) {
-        pool.push({ name: n, qty: 1 });
-      }
+      if (!pool.some(p => p.name === n)) pool.push({ name: n, qty: 1 });
     }
-
-    const items = pool.slice(0, 6).map((it, i) => {
+    const list = pool.slice(0, 6).map(it => {
       const meta = E.foodMeta(it.name);
-      const conf = Math.round((0.62 + Math.random() * 0.36) * 100);
       return {
-        idx: i,
         name: it.name,
+        score: 0.62 + Math.random() * 0.36,
         emoji: meta.emoji,
         unit: meta.unit || '份',
-        qty: it.qty || 1,
         shelf: it.shelf || meta.shelf || 7,
-        storage: it.storage || meta.storage || '',
-        conf: conf,
-        checked: conf >= 70
+        storage: meta.storage || ''
       };
     });
-
-    this.setData({ items: items, round: this.data.round + 1 }, () => this.syncCount());
+    this.applyResult(list, sourceText);
   },
 
   syncCount() {
@@ -92,22 +152,15 @@ Page({
       sourceType: ['camera', 'album'],
       camera: 'back',
       success: (res) => {
-        self.setData({ photo: res.tempFiles[0].tempFilePath, scanning: true });
-        setTimeout(() => {
-          self.setData({ scanning: false });
-          self.build();
-        }, 1100);
+        self.setData({ photo: res.tempFiles[0].tempFilePath });
+        self.analyze();
       },
       fail: () => {}
     });
   },
 
   onRescan() {
-    this.setData({ scanning: true });
-    setTimeout(() => {
-      this.setData({ scanning: false });
-      this.build();
-    }, 800);
+    this.analyze();
   },
 
   onConfirm() {
@@ -129,9 +182,5 @@ Page({
 
   onCancel() {
     wx.switchTab({ url: '/pages/fridge/index' });
-  },
-
-  onDishAll() {
-    this.setData({ items: this.data.items.map(i => (i.checked = true, i)) }, () => this.syncCount());
   }
 });

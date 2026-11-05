@@ -1,0 +1,12 @@
+{
+  "name": "fridge-pair-relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "冰箱对对碰 · 食材识别中转服务（把百度 AI 密钥留在服务端）",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "mock": "node index.js --mock"
+  },
+  "engines": { "node": ">=16" }
+}

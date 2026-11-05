@@ -9,14 +9,15 @@
 
   <view wx:if="{{!scanning}}" class="panel">
     <view class="ptitle">识别结果 <text class="pcount">{{checkedCount}}/{{items.length}} 已选</text></view>
-    <view class="psub">演示版按场景库给候选，勾选你实际放进去的东西</view>
+    <view wx:if="{{sourceText}}" class="psub">{{sourceText}} · 勾选确认后入库</view>
+    <view wx:else class="psub">勾选你实际放进冰箱的东西</view>
 
     <scroll-view scroll-y class="list">
       <view wx:for="{{items}}" wx:key="name" class="item" data-i="{{item.idx}}" bindtap="onToggle">
         <view class="ck {{item.checked ? 'on' : ''}}">{{item.checked ? '✓' : ''}}</view>
         <view class="emo">{{item.emoji}}</view>
         <view class="mid">
-          <view class="nm">{{item.name}}</view>
+          <view class="nm">{{item.name}}<text wx:if="{{item.unknown}}" class="outdb">库外</text></view>
           <view class="cf">置信度 {{item.conf}}%</view>
         </view>
         <view class="qty">
