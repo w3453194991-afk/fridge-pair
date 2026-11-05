@@ -40,6 +40,12 @@ App({
     wx.showModal({ title: '运行出错', content: String(err).slice(0, 180), showCancel: false });
   },
 
+  // 任何找不到的页面都回登录页，避免弹出 onPageNotFound 的错误框
+  onPageNotFound(res) {
+    console.warn('[mp] 页面不存在:', res && res.path);
+    wx.reLaunch({ url: '/pages/login/index' });
+  },
+
   h: {
     toast(msg) {
       wx.showToast({ title: msg, icon: 'none' });
