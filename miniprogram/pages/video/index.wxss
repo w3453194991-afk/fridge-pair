@@ -27,3 +27,24 @@
 .kwlabel { font-size: 20rpx; color: #8B9A96; }
 .kw { font-size: 27rpx; font-weight: 800; color: #0E8F63; margin-left: 12rpx; }
 .mono { font-family: monospace; color: #12A576; }
+
+.kwbox {
+  margin: 18rpx 0; padding: 18rpx 22rpx; border-radius: 20rpx;
+  background: #F3FBF7; border: 1rpx dashed #CBEFE0;
+  display: flex; align-items: center;
+}
+.kwlabel { font-size: 21rpx; color: #8B9A96; flex: none; }
+.kw { font-size: 30rpx; font-weight: 800; color: #0E8F63; margin-left: 16rpx; }
+
+.steps { display: flex; align-items: center; margin-top: 16rpx; }
+.stepno {
+  width: 40rpx; height: 40rpx; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 21rpx; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, #3FDCA4, #12A576); margin-right: 16rpx;
+}
+.steptx { font-size: 24rpx; color: #33473F; }
+
+.tip { background: linear-gradient(120deg, #F7F1FF, #FDF7FF); border-color: #EADFFF; }
+.tipt { font-size: 26rpx; font-weight: 800; color: #5B3FA8; }
+.tipc { font-size: 22rpx; color: #7A6B96; line-height: 1.8; margin-top: 10rpx; }
