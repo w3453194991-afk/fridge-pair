@@ -1,56 +1,109 @@
 <view class="wrap">
 
-  <view class="searchbar">
-    <text class="mag">🔍</text>
-    <input
-      class="sinput"
-      placeholder="搜菜名或食材，如：番茄"
-      value="{{q}}"
-      bindinput="onSearch"
-      confirm-type="search"
-    />
-    <text wx:if="{{q}}" class="clear" bindtap="onClear">✕</text>
-  </view>
-
   <view class="chips tabs">
-    <view class="{{fitCls}}" data-tab="fit" bindtap="onTab">能做的 {{fitCount}}</view>
-    <view class="{{allCls}}" data-tab="all" bindtap="onTab">全部 {{allCount}}</view>
-    <view class="chip vbtn" bindtap="onVideo">▶ 视频做菜</view>
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="{{item.cls}}"
+      data-key="{{item.key}}"
+      bindtap="onTab"
+    >{{item.label}}</view>
   </view>
 
-  <view wx:if="{{list.length}}" class="cardgrid">
+  <!-- 用我的食材做 -->
+  <block wx:if="{{tab == 'fit'}}">
+    <view class="row between meta1">
+      <text class="mtext">共 {{total}} 道 · {{cuisineCount}} 个菜系</text>
+      <view class="addchip" bindtap="onAdd">＋ 添加菜谱</view>
+    </view>
+
+    <view class="sec"><view class="bar2"></view><view class="t">现在就能做</view><view class="n">{{fitCount}} 道</view></view>
+
     <view
-      wx:for="{{list}}"
+      wx:for="{{fitRows}}"
       wx:key="id"
-      class="dcard"
+      class="drow"
       data-id="{{item.id}}"
       bindtap="onDish"
     >
-      <view class="dcoverwrap">
-        <image wx:if="{{item.photo}}" class="dcover" src="{{item.photo}}" mode="aspectFill" />
-        <view wx:else class="dcover fallback">{{item.emoji}}</view>
-
-        <view wx:if="{{item.ok}}" class="dbadge">可做</view>
-        <view wx:if="{{item.mineTag}}" class="dmine">{{item.mineTag}}</view>
-
-        <view class="icorow">
-          <view class="{{item.pinCls}}" data-id="{{item.id}}" catchtap="onPin">📌</view>
-          <view class="icobtn cam" data-id="{{item.id}}" catchtap="onCover">📷</view>
+      <view class="dem">{{item.emoji}}</view>
+      <view class="dbd">
+        <view class="dnm">{{item.name}}<text wx:if="{{item.ok}}" class="badge">可做</text></view>
+        <view class="dds">{{item.sub}}</view>
+        <view class="dmt">
+          <text>{{item.m1}}</text><text>{{item.m2}}</text><text wx:if="{{item.m3}}">{{item.m3}}</text>
         </view>
       </view>
-      <view class="dbody">
-        <view class="dname">{{item.name}}</view>
-        <view class="dsub">{{item.sub}}</view>
-        <view class="dmeta"><text>{{item.m1}}</text><text>{{item.m2}}</text></view>
+      <view class="{{item.pinCls}}" data-id="{{item.id}}" catchtap="onPin">📌</view>
+      <view class="dgo">›</view>
+    </view>
+
+    <block wx:if="{{nearRows.length}}">
+      <view class="sec"><view class="bar2"></view><view class="t">只差 1 样</view><view class="n">补货就能做</view></view>
+      <view
+        wx:for="{{nearRows}}"
+        wx:key="id"
+        class="drow"
+        data-id="{{item.id}}"
+        bindtap="onDish"
+      >
+        <view class="dem">{{item.emoji}}</view>
+        <view class="dbd">
+          <view class="dnm">{{item.name}}</view>
+          <view class="dds">{{item.sub}}<text class="need"> · {{item.needText}}</text></view>
+          <view class="dmt"><text>{{item.m1}}</text><text>{{item.m2}}</text></view>
+        </view>
+        <view class="dgo">›</view>
+      </view>
+    </block>
+  </block>
+
+  <!-- 全部菜谱 -->
+  <block wx:elif="{{tab == 'all'}}">
+    <view class="searchbar">
+      <text class="mag">🔍</text>
+      <input class="sinput" placeholder="搜菜名或食材，如：番茄" value="{{q}}" bindinput="onSearch" confirm-type="search" />
+      <text wx:if="{{q}}" class="clear" bindtap="onClear">✕</text>
+    </view>
+    <view class="row between meta1">
+      <text class="mtext">共 {{total}} 道 · {{cuisineCount}} 个菜系</text>
+      <view class="addchip" bindtap="onAdd">＋ 添加菜谱</view>
+    </view>
+
+    <view wx:if="{{allRows.length}}" class="cardgrid">
+      <view wx:for="{{allRows}}" wx:key="id" class="dcard" data-id="{{item.id}}" bindtap="onDish">
+        <view class="dcoverwrap">
+          <image wx:if="{{item.photo}}" class="dcover" src="{{item.photo}}" mode="aspectFill" />
+          <view wx:else class="dcover fallback">{{item.emoji}}</view>
+          <view wx:if="{{item.ok}}" class="dbadge">可做</view>
+          <view wx:if="{{item.mineTag}}" class="dmine">{{item.mineTag}}</view>
+          <view class="icorow">
+            <view class="{{item.pinCls}}" data-id="{{item.id}}" catchtap="onPin">📌</view>
+            <view class="icobtn cam" data-id="{{item.id}}" catchtap="onCover">📷</view>
+          </view>
+        </view>
+        <view class="dbody">
+          <view class="dname">{{item.name}}</view>
+          <view class="dsub">{{item.sub}}</view>
+          <view class="dmeta"><text>{{item.m1}}</text><text>{{item.m2}}</text></view>
+        </view>
       </view>
     </view>
-  </view>
+    <view wx:else class="empty"><view class="e">🔍</view><view>没找到相关菜谱</view></view>
+  </block>
 
-  <view wx:else class="empty">
-    <view class="e">🥲</view>
-    <view>暂时凑不齐一道菜</view>
-    <view class="muted">去冰箱看看还差什么</view>
-  </view>
+  <!-- 相生相克 -->
+  <block wx:else>
+    <view class="sec"><view class="bar2"></view><view class="t">搭配参考</view><view class="n">{{pairRows.length}} 组</view></view>
+    <view wx:for="{{pairRows}}" wx:key="a" class="pair">
+      <view class="ptop">
+        <text class="pab">{{item.a}} + {{item.b}}</text>
+        <text class="{{item.cls}}">{{item.tag}}</text>
+      </view>
+      <view class="pwhy">{{item.why}}</view>
+    </view>
+    <view wx:if="{{!pairRows.length}}" class="empty"><view class="e">🧩</view><view>暂未匹配到组合</view></view>
+  </block>
 
   <ai-fab />
 </view>

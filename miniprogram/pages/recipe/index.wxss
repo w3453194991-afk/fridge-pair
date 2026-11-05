@@ -60,3 +60,56 @@
   border: 1rpx solid #E4F1EA; border-radius: 8rpx;
   padding: 3rpx 10rpx; margin-right: 8rpx;
 }
+
+
+/* ---------- 列表行（用我的食材做） ---------- */
+.meta1 { margin: 6rpx 0 4rpx; }
+.mtext { font-size: 22rpx; color: #8B9A96; }
+.addchip {
+  font-size: 22rpx; font-weight: 800; color: #FF5C7A;
+  background: #FFF1F4; border: 1rpx solid #FFD6DF;
+  border-radius: 20rpx; padding: 10rpx 22rpx;
+}
+.drow {
+  display: flex; align-items: center;
+  background: #fff; border: 1rpx solid #EDF3F0; border-radius: 28rpx;
+  padding: 24rpx; margin-bottom: 18rpx;
+  box-shadow: 0 6rpx 20rpx -16rpx rgba(20, 60, 45, .55);
+}
+.dem {
+  width: 96rpx; height: 96rpx; border-radius: 28rpx; font-size: 46rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(145deg, #EDFBF5, #DBF6EB); margin-right: 22rpx;
+}
+.dbd { flex: 1; min-width: 0; }
+.dnm { font-size: 30rpx; font-weight: 800; display: flex; align-items: center; }
+.badge {
+  font-size: 18rpx; font-weight: 800; color: #0E8F63;
+  background: #E6FAF1; border-radius: 8rpx; padding: 3rpx 10rpx; margin-left: 12rpx;
+}
+.dds { font-size: 22rpx; color: #8B9A96; margin-top: 6rpx; }
+.need { color: #C2410C; }
+.dmt { display: flex; margin-top: 12rpx; }
+.dmt text {
+  font-size: 19rpx; color: #54786A; background: #F1F9F5;
+  border: 1rpx solid #E4F1EA; border-radius: 8rpx;
+  padding: 3rpx 10rpx; margin-right: 10rpx;
+}
+.rd-pin {
+  width: 52rpx; height: 52rpx; border-radius: 16rpx; margin-left: 8rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22rpx; background: #F5FAF7;
+}
+.rd-pin.on { background: #E6FAF1; }
+.dgo { color: #C9D6D1; font-size: 34rpx; margin-left: 10rpx; }
+
+/* 相生相克 */
+.pair {
+  background: #fff; border: 1rpx solid #EDF3F0; border-radius: 26rpx;
+  padding: 22rpx 24rpx; margin-bottom: 16rpx;
+}
+.ptop { display: flex; align-items: center; justify-content: space-between; }
+.pab { font-size: 28rpx; font-weight: 800; }
+.ptag { font-size: 18rpx; font-weight: 800; color: #7C8B87; background: #F2F7F4; border-radius: 8rpx; padding: 3rpx 10rpx; }
+.ptag.ok { color: #0E8F63; background: #E6FAF1; }
+.pwhy { font-size: 22rpx; color: #7C8B87; margin-top: 8rpx; line-height: 1.6; }
