@@ -10,7 +10,14 @@ Page({
     prep: [],
     steps: [],
     can: false,
-    speaking: false
+    /* 朗读模式 */
+    readMode: false,
+    readIdx: 0,
+    readText: '',
+    readNo: '',
+    readTotal: 0,
+    playing: false,
+    speed: 4
   },
 
   onLoad(q) {
@@ -49,69 +56,92 @@ Page({
     });
   },
 
-  /* ---------- 语音朗读（微信同声传译插件） ---------- */
-  speak(text) {
-    const self = this;
-    if (!text) return;
-    let plugin = null;
-    try {
-      plugin = requirePlugin('WechatSI');
-    } catch (e) {
-      plugin = null;
-    }
-    if (!plugin) {
-      wx.showModal({
-        title: '语音暂不可用',
-        content: '小程序语音需要在小程序后台关联「微信同声传译」插件（真实 AppID）。\n\n网页版可以直接用系统语音朗读这道菜。',
-        showCancel: false
-      });
+  /* ---------- 朗读模式（不依赖插件） ---------- */
+  buildLines() {
+    const lines = [];
+    (this.data.prep || []).forEach((p, i) => {
+      lines.push({ tag: '备料 ' + (i + 1), text: p });
+    });
+    (this.data.steps || []).forEach(s => {
+      lines.push({ tag: '第 ' + s.no + ' 步' + (s.heat ? ' · ' + s.heat : ''), text: s.text });
+    });
+    return lines;
+  },
+
+  openRead(startAt) {
+    const lines = this.buildLines();
+    if (!lines.length) return;
+    this.lines = lines;
+    this.gotoLine(startAt || 0, false);
+    this.setData({ readMode: true });
+  },
+
+  gotoLine(i, play) {
+    const lines = this.lines || [];
+    if (!lines.length) return;
+    const idx = Math.max(0, Math.min(lines.length - 1, i));
+    const l = lines[idx];
+    this.setData({
+      readIdx: idx,
+      readNo: l.tag,
+      readText: l.text,
+      readTotal: lines.length,
+      playing: !!play
+    });
+    try { wx.vibrateShort({ type: 'light' }); } catch (e) {}
+    this.tick();
+  },
+
+  tick() {
+    if (this.timer) { clearTimeout(this.timer); this.timer = null; }
+    if (!this.data.playing) return;
+    const ms = (this.data.speed || 4) * 1000;
+    this.timer = setTimeout(() => {
+      const next = this.data.readIdx + 1;
+      if (next >= (this.lines || []).length) {
+        this.setData({ playing: false });
+        try { wx.vibrateShort({ type: 'heavy' }); } catch (e) {}
+        return;
+      }
+      this.gotoLine(next, true);
+    }, ms);
+  },
+
+  onRead() {
+    this.openRead(0);
+  },
+
+  onReadStep(e) {
+    const i = parseInt(e.currentTarget.dataset.i, 10);
+    this.openRead(i);
+  },
+
+  onReadPrev() {
+    this.gotoLine(this.data.readIdx - 1, this.data.playing);
+  },
+
+  onReadNext() {
+    this.gotoLine(this.data.readIdx + 1, this.data.playing);
+  },
+
+  onReadPlay() {
+    if (this.data.playing) {
+      this.setData({ playing: false });
+      if (this.timer) clearTimeout(this.timer);
       return;
     }
-    wx.showLoading({ title: '合成中', mask: false });
-    plugin.textToSpeech({
-      lang: 'zh_CN',
-      tts: true,
-      content: text,
-      success: (res) => {
-        wx.hideLoading();
-        if (!res || !res.filename) {
-          wx.showToast({ title: '合成失败', icon: 'none' });
-          return;
-        }
-        if (!self.audio) {
-          self.audio = wx.createInnerAudioContext();
-          self.audio.onEnded(() => self.setData({ speaking: false }));
-          self.audio.onError(() => self.setData({ speaking: false }));
-        }
-        self.audio.src = res.filename;
-        self.audio.play();
-        self.setData({ speaking: true });
-      },
-      fail: () => {
-        wx.hideLoading();
-        wx.showToast({ title: '语音合成失败', icon: 'none' });
-      }
-    });
+    this.setData({ playing: true }, () => this.tick());
   },
 
-  onSpeakStep(e) {
-    const i = parseInt(e.currentTarget.dataset.i, 10);
-    const s = this.data.steps[i];
-    if (s) this.speak(s.text);
+  onSpeed() {
+    const order = [3, 5, 8];
+    const cur = order.indexOf(this.data.speed);
+    this.setData({ speed: order[(cur + 1) % order.length] }, () => this.tick());
   },
 
-  onSpeakAll() {
-    const parts = [];
-    (this.data.prep || []).forEach(p => parts.push(p));
-    (this.data.steps || []).forEach(s => parts.push('第' + s.no + '步，' + s.heat + '。' + s.text));
-    this.speak(parts.join('。'));
-  },
-
-  onStop() {
-    if (this.audio) {
-      try { this.audio.stop(); } catch (e) {}
-    }
-    this.setData({ speaking: false });
+  onReadClose() {
+    if (this.timer) clearTimeout(this.timer);
+    this.setData({ readMode: false, playing: false });
   },
 
   /* ---------- 做菜 / 视频 ---------- */

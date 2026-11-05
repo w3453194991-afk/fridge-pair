@@ -25,7 +25,7 @@
 
   <view class="sec">
     <view class="bar2"></view><view class="t">预处理</view>
-    <view class="speakall" bindtap="onSpeakAll">🔊 朗读全部</view>
+    <view class="speakall" bindtap="onRead">📖 朗读模式</view>
   </view>
   <view class="card">
     <view wx:for="{{prep}}" wx:key="*this" class="step">
@@ -42,7 +42,7 @@
         <text wx:if="{{item.heat}}" class="heat">{{item.heat}}</text>
         {{item.text}}
         <view class="steptools">
-          <view class="tool" data-i="{{index}}" catchtap="onSpeakStep">🔊 朗读</view>
+          <view class="tool" data-i="{{index}}" catchtap="onReadStep">📖 跟读</view>
         </view>
       </view>
     </view>
@@ -51,8 +51,37 @@
   <view class="btns">
     <view class="btn primary" bindtap="onCook" hover-class="btn-hover">开始做菜 · 更新库存</view>
     <view class="btn ghost mt" bindtap="onVideo" hover-class="btn-hover">▶ 看视频教程</view>
-    <view wx:if="{{speaking}}" class="btn ghost mt" bindtap="onStop">⏹ 停止朗读</view>
+    <view class="btn ghost mt" bindtap="onRead" hover-class="btn-hover">📖 朗读模式（大字逐句）</view>
   </view>
 
   <view class="bottomspace"></view>
+
+  <!-- 朗读模式覆盖层 -->
+  <view wx:if="{{readMode}}" class="reader">
+    <view class="rd-top">
+      <text class="rd-name">{{dish.name}}</text>
+      <text class="rd-close" bindtap="onReadClose">✕</text>
+    </view>
+
+    <view class="rd-progress">
+      <view class="rd-fill" style="width:{{(readIdx + 1) / readTotal * 100}}%"></view>
+    </view>
+
+    <view class="rd-body">
+      <view class="rd-tag">{{readNo}} · {{readIdx + 1}}/{{readTotal}}</view>
+      <view class="rd-text">{{readText}}</view>
+    </view>
+
+    <view class="rd-ctrls">
+      <view class="rd-btn" bindtap="onReadPrev">‹ 上一句</view>
+      <view class="rd-btn main" bindtap="onReadPlay">{{playing ? '⏸ 暂停' : '▶ 自动播放'}}</view>
+      <view class="rd-btn" bindtap="onReadNext">下一句 ›</view>
+    </view>
+
+    <view class="rd-bottom">
+      <view class="rd-speed" bindtap="onSpeed">每句 {{speed}} 秒 · 切换</view>
+      <view class="rd-hint">大字号 + 逐句推进 + 轻振动提示</view>
+    </view>
+  </view>
+
 </view>
