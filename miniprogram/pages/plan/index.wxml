@@ -1,0 +1,31 @@
+<view class="wrap">
+
+  <view class="card hero">
+    <view class="row between">
+      <view>
+        <view class="t1">为你家生成的菜单</view>
+        <view class="t2">{{has ? '已排好 7 天 · ' + system : '还没排，点下面生成'}}</view>
+      </view>
+      <view class="sys">{{system}}</view>
+    </view>
+    <view class="btn primary gen" bindtap="onGenerate">
+      {{has ? '重新生成一周' : '生成一周菜单'}}
+    </view>
+  </view>
+
+  <view wx:for="{{days}}" wx:key="label" class="card day">
+    <view class="dlabel">{{item.label}}</view>
+    <view wx:for="{{item.meals}}" wx:for-item="meal" wx:key="slot" class="meal">
+      <view class="slot">{{meal.slot}}</view>
+      <view class="mnames">{{meal.names}}</view>
+      <view wx:if="{{meal.missing}}" class="miss">补料</view>
+    </view>
+  </view>
+
+  <view wx:if="{{!has}}" class="empty">
+    <view class="e">🍽</view>
+    <view>还没有菜单</view>
+    <view class="muted">点上面的按钮，按家庭档案自动排</view>
+  </view>
+
+</view>

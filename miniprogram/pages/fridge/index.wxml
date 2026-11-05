@@ -1,0 +1,86 @@
+<view class="wrap">
+
+  <!-- 顶部总览 -->
+  <view class="card hero">
+    <view class="row between">
+      <view>
+        <view class="eyebrow">{{name}}的冰箱</view>
+        <view class="big">{{total}}<text class="unit">种食材在库</text></view>
+      </view>
+      <view class="fam">👨‍👩‍👧 {{members}} 人</view>
+    </view>
+
+    <view class="stats">
+      <view class="st">
+        <view class="si g">✓</view>
+        <view class="sv g">{{counts.g}}</view>
+        <view class="sl">充足</view>
+      </view>
+      <view class="st">
+        <view class="si y">!</view>
+        <view class="sv y">{{counts.y}}</view>
+        <view class="sl">正常</view>
+      </view>
+      <view class="st">
+        <view class="si p">⏱</view>
+        <view class="sv p">{{counts.p}}</view>
+        <view class="sl">临期</view>
+      </view>
+      <view class="st">
+        <view class="si b">×</view>
+        <view class="sv b">{{counts.b}}</view>
+        <view class="sl">过期</view>
+      </view>
+    </view>
+
+    <view wx:if="{{urgent.length}}" class="alert" bindtap="onUrgent">
+      <text>⚡ {{urgent.length}} 种临期：{{urgent[0]}}、{{urgent[1]}} 等，优先吃掉</text>
+      <text class="go">去看看 ›</text>
+    </view>
+  </view>
+
+  <!-- 操作 -->
+  <view class="row between ops">
+    <view class="btn primary op" bindtap="onShoot">📷 拍照入库</view>
+  </view>
+
+  <!-- 筛选 -->
+  <scroll-view scroll-x class="filters">
+    <view class="chips">
+      <view
+        wx:for="{{cats}}"
+        wx:key="key"
+        class="chip {{filter === item.key ? 'on' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="onFilter"
+      >{{item.label}} {{item.n}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 列表 -->
+  <view wx:if="{{foods.length}}">
+    <view
+      wx:for="{{foods}}"
+      wx:key="id"
+      class="food {{item.tier}}"
+      data-id="{{item.id}}"
+      bindtap="onFood"
+    >
+      <view class="fico">{{item.emoji}}</view>
+      <view class="fmain">
+        <view class="fname">{{item.name}}</view>
+        <view class="fqty">{{item.qty}}</view>
+      </view>
+      <view class="fright">
+        <view class="pill {{item.tier}}">{{item.tierWord}}</view>
+        <view class="fday {{item.tier}}">{{item.day}}</view>
+      </view>
+    </view>
+  </view>
+  <view wx:else class="empty">
+    <view class="e">🧺</view>
+    <view>这里空空的</view>
+    <view class="muted">点上面的「拍照入库」开始</view>
+  </view>
+
+</view>

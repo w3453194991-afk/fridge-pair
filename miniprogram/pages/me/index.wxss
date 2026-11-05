@@ -1,0 +1,23 @@
+.acct { display: flex; align-items: center; background: linear-gradient(120deg, #F0FCF6, #E4F8EE); border-color: #D8F1E3; }
+.av {
+  width: 96rpx; height: 96rpx; border-radius: 30rpx; font-size: 46rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(145deg, #DBF6EB, #C6F0DE); margin-right: 22rpx;
+}
+.in { flex: 1; }
+.nm { font-size: 34rpx; font-weight: 800; }
+.sub { font-size: 22rpx; color: #7C8B87; margin-top: 8rpx; }
+
+.health .hl { font-size: 24rpx; color: #7C8B87; font-weight: 700; }
+.health .hv { font-size: 56rpx; font-weight: 800; color: #12A576; line-height: 1.1; }
+.health .hu { font-size: 24rpx; margin-left: 4rpx; }
+.health .hx { font-size: 22rpx; color: #7C8B87; }
+.bar { height: 16rpx; background: #EAF3EE; border-radius: 10rpx; margin-top: 18rpx; overflow: hidden; }
+.fill { height: 100%; background: linear-gradient(90deg, #3FDCA4, #12A576); border-radius: 10rpx; }
+
+.line { padding: 16rpx 0; border-bottom: 1rpx solid #F2F7F4; font-size: 26rpx; }
+.line:last-child { border-bottom: 0; }
+.line2 { padding: 14rpx 0; font-size: 26rpx; }
+.dgo { color: #C9D6D1; font-size: 32rpx; }
+
+.about { text-align: center; font-size: 21rpx; color: #9AA6A1; margin-top: 20rpx; }

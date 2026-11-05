@@ -1,0 +1,47 @@
+<view class="wrap" wx:if="{{dish}}">
+
+  <view class="card hero">
+    <view class="hem">{{dish.emoji}}</view>
+    <view class="hname">{{dish.name}}</view>
+    <view class="hmeta">⏱ {{dish.minutes}} 分钟 · {{dish.level}} · {{dish.cuisine}}</view>
+    <view class="htags">{{dish.tags}}</view>
+  </view>
+
+  <view class="sec"><view class="bar"></view><view class="t">食材用量</view></view>
+  <view class="card">
+    <view wx:for="{{states}}" wx:key="name" class="line row between">
+      <text>{{item.name}}</text>
+      <view class="row">
+        <text class="need">{{item.need}}</text>
+        <text class="pill {{item.ok ? 'g' : 'b'}}">{{item.ok ? '库存够' : '缺料'}}</text>
+      </view>
+    </view>
+    <view wx:if="{{dish.seasonings.length}}" class="season">
+      <text wx:for="{{dish.seasonings}}" wx:key="*this" class="tg">{{item}}</text>
+    </view>
+  </view>
+
+  <view class="sec"><view class="bar"></view><view class="t">预处理</view></view>
+  <view class="card">
+    <view wx:for="{{prep}}" wx:key="*this" class="step">
+      <view class="no ghost">{{index + 1}}</view>
+      <view class="tx">{{item}}</view>
+    </view>
+  </view>
+
+  <view class="sec"><view class="bar"></view><view class="t">分步做法</view><view class="n">{{steps.length}} 步</view></view>
+  <view class="card">
+    <view wx:for="{{steps}}" wx:key="no" class="step">
+      <view class="no">{{item.no}}</view>
+      <view class="tx">
+        <text wx:if="{{item.heat}}" class="heat">{{item.heat}}</text>
+        {{item.text}}
+      </view>
+    </view>
+  </view>
+
+  <view class="btns">
+    <view class="btn primary" bindtap="onCook">开始做菜 · 更新库存</view>
+  </view>
+
+</view>

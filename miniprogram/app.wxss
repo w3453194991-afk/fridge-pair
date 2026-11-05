@@ -1,0 +1,85 @@
+/* ============================================================
+   冰箱对对碰 · 全局样式（与 web 版同一套设计语言）
+   ============================================================ */
+page {
+  background: #F4FBF7;
+  color: #12232B;
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+  font-size: 28rpx;
+}
+
+.wrap { padding: 24rpx 28rpx 60rpx; }
+
+/* 卡片 */
+.card {
+  background: #FFFFFF;
+  border: 1rpx solid #EAF3EE;
+  border-radius: 32rpx;
+  padding: 28rpx;
+  box-sizing: border-box;
+  box-shadow: 0 8rpx 24rpx -18rpx rgba(20, 60, 45, .5);
+  margin-bottom: 22rpx;
+}
+
+/* 标题 */
+.sec {
+  display: flex;
+  align-items: center;
+  margin: 26rpx 0 16rpx;
+}
+.sec .bar {
+  width: 8rpx; height: 30rpx; border-radius: 4rpx;
+  background: linear-gradient(180deg, #5AEBB2, #12A576);
+  margin-right: 14rpx;
+}
+.sec .t { font-size: 32rpx; font-weight: 800; }
+.sec .n { font-size: 22rpx; color: #7C8B87; margin-left: 12rpx; font-weight: 600; }
+
+/* 按钮 */
+.btn {
+  display: flex; align-items: center; justify-content: center;
+  height: 92rpx; border-radius: 26rpx; font-size: 30rpx; font-weight: 800;
+}
+.btn.primary {
+  color: #fff;
+  background: linear-gradient(135deg, #2FD79E, #12A576);
+  box-shadow: 0 14rpx 28rpx -14rpx rgba(18, 165, 118, .9);
+}
+.btn.ghost {
+  color: #4E6B61; background: #FFFFFF; border: 1rpx solid #DFF0E7;
+}
+.btn::after { border: none; }
+
+/* 四色 */
+.g { color: #0E8F63; } .y { color: #A87400; } .p { color: #6D28D9; } .b { color: #4B5563; }
+.dot { width: 18rpx; height: 18rpx; border-radius: 50%; display: inline-block; margin-right: 10rpx; }
+.dot.g { background: #35C77E } .dot.y { background: #F5B301 }
+.dot.p { background: #9B6BF5 } .dot.b { background: #9AA3AF }
+
+/* 胶囊标签 */
+.pill {
+  display: inline-block; font-size: 20rpx; font-weight: 800;
+  padding: 4rpx 14rpx; border-radius: 12rpx;
+}
+.pill.g { color: #0E8F63; background: #E6FAF1; }
+.pill.y { color: #A87400; background: #FFF8E5; }
+.pill.p { color: #fff; background: linear-gradient(135deg, #A98BFF, #7C3AED); }
+.pill.b { color: #fff; background: #9AA3AF; }
+
+/* 过滤 chips */
+.chips { display: flex; flex-wrap: wrap; }
+.chip {
+  font-size: 24rpx; font-weight: 700; color: #6B7C77;
+  background: #fff; border: 1rpx solid #E7EFEA;
+  padding: 12rpx 26rpx; border-radius: 22rpx; margin: 0 14rpx 14rpx 0;
+}
+.chip.on {
+  color: #fff; border-color: transparent;
+  background: linear-gradient(135deg, #2FD79E, #12A576);
+}
+
+.muted { color: #7C8B87; font-size: 22rpx; }
+.row { display: flex; align-items: center; }
+.between { justify-content: space-between; }
+.empty { text-align: center; padding: 80rpx 0; color: #9AA6A1; }
+.empty .e { font-size: 72rpx; }

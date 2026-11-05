@@ -1,0 +1,31 @@
+.hero { text-align: center; padding: 36rpx 28rpx 30rpx; }
+.hem { font-size: 96rpx; line-height: 1; }
+.hname { font-size: 40rpx; font-weight: 800; margin-top: 14rpx; }
+.hmeta { font-size: 24rpx; color: #7C8B87; margin-top: 10rpx; }
+.htags { font-size: 22rpx; color: #0E8F63; margin-top: 10rpx; }
+
+.line { padding: 18rpx 0; border-bottom: 1rpx solid #F2F7F4; font-size: 27rpx; }
+.line:last-child { border-bottom: 0; }
+.need { color: #7C8B87; margin-right: 16rpx; font-size: 24rpx; }
+
+.season { display: flex; flex-wrap: wrap; margin-top: 8rpx; }
+.tg {
+  font-size: 21rpx; color: #54786A; background: #F2F9F5;
+  border-radius: 10rpx; padding: 8rpx 16rpx; margin: 8rpx 10rpx 0 0;
+}
+
+.step { display: flex; padding: 14rpx 0; }
+.no {
+  width: 44rpx; height: 44rpx; border-radius: 50%; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22rpx; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, #3FDCA4, #12A576);
+  margin-right: 18rpx;
+}
+.no.ghost { background: #D8EFE4; color: #4E7A6A; }
+.tx { flex: 1; font-size: 26rpx; line-height: 1.7; color: #22322C; }
+.heat {
+  font-size: 20rpx; font-weight: 800; color: #0E8F63;
+  background: #E6FAF1; border-radius: 8rpx; padding: 3rpx 10rpx; margin-right: 8rpx;
+}
+.btns { margin-top: 16rpx; }

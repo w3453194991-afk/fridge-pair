@@ -1,0 +1,50 @@
+<view class="wrap">
+
+  <view class="row between tabs">
+    <view class="chip {{tab === 'fit' ? 'on' : ''}}" data-tab="fit" bindtap="onTab">
+      用我的食材做 {{counts.fit}}
+    </view>
+    <view class="chip {{tab === 'all' ? 'on' : ''}}" data-tab="all" bindtap="onTab">
+      全部菜谱 {{counts.all}}
+    </view>
+  </view>
+
+  <input
+    class="search"
+    placeholder="搜菜名或食材，如：番茄"
+    value="{{q}}"
+    bindinput="onSearch"
+    confirm-type="search"
+  />
+
+  <view wx:if="{{list.length}}">
+    <view
+      wx:for="{{list}}"
+      wx:key="id"
+      class="dish"
+      data-id="{{item.id}}"
+      bindtap="onDish"
+    >
+      <view class="dem">{{item.emoji}}</view>
+      <view class="dbd">
+        <view class="dnm">
+          {{item.name}}
+          <text wx:if="{{item.ok}}" class="ok">可做</text>
+        </view>
+        <view class="dds">{{item.sub}}</view>
+        <view class="dmt">
+          <text>⏱ {{item.minutes}} 分钟</text>
+          <text>{{item.level}}</text>
+          <text>{{item.cuisine}}</text>
+        </view>
+      </view>
+      <view class="dgo">›</view>
+    </view>
+  </view>
+  <view wx:else class="empty">
+    <view class="e">🥲</view>
+    <view>暂时凑不齐一道菜</view>
+    <view class="muted">去冰箱看看还差什么</view>
+  </view>
+
+</view>

@@ -1,0 +1,57 @@
+<view class="wrap">
+
+  <view class="card acct">
+    <view class="av">🧑‍🍳</view>
+    <view class="in">
+      <view class="nm">{{fam.name || '我'}}</view>
+      <view class="sub">{{members.length}} 位家人 · 冰箱 {{total}} 件</view>
+    </view>
+  </view>
+
+  <view class="card health">
+    <view class="row between">
+      <view>
+        <view class="hl">冰箱健康度</view>
+        <view class="hv">{{health}}<text class="hu">%</text></view>
+      </view>
+      <view class="hx">充足占比</view>
+    </view>
+    <view class="bar"><view class="fill" style="width:{{health}}%"></view></view>
+  </view>
+
+  <view class="sec"><view class="bar"></view><view class="t">家庭档案</view></view>
+  <view class="card">
+    <view wx:for="{{members}}" wx:key="index" class="line row between">
+      <text>{{item.name || ('家人' + (index + 1))}} · {{item.role}}</text>
+      <text class="muted">{{item.age}} 岁</text>
+    </view>
+    <view wx:if="{{!members.length}}" class="muted">还没填家庭成员</view>
+  </view>
+
+  <view class="sec"><view class="bar"></view><view class="t">健康档案</view></view>
+  <view class="card" bindtap="onHealth">
+    <view class="row between">
+      <text>过敏原：{{avoid.length ? avoid : '未设置'}}</text>
+      <text class="dgo">›</text>
+    </view>
+    <view class="row between" style="margin-top:16rpx">
+      <text>疾病史：{{conditions.length ? conditions : '未设置'}}</text>
+      <text class="dgo">›</text>
+    </view>
+  </view>
+
+  <view class="sec"><view class="bar"></view><view class="t">演示工具</view></view>
+  <view class="card">
+    <view class="row between line2">
+      <text>时间旅行（+3 天看颜色变化）</text>
+      <view class="chip" bindtap="onTravel">+3 天</view>
+    </view>
+    <view class="row between line2">
+      <text>重置为初始示例冰箱</text>
+      <view class="chip" bindtap="onReset">重置</view>
+    </view>
+  </view>
+
+  <view class="about" bindtap="onAbout">冰箱对对碰 · 小程序版（与 web 版共用核心）</view>
+
+</view>

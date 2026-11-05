@@ -1,0 +1,26 @@
+.hero { background: linear-gradient(170deg, #FFFFFF, #F2FCF7); }
+.t1 { font-size: 34rpx; font-weight: 800; }
+.t2 { font-size: 24rpx; color: #7C8B87; margin-top: 8rpx; }
+.sys {
+  font-size: 22rpx; font-weight: 800; color: #0E8F63;
+  background: #E6FAF1; border-radius: 12rpx; padding: 8rpx 16rpx;
+}
+.gen { margin-top: 26rpx; }
+
+.day { padding: 24rpx; }
+.dlabel { font-size: 30rpx; font-weight: 800; margin-bottom: 12rpx; }
+.meal {
+  display: flex; align-items: center;
+  padding: 14rpx 0; border-top: 1rpx solid #F2F7F4;
+}
+.slot {
+  width: 52rpx; height: 44rpx; border-radius: 12rpx; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22rpx; font-weight: 800; color: #0E8F63; background: #E6FAF1;
+  margin-right: 18rpx;
+}
+.mnames { flex: 1; font-size: 26rpx; line-height: 1.6; }
+.miss {
+  font-size: 18rpx; font-weight: 800; color: #B91C1C;
+  background: #FEE2E2; border-radius: 8rpx; padding: 4rpx 10rpx;
+}
