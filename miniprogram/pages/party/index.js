@@ -5,18 +5,23 @@ const CUISINES = ['家常', '川菜', '粤菜', '江浙', '鲁菜', '湘菜', '�
 
 Page({
   data: {
-    people: 4,
+    men: 2,
+    women: 2,
+    kids: 1,
+    total: 5,
+    portions: '4.6',
     budget: '',
     wish: '',
     cuisine: '',
     cuisines: [],
-    result: null,
+    result: false,
     dishes: [],
     missing: [],
-    total: 0,
+    cost: '0.0',
     over: false,
     droppedText: '',
-    dateText: ''
+    dateText: '',
+    dishCount: 0
   },
 
   onLoad() {
@@ -26,37 +31,55 @@ Page({
       cuisines: CUISINES.map(c => ({ key: c, cls: 'chip' })),
       dateText: wk + ' ' + (now.getMonth() + 1) + '月' + now.getDate() + '日'
     });
+    this.syncCount();
   },
 
-  onMinus() {
-    if (this.data.people <= 1) return;
-    this.setData({ people: this.data.people - 1 });
+  syncCount() {
+    const { men, women, kids } = this.data;
+    const total = men + women + kids;
+    const portions = men * 1.2 + women * 1.0 + kids * 0.6;
+    this.setData({
+      total: total,
+      portions: portions.toFixed(1)
+    });
+    return total;
   },
-  onPlus() {
-    if (this.data.people >= 16) return;
-    this.setData({ people: this.data.people + 1 });
+
+  onStep(e) {
+    const k = e.currentTarget.dataset.k;
+    const d = parseInt(e.currentTarget.dataset.d, 10);
+    const cur = this.data[k] || 0;
+    const next = Math.max(0, Math.min(20, cur + d));
+    const obj = {};
+    obj[k] = next;
+    this.setData(obj, () => this.syncCount());
   },
+
   onBudget(e) { this.setData({ budget: e.detail.value }); },
   onWish(e) { this.setData({ wish: e.detail.value }); },
 
   onCuisine(e) {
     const key = e.currentTarget.dataset.key;
     const next = this.data.cuisine === key ? '' : key;
-    const cuisines = CUISINES.map(c => ({ key: c, cls: c === next ? 'chip on' : 'chip' }));
-    this.setData({ cuisine: next, cuisines: cuisines });
+    this.setData({
+      cuisine: next,
+      cuisines: CUISINES.map(c => ({ key: c, cls: c === next ? 'chip on' : 'chip' }))
+    });
   },
 
   onGen() {
-    const n = this.data.people;
-    const men = Math.ceil(n / 2);
-    const women = n - men;
+    const total = this.syncCount();
+    if (!total) {
+      wx.showToast({ title: '至少要有 1 个人', icon: 'none' });
+      return;
+    }
     const budget = parseFloat(this.data.budget) || 0;
     let p = null;
     try {
       p = E.partyPlan(S.state, {
-        men: men,
-        women: women,
-        kids: 0,
+        men: this.data.men,
+        women: this.data.women,
+        kids: this.data.kids,
         cuisine: this.data.cuisine || '',
         dateLabel: this.data.dateText,
         wish: this.data.wish || '',
@@ -66,18 +89,15 @@ Page({
         conditions: (S.state.family && S.state.family.conditions) || [],
         exclude: []
       });
-    } catch (e) {
-      wx.showToast({ title: '生成失败：' + ((e && e.message) || e), icon: 'none' });
+    } catch (err) {
+      wx.showModal({ title: '生成失败', content: String((err && err.message) || err), showCancel: false });
       return;
     }
 
     const dishes = (p.dishes || []).map(d => {
       const cost = (d.ingredients || []).reduce((s, i) => s + i.qty * (E.foodMeta(i.name).price || 0), 0);
       return {
-        id: d.id,
-        name: d.name,
-        emoji: d.emoji,
-        minutes: d.minutes,
+        id: d.id, name: d.name, emoji: d.emoji, minutes: d.minutes,
         sub: (d.ingredients || []).map(i => i.name).join(' + '),
         cost: cost.toFixed(1)
       };
@@ -92,11 +112,13 @@ Page({
     this.setData({
       result: true,
       dishes: dishes,
+      dishCount: dishes.length,
       missing: missing,
-      total: (p.totalCost || 0).toFixed(1),
+      cost: (p.totalCost || 0).toFixed(1),
       over: !!p.overBudget,
       droppedText: (p.dropped && p.dropped.length) ? ('为控制预算已去掉：' + p.dropped.join('、')) : ''
     });
+    wx.pageScrollTo({ scrollTop: 400, duration: 260 });
   },
 
   onDish(e) {
@@ -104,14 +126,14 @@ Page({
   },
 
   onCopy() {
-    const lines = [];
-    lines.push('聚餐 ' + this.data.dateText + ' · ' + this.data.people + ' 人');
+    const lines = ['聚餐 ' + this.data.dateText + ' · ' + this.data.total + ' 人',
+      '男 ' + this.data.men + ' · 女 ' + this.data.women + ' · 小孩 ' + this.data.kids];
     this.data.dishes.forEach(d => lines.push('· ' + d.name + '（约 ¥' + d.cost + '）'));
     if (this.data.missing.length) {
       lines.push('需要采购：');
       this.data.missing.forEach(m => lines.push('· ' + m.name + ' ¥' + m.cost));
     }
-    lines.push('合计约 ¥' + this.data.total);
+    lines.push('合计约 ¥' + this.data.cost);
     wx.setClipboardData({
       data: lines.join('\n'),
       success: () => wx.showToast({ title: '菜单已复制', icon: 'none' })

@@ -42,3 +42,26 @@
 .semo { font-size: 28rpx; margin-right: 14rpx; }
 .sname { flex: 1; font-size: 26rpx; }
 .sprice { font-size: 24rpx; color: #12A576; font-weight: 700; }
+
+.crow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 22rpx 0; border-top: 1rpx solid #F2F7F4;
+}
+.crow:first-of-type { border-top: 0; }
+.cl { display: flex; align-items: center; }
+.ce { font-size: 40rpx; margin-right: 18rpx; }
+.cn { font-size: 28rpx; font-weight: 800; }
+.cs { font-size: 20rpx; color: #8B9A96; margin-top: 4rpx; }
+.stepper { display: flex; align-items: center; }
+.step {
+  width: 64rpx; height: 64rpx; border-radius: 18rpx; text-align: center; line-height: 64rpx;
+  background: #EAFBF2; color: #0E8F63; font-size: 36rpx; font-weight: 800;
+}
+.num { min-width: 80rpx; text-align: center; font-size: 34rpx; font-weight: 800; }
+.sumline {
+  margin-top: 6rpx; padding: 18rpx 22rpx; border-radius: 20rpx;
+  background: #F3FBF7; border: 1rpx dashed #CBEFE0;
+  font-size: 24rpx; color: #4E6B61;
+}
+.sumN { font-size: 30rpx; font-weight: 800; color: #12A576; }
+.ssub { font-size: 21rpx; color: #7C8B87; margin-top: 8rpx; }

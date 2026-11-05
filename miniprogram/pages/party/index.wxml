@@ -2,23 +2,63 @@
 
   <view class="card hero">
     <view class="t1">🎉 聚餐规划</view>
-    <view class="t2">按人数和菜系排一桌，自动算成本、控制预算。</view>
+    <view class="t2">男女小孩分开填，按各人饭量算份量，再配菜。</view>
 
-    <view class="row between field">
-      <text class="lab">人数</text>
+    <view class="crow">
+      <view class="cl">
+        <text class="ce">👨</text>
+        <view>
+          <view class="cn">男生</view>
+          <view class="cs">每人 1.2 份</view>
+        </view>
+      </view>
       <view class="stepper">
-        <view class="step" bindtap="onMinus">−</view>
-        <view class="num">{{people}}</view>
-        <view class="step" bindtap="onPlus">+</view>
+        <view class="step" data-k="men" data-d="-1" bindtap="onStep">−</view>
+        <view class="num">{{men}}</view>
+        <view class="step" data-k="men" data-d="1" bindtap="onStep">+</view>
       </view>
     </view>
 
-    <view class="row between field">
+    <view class="crow">
+      <view class="cl">
+        <text class="ce">👩</text>
+        <view>
+          <view class="cn">女生</view>
+          <view class="cs">每人 1.0 份</view>
+        </view>
+      </view>
+      <view class="stepper">
+        <view class="step" data-k="women" data-d="-1" bindtap="onStep">−</view>
+        <view class="num">{{women}}</view>
+        <view class="step" data-k="women" data-d="1" bindtap="onStep">+</view>
+      </view>
+    </view>
+
+    <view class="crow">
+      <view class="cl">
+        <text class="ce">👶</text>
+        <view>
+          <view class="cn">小孩</view>
+          <view class="cs">每人 0.6 份 · 菜会选软一点</view>
+        </view>
+      </view>
+      <view class="stepper">
+        <view class="step" data-k="kids" data-d="-1" bindtap="onStep">−</view>
+        <view class="num">{{kids}}</view>
+        <view class="step" data-k="kids" data-d="1" bindtap="onStep">+</view>
+      </view>
+    </view>
+
+    <view class="sumline">
+      共 <text class="sumN">{{total}}</text> 人 · 折合 <text class="sumN">{{portions}}</text> 人份
+    </view>
+
+    <view class="field">
       <text class="lab">预算（可选）</text>
       <input class="inp" type="digit" placeholder="如 300" value="{{budget}}" bindinput="onBudget" />
     </view>
 
-    <view class="row between field">
+    <view class="field">
       <text class="lab">想吃的菜（可选）</text>
       <input class="inp" placeholder="如 水煮鱼、糖醋排骨" value="{{wish}}" bindinput="onWish" />
     </view>
@@ -40,14 +80,17 @@
   <view wx:if="{{result}}">
     <view class="card sum">
       <view class="row between">
-        <text class="stitle">{{dateText}} · {{people}} 人</text>
-        <text class="cost">约 ¥{{total}}</text>
+        <view>
+          <view class="stitle">{{dateText}} · {{total}} 人</view>
+          <view class="ssub">男 {{men}} · 女 {{women}} · 小孩 {{kids}} · {{dishCount}} 道菜</view>
+        </view>
+        <text class="cost">约 ¥{{cost}}</text>
       </view>
       <view wx:if="{{over}}" class="warn">超出预算，建议减一两道</view>
       <view wx:if="{{droppedText}}" class="warn2">{{droppedText}}</view>
     </view>
 
-    <view class="sec"><view class="bar2"></view><view class="t">菜单</view><view class="n">{{dishes.length}} 道</view></view>
+    <view class="sec"><view class="bar2"></view><view class="t">菜单</view><view class="n">{{dishCount}} 道</view></view>
     <view wx:for="{{dishes}}" wx:key="id" class="dish" data-id="{{item.id}}" bindtap="onDish">
       <view class="dem">{{item.emoji}}</view>
       <view class="dbd">
