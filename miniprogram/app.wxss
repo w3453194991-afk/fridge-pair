@@ -83,3 +83,10 @@ page {
 .between { justify-content: space-between; }
 .empty { text-align: center; padding: 80rpx 0; color: #9AA6A1; }
 .empty .e { font-size: 72rpx; }
+
+/* 区块标题竖条（me 页复用了 .bar 做进度条，这里用 .bar2 区分） */
+.sec .bar2 {
+  width: 8rpx; height: 30rpx; border-radius: 4rpx;
+  background: linear-gradient(180deg, #5AEBB2, #12A576);
+  margin-right: 14rpx;
+}

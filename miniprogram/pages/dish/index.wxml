@@ -13,7 +13,7 @@
       <text>{{item.name}}</text>
       <view class="row">
         <text class="need">{{item.need}}</text>
-        <text class="pill {{item.ok ? 'g' : 'b'}}">{{item.ok ? '库存够' : '缺料'}}</text>
+        <text class="{{item.pillCls}}">{{item.pillText}}</text>
       </view>
     </view>
     <view wx:if="{{dish.seasonings.length}}" class="season">

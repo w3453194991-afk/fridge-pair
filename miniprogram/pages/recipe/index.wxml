@@ -1,12 +1,8 @@
 <view class="wrap">
 
-  <view class="row between tabs">
-    <view class="chip {{tab === 'fit' ? 'on' : ''}}" data-tab="fit" bindtap="onTab">
-      用我的食材做 {{counts.fit}}
-    </view>
-    <view class="chip {{tab === 'all' ? 'on' : ''}}" data-tab="all" bindtap="onTab">
-      全部菜谱 {{counts.all}}
-    </view>
+  <view class="chips tabs">
+    <view class="{{fitCls}}" data-tab="fit" bindtap="onTab">用我的食材做 {{fitCount}}</view>
+    <view class="{{allCls}}" data-tab="all" bindtap="onTab">全部菜谱 {{allCount}}</view>
   </view>
 
   <input
@@ -27,20 +23,17 @@
     >
       <view class="dem">{{item.emoji}}</view>
       <view class="dbd">
-        <view class="dnm">
-          {{item.name}}
-          <text wx:if="{{item.ok}}" class="ok">可做</text>
-        </view>
+        <view class="dnm">{{item.name}}<text wx:if="{{item.ok}}" class="ok">可做</text></view>
         <view class="dds">{{item.sub}}</view>
         <view class="dmt">
-          <text>⏱ {{item.minutes}} 分钟</text>
-          <text>{{item.level}}</text>
-          <text>{{item.cuisine}}</text>
+          <text>{{item.m1}}</text>
+          <text>{{item.m2}}</text>
+          <text>{{item.m3}}</text>
         </view>
       </view>
-      <view class="dgo">›</view>
     </view>
   </view>
+
   <view wx:else class="empty">
     <view class="e">🥲</view>
     <view>暂时凑不齐一道菜</view>

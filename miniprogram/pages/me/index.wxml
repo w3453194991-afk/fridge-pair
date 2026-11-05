@@ -3,8 +3,8 @@
   <view class="card acct">
     <view class="av">🧑‍🍳</view>
     <view class="in">
-      <view class="nm">{{fam.name || '我'}}</view>
-      <view class="sub">{{members.length}} 位家人 · 冰箱 {{total}} 件</view>
+      <view class="nm">{{famName}}</view>
+      <view class="sub">{{memberCount}} 位家人 · 冰箱 {{total}} 件</view>
     </view>
   </view>
 
@@ -19,39 +19,41 @@
     <view class="bar"><view class="fill" style="width:{{health}}%"></view></view>
   </view>
 
-  <view class="sec"><view class="bar"></view><view class="t">家庭档案</view></view>
+  <view class="sec"><view class="bar2"></view><view class="t">家庭档案</view></view>
   <view class="card">
-    <view wx:for="{{members}}" wx:key="index" class="line row between">
-      <text>{{item.name || ('家人' + (index + 1))}} · {{item.role}}</text>
-      <text class="muted">{{item.age}} 岁</text>
+    <view wx:if="{{memberRows.length}}">
+      <view wx:for="{{memberRows}}" wx:key="idx" class="line row between">
+        <text>{{item.label}}</text>
+        <text class="muted">{{item.age}}</text>
+      </view>
     </view>
-    <view wx:if="{{!members.length}}" class="muted">还没填家庭成员</view>
+    <view wx:else class="muted">还没填家庭成员</view>
   </view>
 
-  <view class="sec"><view class="bar"></view><view class="t">健康档案</view></view>
+  <view class="sec"><view class="bar2"></view><view class="t">健康档案</view></view>
   <view class="card" bindtap="onHealth">
-    <view class="row between">
-      <text>过敏原：{{avoid.length ? avoid : '未设置'}}</text>
-      <text class="dgo">›</text>
+    <view class="line row between">
+      <text>过敏原</text>
+      <text class="muted">{{avoidText}}</text>
     </view>
-    <view class="row between" style="margin-top:16rpx">
-      <text>疾病史：{{conditions.length ? conditions : '未设置'}}</text>
-      <text class="dgo">›</text>
+    <view class="line row between">
+      <text>疾病史</text>
+      <text class="muted">{{condText}}</text>
     </view>
   </view>
 
-  <view class="sec"><view class="bar"></view><view class="t">演示工具</view></view>
+  <view class="sec"><view class="bar2"></view><view class="t">演示工具</view></view>
   <view class="card">
-    <view class="row between line2">
-      <text>时间旅行（+3 天看颜色变化）</text>
-      <view class="chip" bindtap="onTravel">+3 天</view>
+    <view class="line2 row between">
+      <text>时间旅行 +3 天</text>
+      <view class="chip" bindtap="onTravel">试试</view>
     </view>
-    <view class="row between line2">
-      <text>重置为初始示例冰箱</text>
+    <view class="line2 row between">
+      <text>重置示例冰箱</text>
       <view class="chip" bindtap="onReset">重置</view>
     </view>
   </view>
 
-  <view class="about" bindtap="onAbout">冰箱对对碰 · 小程序版（与 web 版共用核心）</view>
+  <view class="about" bindtap="onAbout">冰箱对对碰 · 小程序版</view>
 
 </view>

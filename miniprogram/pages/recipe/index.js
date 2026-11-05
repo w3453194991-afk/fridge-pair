@@ -2,20 +2,33 @@ const G = require('../../lib/shim.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 
 Page({
-  data: { tab: 'fit', q: '', list: [], counts: { fit: 0, all: 0 } },
+  data: {
+    tab: 'fit',
+    q: '',
+    list: [],
+    fitCount: 0,
+    allCount: 0,
+    fitCls: 'chip on',
+    allCls: 'chip'
+  },
 
   onShow() { this.refresh(); },
 
   refresh() {
     const foods = S.state.foods;
+    const tab = this.data.tab;
     let list = [];
-    if (this.data.tab === 'fit') {
+
+    if (tab === 'fit') {
       list = E.cookable(foods);
     } else {
       list = D.DISHES.slice();
       const q = (this.data.q || '').trim();
-      if (q) list = list.filter(d => d.name.indexOf(q) >= 0 || d.ingredients.some(i => i.name.indexOf(q) >= 0));
+      if (q) {
+        list = list.filter(d => d.name.indexOf(q) >= 0 || d.ingredients.some(i => i.name.indexOf(q) >= 0));
+      }
     }
+
     const rows = list.slice(0, 80).map(d => {
       const ok = E.ingredientState(d, foods).every(s => s.ok);
       return {
@@ -23,15 +36,19 @@ Page({
         name: d.name,
         emoji: d.emoji,
         sub: d.ingredients.map(i => i.name).join(' + '),
-        minutes: d.minutes,
-        level: d.level,
-        cuisine: (d.cuisine && d.cuisine[0]) || '家常',
-        ok: ok
+        ok: ok,
+        m1: '⏱ ' + d.minutes + ' 分钟',
+        m2: d.level,
+        m3: (d.cuisine && d.cuisine[0]) || '家常'
       };
     });
+
     this.setData({
       list: rows,
-      counts: { fit: E.cookable(foods).length, all: D.DISHES.length }
+      fitCount: E.cookable(foods).length,
+      allCount: D.DISHES.length,
+      fitCls: tab === 'fit' ? 'chip on' : 'chip',
+      allCls: tab === 'all' ? 'chip on' : 'chip'
     });
   },
 

@@ -11,7 +11,9 @@ Page({
     const states = E.ingredientState(d, st.foods).map(s => ({
       name: s.name,
       need: s.need + ' ' + (s.unit || ''),
-      ok: s.ok
+      ok: s.ok,
+      pillCls: s.ok ? 'pill g' : 'pill b',
+      pillText: s.ok ? '库存够' : '缺料'
     }));
     this.setData({
       dish: {
