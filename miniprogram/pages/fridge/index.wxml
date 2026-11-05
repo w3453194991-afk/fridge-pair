@@ -120,4 +120,5 @@
     <view class="muted">点上面的「拍照入库」开始</view>
   </view>
 
+  <ai-fab />
 </view>

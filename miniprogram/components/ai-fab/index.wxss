@@ -1,0 +1,14 @@
+.fabarea {
+  position: fixed; right: 0; bottom: 150rpx; z-index: 60;
+  width: 230rpx; height: 380rpx;
+}
+.fabview { width: 130rpx; height: 130rpx; }
+.fab {
+  width: 118rpx; height: 118rpx; border-radius: 30rpx;
+  background: rgba(255, 255, 255, .97);
+  border: 2rpx solid #CBEFE0;
+  box-shadow: 0 12rpx 26rpx -14rpx rgba(16, 120, 90, .55);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.femic { font-size: 46rpx; line-height: 1; }
+.femt { font-size: 18rpx; color: #12A576; font-weight: 800; margin-top: 4rpx; }

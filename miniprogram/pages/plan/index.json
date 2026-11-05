@@ -1,1 +1,6 @@
-{ "navigationBarTitleText": "一周配餐", "usingComponents": {} }
+{
+  "navigationBarTitleText": "一周配餐",
+  "usingComponents": {
+    "ai-fab": "/components/ai-fab/index"
+  }
+}

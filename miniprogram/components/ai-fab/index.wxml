@@ -1,0 +1,17 @@
+<movable-area class="fabarea">
+  <movable-view
+    class="fabview"
+    direction="all"
+    x="{{fx}}"
+    y="{{fy}}"
+    damping="26"
+    friction="3"
+    bindchange="onMove"
+    bindtap="onChat"
+  >
+    <view class="fab">
+      <text class="femic">🤖</text>
+      <text class="femt">问冰箱</text>
+    </view>
+  </movable-view>
+</movable-area>

@@ -1,1 +1,6 @@
-{ "navigationBarTitleText": "菜谱", "usingComponents": {} }
+{
+  "navigationBarTitleText": "菜谱",
+  "usingComponents": {
+    "ai-fab": "/components/ai-fab/index"
+  }
+}

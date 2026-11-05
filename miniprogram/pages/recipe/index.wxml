@@ -52,4 +52,5 @@
     <view class="muted">去冰箱看看还差什么</view>
   </view>
 
+  <ai-fab />
 </view>
