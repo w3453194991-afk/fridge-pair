@@ -327,11 +327,12 @@
   /* ---------- 8. 视频平台（搜索深链，无需任何 API Key） ---------- */
   const PLATFORMS = [
     { key: 'bilibili', name: '哔哩哔哩', icon: '📺', color: '#FB7299',
-      search: k => 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(k) },
+      // tids_1=211 是「美食」分区，能过滤掉综艺/吃播/商品
+      search: k => 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(k) + '&tids_1=211' },
     { key: 'douyin', name: '抖音', icon: '🎵', color: '#161823',
-      search: k => 'https://www.douyin.com/search/' + encodeURIComponent(k) },
+      search: k => 'https://www.douyin.com/search/' + encodeURIComponent(k) + '?type=video' },
     { key: 'xhs', name: '小红书', icon: '📕', color: '#FF2442',
-      search: k => 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(k) }
+      search: k => 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(k) + '&source=web_search_result_notes' }
   ];
 
   const PLATFORM_MAP = {};

@@ -19,3 +19,11 @@
 .tip { background: linear-gradient(120deg, #F7F1FF, #FDF7FF); border-color: #EADFFF; }
 .tipt { font-size: 26rpx; font-weight: 800; color: #5B3FA8; }
 .tipc { font-size: 22rpx; color: #7A6B96; line-height: 1.75; margin-top: 10rpx; }
+
+.kwbox {
+  margin: 18rpx 0; padding: 16rpx 20rpx; border-radius: 18rpx;
+  background: #F3FBF7; border: 1rpx dashed #CBEFE0;
+}
+.kwlabel { font-size: 20rpx; color: #8B9A96; }
+.kw { font-size: 27rpx; font-weight: 800; color: #0E8F63; margin-left: 12rpx; }
+.mono { font-family: monospace; color: #12A576; }

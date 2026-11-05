@@ -2,25 +2,26 @@
 
   <view class="card hero">
     <view class="t1">🎬 视频教程</view>
-    <view class="t2">小程序里不能内嵌视频站播放，这里给你生成**可直接搜到的链接**，复制后去对应平台看。</view>
+    <view class="t2">搜「菜名 + 做法」才能搜到做菜内容；只搜菜名会混进吃播和综艺。</view>
   </view>
 
   <view class="card">
     <view class="lab">菜名</view>
     <input class="q" placeholder="如：番茄炒蛋" value="{{q}}" bindinput="onInput" confirm-type="search" />
 
-    <view class="lab" style="margin-top:16rpx">选平台，复制搜索链接</view>
-    <view class="plats">
-      <view
-        wx:for="{{platforms}}"
-        wx:key="key"
-        class="plat"
-        data-key="{{item.key}}"
-        bindtap="onPlatform"
-      >{{item.label}}</view>
+    <view class="kwbox">
+      <text class="kwlabel">实际搜索词</text>
+      <text class="kw">{{kw}}</text>
     </view>
 
-    <view class="btn ghost mt" bindtap="onOpenAll">复制三个平台的全部链接</view>
+    <view class="btn primary" bindtap="onCopyWord">📋 复制搜索词（推荐）</view>
+
+    <view class="lab" style="margin-top:26rpx">或者复制带筛选的链接</view>
+    <view class="plats">
+      <view wx:for="{{platforms}}" wx:key="key" class="plat" data-key="{{item.key}}" bindtap="onPlatform">{{item.label}}</view>
+    </view>
+
+    <view class="btn ghost mt" bindtap="onCopyAll">复制搜索词 + 全部链接</view>
   </view>
 
   <view class="sec"><view class="bar2"></view><view class="t">热门菜</view></view>
@@ -35,11 +36,13 @@
   </view>
 
   <view class="card tip">
-    <view class="tipt">为什么不是直接播放？</view>
+    <view class="tipt">用了哪些筛选</view>
     <view class="tipc">
-      视频站的播放地址需要在小程序后台配置「业务域名」并通过备案，
-      没有备案域名时只能跳转或复制链接。这里用复制链接的方式，
-      搜到的就是你想做的那道菜，不会出现「点进去搜不到」的情况。
+      · 搜索词统一加「做法」，避开吃播、探店、商品<br/>
+      · B站链接带 <text class="mono">tids_1=211</text>（美食分区）<br/>
+      · 抖音链接带 <text class="mono">type=video</text><br/>
+      · 小红书带 <text class="mono">source=web_search_result_notes</text><br/><br/>
+      网页版部分平台要登录，所以**优先用「复制搜索词」在 App 里搜**，结果最准。
     </view>
   </view>
 
