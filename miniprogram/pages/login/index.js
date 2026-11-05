@@ -68,14 +68,21 @@ Page({
   finishLogin(openid) {
     try {
       S.load();
-      // 首次登录：建一份默认家庭档案
-      if (!(S.state.family.members || []).length) {
-        S.demoFamily();
+      const fam = S.state.family || (S.state.family = {});
+      const isNew = !fam.registered;
+
+      fam.openid = openid;
+      fam.loggedIn = true;
+      fam.phone = fam.phone || '';
+      fam.loginAt = Date.now();
+
+      // 新用户：从空冰箱开始，不塞示例数据
+      if (isNew) {
+        S.state.foods = [];
+        S.state.cart = [];
+        S.state.week = null;
+        S.state.stats = { cooked: 0, saved: 0, added: 0, trashed: 0 };
       }
-      S.state.family.openid = openid;
-      S.state.family.loggedIn = true;
-      S.state.family.phone = S.state.family.phone || '';
-      S.state.family.loginAt = Date.now();
       S.save();
       this.setData({ openid: openid, loading: false });
     } catch (e) {
@@ -83,20 +90,31 @@ Page({
       return;
     }
 
-    // 接管保存 + 拉云端数据；失败也不阻塞进入
-    const go = () => {
+    // 只跳一次（之前 pull 回调和兜底 timeout 都会触发，导致开屏动画播两遍）
+    let gone = false;
+    const route = () => {
+      if (gone) return;
+      gone = true;
+      const f = S.state.family || {};
       wx.showToast({ title: '登录成功', icon: 'success' });
-      setTimeout(() => wx.reLaunch({ url: '/pages/splash/index' }), 400);
+      setTimeout(() => {
+        if (!f.registered || !(f.members || []).length) {
+          wx.reLaunch({ url: '/pages/onboard/index' });
+        } else {
+          wx.reLaunch({ url: '/pages/splash/index' });
+        }
+      }, 400);
     };
+
     try {
       if (CFG && CFG.CLOUD_ENV) {
         SYNC.attach(S);
-        SYNC.pull(S).then(() => go(), () => go());
-        setTimeout(go, 2500);        // 网络慢也不卡住
+        SYNC.pull(S).then(route, route);
+        setTimeout(route, 2000);       // 网络慢也不卡住，route 幂等
         return;
       }
     } catch (e) {}
-    go();
+    route();
   },
 
   /* 开发/体验版专用：跳过登录 */

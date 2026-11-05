@@ -61,8 +61,12 @@
       <view class="chip" bindtap="onTravel">试试</view>
     </view>
     <view class="line2 row between">
-      <text>重置示例冰箱</text>
-      <view class="chip" bindtap="onReset">重置</view>
+      <text>填充示例冰箱</text>
+      <view class="chip" bindtap="onReset">填充</view>
+    </view>
+    <view class="line2 row between">
+      <text>清空冰箱</text>
+      <view class="chip" bindtap="onClearFridge">清空</view>
     </view>
   </view>
 

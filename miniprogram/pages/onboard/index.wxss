@@ -1,0 +1,53 @@
+page { background: #F4FBF7; }
+
+.onb {
+  min-height: 100vh; display: flex; flex-direction: column;
+  padding: 40rpx 44rpx calc(40rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+.top { display: flex; align-items: center; justify-content: space-between; }
+.dots { display: flex; }
+.dot {
+  width: 44rpx; height: 8rpx; border-radius: 4rpx; background: #DFEDE6; margin-right: 10rpx;
+}
+.dot.on { background: #12A576; }
+.skip { font-size: 22rpx; color: #9AA6A1; }
+
+.title { font-size: 46rpx; font-weight: 900; margin-top: 46rpx; }
+.sub { font-size: 24rpx; color: #8B9A96; margin-top: 12rpx; line-height: 1.6; }
+.title2 { font-size: 30rpx; font-weight: 800; margin: 40rpx 0 16rpx; }
+
+.members { margin-top: 32rpx; }
+.mrow {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #fff; border: 1rpx solid #E7EFEA; border-radius: 26rpx;
+  padding: 22rpx 24rpx; margin-bottom: 16rpx;
+}
+.mleft { display: flex; align-items: center; }
+.mico { font-size: 44rpx; margin-right: 18rpx; }
+.mrole { font-size: 28rpx; font-weight: 800; }
+.mchange { display: block; font-size: 19rpx; color: #12A576; font-weight: 500; margin-top: 4rpx; }
+
+.mright { display: flex; align-items: center; }
+.qb {
+  width: 56rpx; height: 56rpx; border-radius: 16rpx; text-align: center; line-height: 56rpx;
+  background: #EAFBF2; color: #0E8F63; font-size: 32rpx; font-weight: 800;
+}
+.age { min-width: 110rpx; text-align: center; font-size: 27rpx; font-weight: 800; }
+
+.addrow { display: flex; margin-top: 8rpx; }
+.addbtn, .delbtn {
+  font-size: 24rpx; font-weight: 800; border-radius: 20rpx; padding: 16rpx 28rpx; margin-right: 16rpx;
+}
+.addbtn { color: #0E8F63; background: #EAFBF2; border: 1rpx solid #CBEFE0; }
+.delbtn { color: #9AA6A1; background: #F5F8F6; border: 1rpx solid #E7EFEA; }
+
+.chips { display: flex; flex-wrap: wrap; margin-top: 30rpx; }
+.chips .chip { font-size: 26rpx; padding: 18rpx 30rpx; margin: 0 16rpx 16rpx 0; }
+.note { font-size: 21rpx; color: #9AA6A1; margin-top: 20rpx; }
+
+.spacer { flex: 1; min-height: 40rpx; }
+.bottom { display: flex; }
+.bottom .btn { flex: 1; margin-right: 16rpx; }
+.bottom .btn:last-child { margin-right: 0; flex: 1.6; }

@@ -84,6 +84,26 @@ Page({
     });
   },
 
+  /* 清空冰箱：回到真实的"空"状态 */
+  onClearFridge() {
+    wx.showModal({
+      title: '清空冰箱',
+      content: '会移除所有食材和菜单，家庭档案保留。',
+      success: (res) => {
+        if (!res.confirm) return;
+        try {
+          S.state.foods = [];
+          S.state.week = null;
+          S.state.cart = [];
+          S.state.stats = { cooked: 0, saved: 0, added: 0, trashed: 0 };
+          S.save();
+        } catch (e) {}
+        this.render();
+        wx.showToast({ title: '已清空', icon: 'none' });
+      }
+    });
+  },
+
   onHealth() {
     wx.showModal({
       title: '健康档案',

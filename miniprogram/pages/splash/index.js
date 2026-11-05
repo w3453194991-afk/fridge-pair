@@ -8,7 +8,8 @@ Page({
     line1: '', line2: '', line3: '',
     hasUrgent: false,
     urgentN: 0,
-    canSkip: false
+    canSkip: false,
+    typed: false
   },
 
   onLoad() {
@@ -54,7 +55,10 @@ Page({
       });
       this.typeLine('line1', l1, 60, () => {
         this.typeLine('line2', l2, 55, () => {
-          this.typeLine('line3', l3, 50, () => {});
+          this.typeLine('line3', l3, 50, () => {
+            // 机器人说完再显示按钮
+            this.setData({ typed: true });
+          });
         });
       });
     } catch (e) {}

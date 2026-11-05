@@ -213,3 +213,5 @@ page { background: #04120E; }
 
 .acts { margin-top: 8rpx; width: 600rpx; }
 .acts .btn { margin-bottom: 18rpx; }
+
+.actspace { height: 220rpx; }
