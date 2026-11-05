@@ -90,3 +90,6 @@ page {
   background: linear-gradient(180deg, #5AEBB2, #12A576);
   margin-right: 14rpx;
 }
+
+/* 底部 tabBar 是 fixed 的，tab 页要留出等高高度的空白，否则最后一项被盖住 */
+.tabpad { padding-bottom: calc(190rpx + env(safe-area-inset-bottom)) !important; }
