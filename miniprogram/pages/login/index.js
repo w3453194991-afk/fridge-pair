@@ -12,11 +12,6 @@ Page({
   },
 
   onLoad() {
-    // 已登录直接进首页
-    try {
-      S.load();
-      if (S.state.family.loggedIn) wx.switchTab({ url: '/pages/fridge/index' });
-    } catch (e) {}
     this.timer = null;
   },
 
@@ -73,7 +68,7 @@ Page({
       return;
     }
     wx.showToast({ title: '登录成功', icon: 'success' });
-    setTimeout(() => wx.switchTab({ url: '/pages/fridge/index' }), 500);
+    setTimeout(() => wx.reLaunch({ url: '/pages/splash/index' }), 500);
   },
 
   onDemo() {
@@ -83,7 +78,7 @@ Page({
       S.save();
     } catch (e) {}
     wx.showToast({ title: '已进入体验模式', icon: 'none' });
-    setTimeout(() => wx.switchTab({ url: '/pages/fridge/index' }), 400);
+    setTimeout(() => wx.reLaunch({ url: '/pages/splash/index' }), 400);
   },
 
   onAgree() {

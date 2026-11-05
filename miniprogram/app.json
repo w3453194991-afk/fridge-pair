@@ -1,7 +1,7 @@
 {
   "pages": [
-    "pages/splash/index",
     "pages/login/index",
+    "pages/splash/index",
     "pages/fridge/index",
     "pages/recipe/index",
     "pages/plan/index",

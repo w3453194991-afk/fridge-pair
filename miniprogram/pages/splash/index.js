@@ -26,8 +26,8 @@ Page({
       this.speak();
     }, 1650));
 
-    // 兜底：6s 后自动进入
-    this.timers.push(setTimeout(goto, 6500));
+    // 兜底：3.4s 后自动进入
+    this.timers.push(setTimeout(goto, 3400));
   },
 
   onUnload() {
