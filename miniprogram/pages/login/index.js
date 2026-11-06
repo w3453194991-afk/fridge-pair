@@ -105,15 +105,17 @@ Page({
       } catch (e) {}
 
       const f = S.state.family || {};
-      const isNew = !f.onboarded;
+      // 只要已经有家庭成员，就认为档案已建好 —— 不必依赖 onboarded 标记（它可能被云端旧值覆盖）
+      const hasFamily = !!(f.members && f.members.length);
+      const needsOnboard = !f.onboarded && !hasFamily;
 
       // 额外存一份轻量会话，防止主存储被清后回登录页
       try { SESSION.save(S.state.family, S.state.family.openid || ''); } catch (e) {}
 
       wx.showToast({ title: '登录成功', icon: 'success' });
       setTimeout(() => {
-        // 只有第一次登录（没走过家庭设置）才进引导页
-        if (isNew) {
+        // 只有第一次登录、且还没有家庭档案时才进引导页
+        if (needsOnboard) {
           wx.reLaunch({ url: '/pages/onboard/index?from=login&new=1' });
         } else {
           wx.reLaunch({ url: '/pages/splash/index' });
@@ -132,12 +134,12 @@ Page({
     route();
   },
 
-  /* 开发/体验版专用：跳过登录 */
+  /* 开发/体验版专用：跳过登录（不建家庭档案，进首页后可手动添加） */
   onDemo() {
     try {
       S.load();
-      S.demoFamily();
       S.state.family.loggedIn = true;
+      if (!S.state.family.openid) S.state.family.openid = 'demo-' + Date.now();
       S.save();
     } catch (e) {}
     wx.showToast({ title: '已进入体验模式', icon: 'none' });

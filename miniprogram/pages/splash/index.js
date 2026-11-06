@@ -44,6 +44,14 @@ Page({
         wx.redirectTo({ url: '/pages/login/index' });
         return;
       }
+
+      // 登录了但家庭档案还没建（比如在引导页中途退出）→ 补一次引导
+      const fam = S.state.family || {};
+      if (!fam.onboarded && !(fam.members || []).length) {
+        this.leaving = true;
+        wx.redirectTo({ url: '/pages/onboard/index?from=login&new=1' });
+        return;
+      }
     } catch (e) {}
 
     this.goto = () => {
