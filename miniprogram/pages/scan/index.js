@@ -29,6 +29,7 @@ Page({
   data: {
     photo: '',
     imgErr: false,
+    warnText: '',
     errText: '',
     scanning: true,
     items: [],
@@ -131,11 +132,23 @@ Page({
         success: (res) => {
           const d = (res && res.result) || {};
           const list = Array.isArray(d.items) ? d.items : [];
-          if (!list.length) {
-            self.showError(d.error ? ('识别失败：' + d.error) : '识别没有返回结果');
+
+          // 云函数明确报错（百度密钥错、接口没开通等）
+          if (!d.ok && d.error) {
+            self.showError('云端识别失败：' + d.error);
             return;
           }
-          self.applyResult(list, d.source === 'baidu' ? '百度 AI 识别（云函数）' : '云函数演示识别');
+          if (!list.length) {
+            self.showError('识别没有返回结果');
+            return;
+          }
+
+          const isMock = d.source !== 'baidu';
+          let label = '百度 AI 识别（云函数）';
+          if (isMock) {
+            label = d.hint ? ('演示数据 · ' + d.hint) : '演示数据（云端未接入百度 AI）';
+          }
+          self.applyResult(list, label, isMock);
         },
         fail: (err) => {
           const msg = (err && err.errMsg) || '未知错误';
@@ -181,7 +194,7 @@ Page({
     });
   },
 
-  applyResult(list, sourceText) {
+  applyResult(list, sourceText, isMock) {
     const items = list.slice(0, 8).map((x, i) => {
       const name = String(x.name || '').trim();
       const meta = E.foodMeta(name);
@@ -204,6 +217,7 @@ Page({
       scanning: false,
       items: items,
       sourceText: sourceText,
+      warnText: isMock ? '以下不是真实识别结果，只是演示数据' : '',
       round: this.data.round + 1
     }, () => this.syncCount());
   },

@@ -29,6 +29,7 @@
 
   <view wx:elif="{{!scanning}}" class="panel">
     <view class="ptitle">识别结果 <text class="pcount">{{checkedCount}}/{{items.length}} 已选</text></view>
+    <view wx:if="{{warnText}}" class="warnbanner">⚠️ {{warnText}}</view>
     <view wx:if="{{sourceText}}" class="psub">{{sourceText}} · 勾选确认后入库</view>
     <view wx:else class="psub">勾选你实际放进冰箱的东西</view>
 

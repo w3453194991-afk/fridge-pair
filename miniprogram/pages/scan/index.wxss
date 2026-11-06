@@ -87,3 +87,9 @@ page { background: #04120E; }
   line-height: 1.7; word-break: break-all;
 }
 .errtip { font-size: 21rpx; color: #9AA6A1; margin-top: 14rpx; }
+
+.warnbanner {
+  margin-top: 12rpx; font-size: 22rpx; font-weight: 700;
+  color: #B45309; background: #FFF7E8; border: 1rpx solid #FBE3CF;
+  border-radius: 16rpx; padding: 14rpx 18rpx; line-height: 1.6;
+}
