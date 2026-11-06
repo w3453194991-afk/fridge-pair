@@ -990,7 +990,8 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     蟹: '螃蟹', 贝: '扇贝', 蚝: '生蚝', 蛤: '蛤蜊', 螺: '蛤蜊', 菇: '香菇', 笋: '竹笋',
     茄子: '茄子', 土豆: '土豆', 番茄: '番茄', 西红柿: '番茄', 鸡蛋: '鸡蛋', 蛋: '鸡蛋',
     白菜: '大白菜', 菠菜: '菠菜', 豆角: '豆角', 藕: '莲藕', 香菇: '香菇', 蘑菇: '香菇',
-    黄瓜: '黄瓜', 冬瓜: '冬瓜', 南瓜: '南瓜', 青椒: '青椒', 芹菜: '芹菜', 韭菜: '韭菜'
+    黄瓜: '黄瓜', 冬瓜: '冬瓜', 南瓜: '南瓜', 青椒: '青椒', 芹菜: '芹菜', 韭菜: '韭菜',
+    鸡: '鸡腿', 鸭: '鸭肉', 鹅: '鸭肉', 牛: '牛里脊', 羊: '羊肉', 猪: '五花肉'
   };
 
   const METHOD_TPL = {
@@ -1070,7 +1071,9 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
   function detectMethod(name) {
     const n = String(name || '');
     if (/红烧|糖醋|酱焖/.test(n)) return '红烧';
+    if (/炖|焖|煲|烧/.test(n)) return '炖';
     if (/蒸/.test(n)) return '清蒸';
+    if (/煎|烤/.test(n)) return '煎';
     if (/汤|羹|粥/.test(n)) return '汤';
     if (/凉拌|拌/.test(n)) return '凉拌';
     if (/炸|锅包|酥/.test(n)) return '炸';
@@ -1079,8 +1082,17 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
 
   function guessMain(name) {
     const n = String(name || '');
-    // 先按食材库里的具体名字匹配（口蘑/金针菇 这类要优先于「菇→香菇」的模糊规则）
     const names = D.FOOD_DB.map(f => f.name).sort((a, b) => b.length - a.length);
+
+    // 「土豆炖鸡」这类：做法词右边才是主料，先看右半边
+    const m = n.match(/(?:炖|炒|烧|焖|蒸|煎|拌|烤|煸|爆|煮|卤)(.+)$/);
+    if (m && m[1]) {
+      const right = m[1];
+      for (const x of names) if (right.indexOf(x) >= 0) return x;
+      for (const k in NAME_FRAG) if (right.indexOf(k) >= 0) return NAME_FRAG[k];
+    }
+
+    // 再按食材库具体名字匹配（口蘑/金针菇 优先于「菇→香菇」模糊规则）
     for (const x of names) if (n.indexOf(x) >= 0) return x;
     for (const k in NAME_FRAG) if (n.indexOf(k) >= 0) return NAME_FRAG[k];
     return '';
@@ -1141,6 +1153,96 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
   }
 
   // 生成一份菜谱草稿
+  /* 按「主料类型 × 做法」组合步骤，避免所有自定义菜共用一套模板 */
+  function buildCustom(name, main, method, meta) {
+    const cat = meta.cat || '';
+    let kind = 'veg';
+    if (cat === '肉类') kind = 'meat';
+    else if (cat === '水产') kind = 'fish';
+    else if (cat === '豆制品') kind = 'tofu';
+    else if (cat === '蛋奶') kind = 'egg';
+    else if (cat === '主食') kind = 'staple';
+    else if (/鱼|虾|蟹|贝|蛤|蚝|鱿/.test(main)) kind = 'fish';
+    else if (/肉|排骨|鸡|鸭|牛|羊|猪|翅/.test(main)) kind = 'meat';
+    else if (/蛋|奶|芝士/.test(main)) kind = 'egg';
+    else if (/豆腐|豆皮|腐竹|豆干/.test(main)) kind = 'tofu';
+    else if (/米|面|粉|馒头|饭|年糕/.test(main)) kind = 'staple';
+
+    const seedT = 50 + ((name.length * 17) % 4) * 15;   // 同一道菜稳定，不同菜不同
+    const seedS = 2 + (name.length % 2);
+
+    const prep = [];
+    const steps = [];
+    const tips = [];
+    let season = [];
+
+    /* ---------- 预处理 ---------- */
+    if (kind === 'veg') {
+      prep.push(main + '洗净，按入口大小切好，沥干水分。');
+      season = ['蒜末 2 瓣', '盐 ' + seedS + ' g', '食用油 15 ml'];
+      tips.push('下锅前一定沥干，不然会爆油、也炒不香。');
+    } else if (kind === 'meat') {
+      prep.push(main + '逆纹切片（或丝），加生抽 5 ml、料酒 5 ml、淀粉抓匀腌 10 分钟。');
+      season = ['生抽 10 ml', '料酒 5 ml', '淀粉 5 g', '盐 ' + seedS + ' g', '食用油 20 ml'];
+      tips.push('腌肉时抓匀上浆，炒出来才嫩。');
+    } else if (kind === 'fish') {
+      prep.push(main + '处理干净，两面划两刀，用姜片和料酒抹匀腌 10 分钟去腥。');
+      season = ['姜片 3 片', '料酒 10 ml', '蒸鱼豉油 15 ml', '葱丝 少许'];
+      tips.push('鱼身擦干再下锅，皮才不破。');
+    } else if (kind === 'tofu') {
+      prep.push(main + '切 2 cm 见方块，淡盐水浸泡 5 分钟去豆腥。');
+      season = ['生抽 10 ml', '蚝油 5 g', '蒜末 2 瓣', '盐 ' + seedS + ' g'];
+      tips.push('先用盐水泡过，煎的时候不容易碎。');
+    } else if (kind === 'egg') {
+      prep.push(main + '打散备用，加一小撮盐搅匀。');
+      season = ['盐 ' + seedS + ' g', '葱花 少许', '食用油 15 ml'];
+      tips.push('蛋液过筛一遍，口感更滑。');
+    } else {
+      prep.push(main + '按需要切好备用。');
+      season = ['生抽 10 ml', '盐 ' + seedS + ' g', '食用油 15 ml'];
+    }
+
+    /* ---------- 做法 ---------- */
+    if (method === '汤' || method === '炖') {
+      steps.push({ heat: '中火', text: '锅中少油，下' + main + '翻炒 1 分钟出香。' });
+      steps.push({ heat: '大火', text: '冲入 700 ml 热水，煮开后撇去浮沫。' });
+      steps.push({ heat: '小火', text: '盖盖炖 ' + (kind === 'meat' ? '35' : '15') + ' 分钟至软。' });
+      steps.push({ heat: '中火', text: '加盐和生抽调味，再煮 2 分钟出锅。' });
+      tips.push('加水一定要加热水，冷水会让肉质发柴。');
+    } else if (method === '红烧') {
+      steps.push({ heat: '中火', text: '锅中放油，下' + main + '煸炒 2 分钟至表面微黄。' });
+      steps.push({ heat: '中火', text: '加生抽、老抽各 10 ml 翻炒上色。' });
+      steps.push({ heat: '大火', text: '倒热水没过食材，烧开转小火。' });
+      steps.push({ heat: '小火', text: '炖 ' + (kind === 'meat' ? '25' : '12') + ' 分钟，大火收汁。' });
+      tips.push('收汁时勤翻动，糖分容易糊底。');
+    } else if (method === '蒸' || method === '清蒸') {
+      steps.push({ heat: '大火', text: '水开上汽后放入' + main + '，蒸 ' + (kind === 'fish' ? '8' : '10') + ' 分钟。' });
+      steps.push({ heat: '中火', text: '取出倒掉盘中汤汁，铺上葱丝姜丝。' });
+      steps.push({ heat: '大火', text: '淋蒸鱼豉油，浇一勺热油激香。' });
+      tips.push('蒸好别立刻开盖，焖 2 分钟更嫩。');
+    } else if (method === '凉拌') {
+      steps.push({ heat: '大火', text: '水开下' + main + '焯 ' + seedT + ' 秒，捞出过冰水。' });
+      steps.push({ heat: '无火', text: '沥干后加蒜末、生抽 10 ml、香醋 8 ml、香油 3 ml。' });
+      steps.push({ heat: '无火', text: '拌匀后冷藏 5 分钟更爽口。' });
+      tips.push('过冰水能锁住脆度，颜色也更好看。');
+    } else if (method === '煎') {
+      steps.push({ heat: '中火', text: '平底锅刷薄油，' + main + '下锅摊平。' });
+      steps.push({ heat: '中火', text: '一面煎 ' + seedT + ' 秒至金黄，翻面再煎同样时间。' });
+      steps.push({ heat: '关火', text: '撒盐调味，出锅前淋少许生抽。' });
+      tips.push('锅要够热再下料，才不粘。');
+    } else {
+      /* 默认：快炒 */
+      steps.push({ heat: '大火', text: '热锅下油，爆香蒜末 10 秒。' });
+      steps.push({ heat: '大火', text: '下' + main + '快速翻炒 ' + seedT + ' 秒。' });
+      steps.push({ heat: '大火', text: '加盐和生抽调味，翻匀 ' + (seedT - 20) + ' 秒。' });
+      steps.push({ heat: '关火', text: '出锅装盘，趁热吃。' });
+      tips.push('全程大火快炒，时间长了会出水变软。');
+    }
+
+    tips.push('用量和火候按自家灶具微调，第一次做建议少放盐。');
+    return { prep: prep, steps: steps, tips: tips, seasonings: season };
+  }
+
   function generateRecipe(name, mainName) {
     const nm = String(name || '').trim();
     const main = mainName || guessMain(nm) || '五花肉';
@@ -1155,6 +1257,7 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     const companion = { 猪里脊: '青椒', 五花肉: '青椒', 牛里脊: '洋葱', 鸡胸肉: '青椒' }[main];
     if (companion && (m === '炒' || m === '红烧')) ing.push({ name: companion, qty: 1 });
 
+    const built = buildCustom(nm, main, m, meta);
     const d = {
       id: 'c-' + hashName(nm),
       name: nm,
@@ -1165,10 +1268,10 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       meals: ['午', '晚'],
       tags: [tpl.tag, '自定义'],
       ingredients: ing,
-      seasonings: tpl.season.slice(),
-      prep: tpl.prep.map(fill),
-      steps: tpl.steps.map(s => ({ heat: s.heat, text: fill(s.text) })),
-      tips: tpl.tips.slice(),
+      seasonings: built.seasonings,
+      prep: built.prep,
+      steps: built.steps,
+      tips: built.tips,
       nutrition: '按' + main + '为主要食材估算，营养值以食材折算为准。',
       pair: '自定义菜谱 · 可按口味调整',
       custom: true
