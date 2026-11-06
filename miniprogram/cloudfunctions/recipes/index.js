@@ -129,22 +129,34 @@ async function fetchJuhe(keyword) {
 
   // 聚合的路径有带 .php 和不带两种，两个都试
   let r = null;
+  let rawText = '';
   let lastErr = null;
+
   for (const path of [base, base + '.php']) {
     try {
       r = await request(path + q);
+      rawText = JSON.stringify(r).slice(0, 300);
       if (r && (r.resultcode === '200' || r.error_code === 0 || (r.result && r.result.data))) break;
+      // 返回了明确错误码，直接透出原因
+      if (r && (r.error_code || r.resultcode)) {
+        throw new Error('聚合返回：' + (r.reason || r.reason_text || rawText));
+      }
       r = null;
     } catch (e) {
       lastErr = e;
+      if (e && /聚合返回/.test(e.message)) throw e;
     }
   }
 
-  if (!r) throw new Error('聚合接口无响应' + (lastErr ? ('：' + lastErr.message) : ''));
+  if (!r) {
+    throw new Error('聚合接口无响应' +
+      (lastErr ? ('：' + lastErr.message) : '') +
+      (rawText ? (' | 原始返回：' + rawText) : ''));
+  }
 
   const code = r.resultcode !== undefined ? Number(r.resultcode) : Number(r.error_code);
   if (code && code !== 200 && code !== 0) {
-    throw new Error('聚合接口错误：' + (r.reason || r.reason_text || JSON.stringify(r).slice(0, 120)));
+    throw new Error('聚合接口错误：' + (r.reason || r.reason_text || rawText));
   }
 
   const list = (r.result && r.result.data) || [];
