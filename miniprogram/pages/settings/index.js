@@ -28,6 +28,16 @@ Page({
     const c = E.counts(st.foods || []);
     const total = c.g + c.y + c.p + c.b;
 
+    // 菜价来源
+    let priceText = '内置参考价';
+    try {
+      const p = G.__prices;
+      if (p && p.count > 0) {
+        const d = new Date(p.updatedAt);
+        priceText = p.count + ' 项 · ' + (d.getMonth() + 1) + '月' + d.getDate() + '日更新';
+      }
+    } catch (e) {}
+
     let syncText = '本地存储';
     let cloudMode = '未开启';
     if (CFG && CFG.CLOUD_ENV) {
@@ -57,7 +67,8 @@ Page({
       cloudMode: cloudMode,
       syncText: syncText,
       scanUsed: used,
-      scanLimit: Number(CFG.DAILY_SCAN_LIMIT) || 0
+      scanLimit: Number(CFG.DAILY_SCAN_LIMIT) || 0,
+      priceText: priceText
     });
   },
 

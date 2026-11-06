@@ -46,6 +46,10 @@
       <text class="lab">立即同步</text>
       <text class="val">上传到云端<text class="go">›</text></text>
     </view>
+    <view class="row between line">
+      <text class="lab">菜价数据</text>
+      <text class="val small">{{priceText}}</text>
+    </view>
   </view>
 
   <view class="sec"><view class="bar2"></view><view class="t">识别</view></view>

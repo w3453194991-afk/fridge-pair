@@ -35,6 +35,7 @@ App({
         try {
           wx.cloud.init({ env: CFG.CLOUD_ENV, traceUser: true });
           console.log('[cloud] 已初始化环境', CFG.CLOUD_ENV);
+          this.loadPrices();
         } catch (e) {
           console.warn('[cloud] 初始化失败', e && e.message);
         }
@@ -52,6 +53,32 @@ App({
 
   onError(err) {
     wx.showModal({ title: '运行出错', content: String(err).slice(0, 180), showCancel: false });
+  },
+
+  /* 拉取云端菜价，覆盖内置单价（拿不到就用内置值） */
+  loadPrices() {
+    wx.cloud.callFunction({
+      name: 'prices',
+      data: { action: 'get' },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        const items = Array.isArray(d.items) ? d.items : [];
+        if (!items.length) {
+          G.__prices = { count: 0, updatedAt: 0 };
+          return;
+        }
+        const db = G.DD_DATA.FOOD_DB || [];
+        let n = 0;
+        items.forEach((it) => {
+          if (!it || typeof it.price !== 'number') return;
+          const f = db.filter((x) => x.name === it.name)[0];
+          if (f) { f.price = it.price; n++; }
+        });
+        G.__prices = { count: n, updatedAt: d.updatedAt || 0 };
+        console.log('[prices] 已更新' + n + '项');
+      },
+      fail: () => { G.__prices = { count: 0, updatedAt: 0 }; }
+    });
   },
 
   // 任何找不到的页面都回登录页，避免弹出 onPageNotFound 的错误框
