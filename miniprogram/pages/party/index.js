@@ -92,12 +92,15 @@ Page({
         // 库里没有这句食材 → 先登记（否则模板会退回五花肉这类默认主料）
         if (E.registerFood) E.registerFood(nm);
 
-        // 只有食材名时，按形态补一个像菜的做法名
+        // 只有食材名时，按形态补一个像菜的做法名（名字里已有做法就不动）
+        const hasMethod = /[拌炒烧蒸炖汤烤煎炸煮焖卤羹粥面饭]/.test(nm);
         let dishName = nm;
-        if (/[笋菜瓜菇豆藕茄椒苗叶根]$/.test(nm)) dishName = '清炒' + nm;
-        else if (/[肉鱼虾鸡鸭牛羊排翅]$/.test(nm)) dishName = '红烧' + nm;
-        else if (/[果莓桃梨橙]$/.test(nm)) dishName = nm + '果盘';
-        else dishName = '家常' + nm;
+        if (!hasMethod) {
+          if (/[笋菜瓜菇豆藕茄椒苗叶根]$/.test(nm)) dishName = '清炒' + nm;
+          else if (/[肉鱼虾鸡鸭牛羊排翅]$/.test(nm)) dishName = '红烧' + nm;
+          else if (/[果莓桃梨橙]$/.test(nm)) dishName = nm + '果盘';
+          else dishName = '家常' + nm;
+        }
 
         const draft = E.generateRecipe(dishName, nm);
         if (!draft || !draft.name) return;
