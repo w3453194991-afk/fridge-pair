@@ -9,6 +9,10 @@
     <view class="htags">{{dish.tags}}</view>
   </view>
 
+  <view wx:if="{{dish.custom}}" class="gennotice">
+    ⚠️ 这道菜由系统按菜名模板生成，做法与用量仅供参考，实际以你的烹饪习惯为准。
+  </view>
+
   <view class="sec"><view class="bar2"></view><view class="t">食材用量</view><view class="n">{{missingCount ? ('缺 ' + missingCount + ' 样') : '都齐了'}}</view></view>
   <view class="card">
     <view wx:for="{{states}}" wx:key="name" class="line row between">

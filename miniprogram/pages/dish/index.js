@@ -55,6 +55,7 @@ Page({
         id: d.id, name: d.name, emoji: d.emoji, minutes: d.minutes,
         level: d.level, cuisine: (d.cuisine || []).join(' / '),
         tags: (d.tags || []).join(' · '), seasonings: d.seasonings || [],
+        custom: !!d.custom || (d.tags || []).indexOf('AI生成') >= 0,
         photo: (P[d.id] && !validPhoto(S.getDishPhoto(d.id))) ? ('/img/' + d.id + '.jpg') : (validPhoto(S.getDishPhoto(d.id)) ? S.getDishPhoto(d.id) : '')
       },
       steps: (d.steps || []).map((s, i) => ({ no: i + 1, heat: s.heat, text: s.text })),

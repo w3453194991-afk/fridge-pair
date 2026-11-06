@@ -23,6 +23,9 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     { name: '胡萝卜', emoji: '🥕', cat: '蔬菜',   unit: '根',  shelf: 14,  price: 1,    storage: '冷藏' },
     { name: '大蒜',   emoji: '🧄', cat: '蔬菜',   unit: '头',  shelf: 30,  price: 1.5,  storage: '阴凉' },
     { name: '香菇',   emoji: '🍄', cat: '蔬菜',   unit: '朵',  shelf: 5,   price: 0.8,  storage: '冷藏' },
+    { name: '松仁',   emoji: '🌰', cat: '干货',   unit: 'g',   shelf: 90,  price: 0.6,   storage: '常温' },
+    { name: '青豆',   emoji: '🫛', cat: '蔬菜',   unit: 'g',   shelf: 5,   price: 0.025, storage: '冷藏' },
+    { name: '牛肉',   emoji: '🥩', cat: '肉类',   unit: 'g',   shelf: 3,   price: 0.1,   storage: '冷藏' },
     { name: '口蘑',   emoji: '🍄', cat: '蔬菜',   unit: 'g',   shelf: 5,   price: 0.02, storage: '冷藏' },
     { name: '杏鲍菇', emoji: '🍄', cat: '蔬菜',   unit: '根',  shelf: 6,   price: 3.5,  storage: '冷藏' },
     { name: '金针菇', emoji: '🍄', cat: '蔬菜',   unit: 'g',   shelf: 5,   price: 0.015,storage: '冷藏' },
@@ -673,6 +676,96 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       ],
       tips: ['大火快炒是保色的关键。', '油菜钙含量不低，别煮太久。'],
       nutrition: '油菜钙含量在绿叶菜里偏高，比牛奶更好吸收的搭配是少油快炒。', pair: '钙 + 维K → 骨骼友好'
+    },
+    {
+      id: 'pine-nut-corn', name: '松仁玉米', emoji: '🌽', minutes: 15, level: '新手',
+      meals: ['午', '晚'], tags: ['家常','孩子爱吃','甜口'],
+      ingredients: [{"name":"玉米","qty":1},{"name":"松仁","qty":50},{"name":"青豆","qty":50},{"name":"胡萝卜","qty":0.5}],
+      seasonings: ['白糖 5 g','盐 2 g','水淀粉 少许','食用油 15 ml'],
+      prep: ['玉米剥粒（或直接用玉米粒 200 g），青豆洗净。','胡萝卜切小丁，大小和玉米粒相近。','松仁小火干炒 1 分钟出香，盛出备用。'],
+      steps: [
+        { heat: '中火', text: '水开加一点盐，下青豆和胡萝卜丁焯 1 分钟，捞出沥干。' },
+        { heat: '大火', text: '热锅下油，倒玉米粒翻炒 1 分钟至微微金黄。' },
+        { heat: '大火', text: '下青豆、胡萝卜丁同炒 30 秒，加盐、白糖调味。' },
+        { heat: '小火', text: '淋少许水淀粉勾薄芡，翻匀后关火。' },
+        { heat: '关火', text: '最后撒上炒香的松仁，拌匀出锅（松仁最后放才脆）。' }
+      ],
+      tips: ['松仁一定要最后撒，早放会回软不脆。','玉米本身带甜，糖只放一点提味。','用甜玉米粒比糯玉米口感更好。'],
+      nutrition: '玉米提供膳食纤维和叶黄素，松仁含不饱和脂肪酸，是孩子爱吃的一道甜口家常菜。', pair: '纤维 + 好脂肪 → 饱腹又护眼'
+    },
+    {
+      id: 'pepper-pork-shreds', name: '青椒肉丝', emoji: '🫑', minutes: 15, level: '新手',
+      meals: ['午', '晚'], tags: ['家常','下饭','快手'],
+      ingredients: [{"name":"猪里脊","qty":200},{"name":"青椒","qty":2}],
+      seasonings: ['生抽 10 ml','淀粉 5 g','料酒 5 ml','盐 2 g','食用油 20 ml'],
+      prep: ['猪里脊逆纹切细丝，加生抽、料酒、淀粉抓匀腌 10 分钟。','青椒去籽切丝，粗细和肉丝相当。'],
+      steps: [
+        { heat: '大火', text: '热锅宽油，下肉丝快速划散，变色立刻盛出。' },
+        { heat: '大火', text: '锅留底油，下青椒丝炒 40 秒至断生。' },
+        { heat: '大火', text: '倒回肉丝，加盐快速翻匀 20 秒出锅。' }
+      ],
+      tips: ['肉丝腌制上浆是嫩的关键。','青椒别炒太久，保持脆感。'],
+      nutrition: '里脊脂肪低、蛋白质高，配青椒补充维生素 C。', pair: '蛋白 + 维C → 有助铁吸收'
+    },
+    {
+      id: 'potato-beef-stew', name: '土豆炖牛肉', emoji: '🍲', minutes: 70, level: '进阶',
+      meals: ['午', '晚'], tags: ['炖菜','硬菜','一锅出'],
+      ingredients: [{"name":"牛肉","qty":400},{"name":"土豆","qty":2},{"name":"胡萝卜","qty":1}],
+      seasonings: ['生抽 20 ml','老抽 5 ml','料酒 15 ml','姜片 3 片','八角 1 个','盐 3 g'],
+      prep: ['牛肉切 3 cm 块，冷水下锅加料酒焯水，撇净浮沫后捞出冲洗。','土豆、胡萝卜切滚刀块，泡水防氧化。'],
+      steps: [
+        { heat: '中火', text: '锅里少油，下姜片、八角炒香，倒牛肉块翻炒 2 分钟。' },
+        { heat: '中火', text: '加生抽、老抽炒上色，倒热水没过牛肉。' },
+        { heat: '小火', text: '盖盖炖 40 分钟至牛肉变软。' },
+        { heat: '小火', text: '下土豆和胡萝卜，再炖 20 分钟。' },
+        { heat: '大火', text: '加盐调味，开盖收汁 5 分钟即可。' }
+      ],
+      tips: ['一定加热水，冷水会让肉变柴。','土豆后放，不然会炖成泥。'],
+      nutrition: '牛肉富含铁和优质蛋白，炖煮后更易消化。', pair: '铁 + 维C → 补血'
+    },
+    {
+      id: 'hot-sour-soup', name: '酸辣汤', emoji: '🥣', minutes: 20, level: '新手',
+      meals: ['午', '晚'], tags: ['汤羹','开胃','低卡'],
+      ingredients: [{"name":"豆腐","qty":0.5},{"name":"木耳","qty":30},{"name":"鸡蛋","qty":1},{"name":"胡萝卜","qty":0.5}],
+      seasonings: ['香醋 20 ml','白胡椒粉 2 g','生抽 10 ml','水淀粉 15 g','香油 3 ml'],
+      prep: ['豆腐、木耳、胡萝卜切细丝。','鸡蛋打散备用。'],
+      steps: [
+        { heat: '大火', text: '锅水烧开，下豆腐丝、木耳丝、胡萝卜丝煮 3 分钟。' },
+        { heat: '中火', text: '加生抽、盐调味，淋水淀粉勾芡至微稠。' },
+        { heat: '小火', text: '转小火，缓缓淋入蛋液，静置 3 秒再轻推成蛋花。' },
+        { heat: '关火', text: '加香醋和白胡椒粉，淋香油出锅。' }
+      ],
+      tips: ['醋和胡椒粉最后放，香气才留得住。','蛋液下锅后别急着搅，蛋花才成型。'],
+      nutrition: '低热量、高水分，饭前一碗帮助控制食量。', pair: '水分 + 醋 → 开胃解腻'
+    },
+    {
+      id: 'tomato-egg-soup', name: '西红柿鸡蛋汤', emoji: '🍅', minutes: 12, level: '新手',
+      meals: ['午', '晚'], tags: ['汤羹','家常','快手'],
+      ingredients: [{"name":"番茄","qty":2},{"name":"鸡蛋","qty":2}],
+      seasonings: ['盐 2 g','香油 3 ml','葱花 少许'],
+      prep: ['番茄顶部划十字，开水烫 30 秒去皮切块。','鸡蛋打散。'],
+      steps: [
+        { heat: '中火', text: '少油下番茄块炒 2 分钟，炒出红油。' },
+        { heat: '大火', text: '加 600 ml 热水煮开，煮 3 分钟。' },
+        { heat: '小火', text: '转小火淋蛋液，静置后轻推成蛋花。' },
+        { heat: '关火', text: '加盐，淋香油，撒葱花。' }
+      ],
+      tips: ['番茄先炒出沙，汤才够红够鲜。'],
+      nutrition: '番茄红素加热后更好吸收，配鸡蛋补充蛋白。', pair: '番茄红素 + 蛋白 → 互补'
+    },
+    {
+      id: 'dry-fried-beans', name: '干煸豆角', emoji: '🫘', minutes: 18, level: '进阶',
+      meals: ['午', '晚'], tags: ['下饭','川味','微辣'],
+      ingredients: [{"name":"豆角","qty":300},{"name":"猪里脊","qty":80}],
+      seasonings: ['干辣椒 5 个','花椒 1 g','蒜末 3 瓣','生抽 10 ml','盐 2 g'],
+      prep: ['豆角掐头去尾撕筋，掰成 5 cm 段，洗净完全沥干。','肉沫用少许生抽抓匀。'],
+      steps: [
+        { heat: '中火', text: '锅里多放油，下豆角煸 5 分钟至表皮起皱发白，盛出。' },
+        { heat: '大火', text: '留底油下肉沫炒散，加干辣椒、花椒、蒜末炒香。' },
+        { heat: '大火', text: '倒回豆角，加生抽、盐翻炒 1 分钟出锅。' }
+      ],
+      tips: ['豆角必须煸透，没熟容易不适。','沥干水分再下锅，不然会爆油。'],
+      nutrition: '豆角纤维丰富，干煸做法油偏多，配清淡汤更好。', pair: '纤维 + 辣味 → 开胃下饭'
     },
     {
       id: 'wood-ear-salad', name: '凉拌木耳', emoji: '🥗', minutes: 10, level: '新手',

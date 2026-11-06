@@ -145,3 +145,9 @@
 .bname { flex: 1; font-size: 26rpx; font-weight: 600; }
 .bneed { font-size: 21rpx; color: #8B6B4A; margin-right: 16rpx; }
 .bprice { font-size: 21rpx; color: #B45309; }
+
+.gennotice {
+  margin: 4rpx 0 18rpx; font-size: 21rpx; line-height: 1.7;
+  color: #B45309; background: #FFF7E8; border: 1rpx solid #FBE3CF;
+  border-radius: 18rpx; padding: 16rpx 20rpx;
+}
