@@ -83,6 +83,23 @@ Page({
     wx.navigateTo({ url: '/pages/onboard/index?edit=1' });
   },
 
+  /* 重新走一遍首次引导（含欢迎开屏） */
+  onRestartGuide() {
+    wx.showModal({
+      title: '重新设置',
+      content: '会重新走一遍家庭设置和欢迎动画。冰箱内容不会被清空。',
+      success: (res) => {
+        if (!res.confirm) return;
+        try {
+          S.state.family.onboarded = false;
+          S.state.family.firstRun = true;
+          S.save();
+        } catch (e) {}
+        wx.reLaunch({ url: '/pages/onboard/index' });
+      }
+    });
+  },
+
   /* 数据 */
   onManualSync() {
     if (!(CFG && CFG.CLOUD_ENV)) {

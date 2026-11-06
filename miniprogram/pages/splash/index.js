@@ -20,7 +20,14 @@ Page({
       if (this.leaving) return;
       this.leaving = true;
       this.timers.forEach(clearTimeout);
-      try { S.load(); } catch (e) {}
+      try {
+        S.load();
+        // 首次欢迎播完就消费掉标记
+        if (S.state.family && S.state.family.firstRun) {
+          S.state.family.firstRun = false;
+          S.save();
+        }
+      } catch (e) {}
       const logged = S.state && S.state.family && S.state.family.loggedIn;
       if (logged) wx.switchTab({ url: '/pages/fridge/index' });
       else wx.redirectTo({ url: '/pages/login/index' });
@@ -48,7 +55,12 @@ Page({
       const names = urgent.map(f => f.name).join('、');
 
       let l1, l2, l3;
-      if (!foods.length) {
+      const firstRun = !!(st.family && st.family.firstRun);
+      if (firstRun) {
+        l1 = '欢迎来到冰箱对对碰！';
+        l2 = '我是你的冰箱管家，从今天起它归我管了。';
+        l3 = '先加几样食材，开启你的精致生活吧。';
+      } else if (!foods.length) {
         l1 = '嘀嘀——冰箱还是空的！';
         l2 = '先拍一张照片，我帮你把食材记进去。';
         l3 = '点一下中间的相机就行';
@@ -63,6 +75,7 @@ Page({
       }
 
       this.setData({
+        firstRun: firstRun,
         isEmpty: !foods.length,
         hasUrgent: urgent.length > 0,
         urgentN: urgent.length,

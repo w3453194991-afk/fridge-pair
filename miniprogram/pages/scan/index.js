@@ -28,6 +28,7 @@ function bumpCount(name) {
 Page({
   data: {
     photo: '',
+    imgErr: false,
     scanning: true,
     items: [],
     checkedCount: 0,
@@ -36,8 +37,19 @@ Page({
     sourceCls: 'src'
   },
 
+  onImgError() {
+    console.warn('[scan] 图片加载失败，路径可能已失效');
+    this.setData({ imgErr: true });
+  },
+
   onLoad(q) {
-    this.setData({ photo: (q && q.photo) || '' });
+    let photo = (q && q.photo) ? decodeURIComponent(q.photo) : '';
+    if (!photo) {
+      try { photo = wx.getStorageSync('ddm.tempPhoto') || ''; } catch (e) {}
+    }
+    // 只接受本地临时文件/包内路径，其它一律视为无效
+    if (photo && !/^(wxfile:|http:\/\/tmp|\/|data:image)/.test(photo)) photo = '';
+    this.setData({ photo: photo });
 
     const limit = Number(CONFIG.DAILY_SCAN_LIMIT) || 0;
     if (limit > 0 && todayCount('scan') >= limit) {

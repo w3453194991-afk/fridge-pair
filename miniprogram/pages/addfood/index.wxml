@@ -1,42 +1,107 @@
 <view class="wrap addpage">
 
-  <view class="searchbar">
-    <text class="mag">🔍</text>
-    <input class="sinput" placeholder="搜食材，如：番茄、菠菜" value="{{q}}" bindinput="onSearch" confirm-type="search" />
-    <text wx:if="{{q}}" class="clear" bindtap="onClear">✕</text>
+  <view class="hero">
+    <view class="ht">添加食材</view>
+    <view class="hs">蔬菜、肉蛋、保健品……有什么就写什么</view>
   </view>
 
-  <view class="chips cats">
+  <!-- 名称 -->
+  <view class="field">
+    <text class="lab">名称</text>
+    <input
+      class="inp"
+      placeholder="如：菠菜 / 三文鱼 / 鱼油胶囊"
+      value="{{name}}"
+      bindinput="onName"
+      confirm-type="done"
+    />
+  </view>
+
+  <view wx:if="{{matched}}" class="matched">
+    食材库里有「{{name}}」· 默认单位 {{matched.unit}} · 建议保质 {{matched.shelf}} 天
+  </view>
+
+  <view wx:if="{{suggest.length}}" class="sug">
     <view
-      wx:for="{{cats}}"
-      wx:key="key"
-      class="{{item.cls}}"
-      data-key="{{item.key}}"
-      bindtap="onCat"
-    >{{item.label}}</view>
+      wx:for="{{suggest}}"
+      wx:key="name"
+      class="sugitem"
+      data-name="{{item.name}}"
+      bindtap="onPickSuggest"
+    >{{item.emoji}} {{item.name}}</view>
   </view>
 
-  <view wx:if="{{list.length}}" class="list">
-    <view wx:for="{{list}}" wx:key="name" class="row">
-      <view class="emo">{{item.emoji}}</view>
-      <view class="mid">
-        <view class="nm">{{item.name}}</view>
-        <view class="sub">{{item.cat}}<text wx:if="{{item.have}}"> · 冰箱已有 {{item.have}}</text></view>
-      </view>
+  <!-- 数量 + 单位 -->
+  <view class="row2">
+    <view class="half">
+      <view class="lab">数量</view>
       <view class="stepper">
-        <view class="qb" data-name="{{item.name}}" data-d="-1" bindtap="onQty">−</view>
-        <text class="qn">{{item.qty}}</text>
-        <view class="qb" data-name="{{item.name}}" data-d="1" bindtap="onQty">+</view>
+        <view class="qb" data-d="-1" bindtap="onQty">−</view>
+        <input class="qn" type="number" value="{{qty}}" bindinput="onQtyInput" />
+        <view class="qb" data-d="1" bindtap="onQty">+</view>
       </view>
-      <view class="addbtn" data-name="{{item.name}}" bindtap="onAdd">添加</view>
+    </view>
+    <view class="half">
+      <view class="lab">单位</view>
+      <input class="inp small" placeholder="份 / 个 / 盒" value="{{unit}}" bindinput="onUnit" />
     </view>
   </view>
 
-  <view wx:else class="empty">
-    <view class="e">🔍</view>
-    <view>没找到这个食材</view>
-    <view class="muted">换个词试试，比如"土豆"</view>
+  <!-- 到期 -->
+  <view class="lab mt">到期时间</view>
+  <view class="segrow">
+    <view class="seg {{useDate ? '' : 'on'}}" bindtap="toggleDate">按天数</view>
+    <view class="seg {{useDate ? 'on' : ''}}" bindtap="toggleDate">选具体日期</view>
   </view>
+
+  <block wx:if="{{!useDate}}">
+    <view class="chips">
+      <view class="chip {{shelf == 3 ? 'on' : ''}}" data-d="3" bindtap="quickShelf">3 天</view>
+      <view class="chip {{shelf == 7 ? 'on' : ''}}" data-d="7" bindtap="quickShelf">7 天</view>
+      <view class="chip {{shelf == 15 ? 'on' : ''}}" data-d="15" bindtap="quickShelf">15 天</view>
+      <view class="chip {{shelf == 30 ? 'on' : ''}}" data-d="30" bindtap="quickShelf">30 天</view>
+      <view class="chip {{shelf == 90 ? 'on' : ''}}" data-d="90" bindtap="quickShelf">90 天</view>
+      <view class="chip {{shelf == 180 ? 'on' : ''}}" data-d="180" bindtap="quickShelf">180 天</view>
+      <view class="chip {{shelf == 365 ? 'on' : ''}}" data-d="365" bindtap="quickShelf">1 年</view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <picker mode="date" value="{{datePicker}}" start="{{minDate}}" end="{{maxDate}}" bindchange="onDate">
+      <view class="datebox">
+        <text class="dicon">📅</text>
+        <text class="dval">{{datePicker}}</text>
+        <text class="dgo">修改 ›</text>
+      </view>
+    </picker>
+  </block>
+
+  <view class="btn primary addnow" bindtap="onAdd">添加到冰箱</view>
+
+  <!-- 常用 -->
+  <view class="sec"><view class="bar2"></view><view class="t">常用</view></view>
+  <view class="chips">
+    <view
+      wx:for="{{common}}"
+      wx:key="*this"
+      class="chip"
+      data-name="{{item}}"
+      bindtap="onPickSuggest"
+    >{{item}}</view>
+  </view>
+
+  <block wx:if="{{recent.length}}">
+    <view class="sec"><view class="bar2"></view><view class="t">最近添加</view></view>
+    <view class="chips">
+      <view
+        wx:for="{{recent}}"
+        wx:key="*this"
+        class="chip"
+        data-name="{{item}}"
+        bindtap="onPickSuggest"
+      >{{item}}</view>
+    </view>
+  </block>
 
   <view class="bottomspace"></view>
   <view class="bottom" bindtap="onDone">完成，回冰箱</view>

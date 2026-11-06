@@ -39,9 +39,8 @@ Component({
           camera: 'back',
           success: (res) => {
             const path = res.tempFiles[0].tempFilePath;
-            wx.navigateTo({
-              url: '/pages/scan/index?photo=' + encodeURIComponent(path)
-            });
+            try { wx.setStorageSync('ddm.tempPhoto', path); } catch (e) {}
+            wx.navigateTo({ url: '/pages/scan/index' });
           },
           fail: () => {}
         });

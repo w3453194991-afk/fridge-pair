@@ -1,8 +1,17 @@
 <view class="scanpage">
 
   <view class="photo-wrap">
-    <image wx:if="{{photo}}" class="photo" src="{{photo}}" mode="aspectFill" />
-    <view wx:else class="photo empty">📷</view>
+    <image
+      wx:if="{{photo && !imgErr}}"
+      class="photo"
+      src="{{photo}}"
+      mode="aspectFill"
+      binderror="onImgError"
+    />
+    <view wx:else class="photo empty">
+      <view class="ph-emoji">📷</view>
+      <view wx:if="{{imgErr}}" class="ph-tip">照片读取失败，可重拍一张</view>
+    </view>
     <view wx:if="{{scanning}}" class="scanline"></view>
     <view wx:if="{{scanning}}" class="scanmask-tip">🤖 识别中…</view>
   </view>

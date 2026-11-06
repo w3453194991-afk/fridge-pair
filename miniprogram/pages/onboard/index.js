@@ -8,6 +8,7 @@ Page({
   data: {
     step: 0,
     famName: '',
+    customCond: '',
     members: [{ role: '成人', age: 30, icon: '👨' }],
     allergens: [],
     condList: [],
@@ -40,7 +41,7 @@ Page({
       famName: (fam.name && fam.name !== '我') ? fam.name : '',
       members: members,
       allergens: (D.ALLERGENS || []).map(a => ({ name: a, on: avoid.indexOf(a) >= 0 })),
-      condList: (D.CONDITIONS || []).map(c => ({
+      condList: (D.CONDITIONS || []).slice(0, 4).map(c => ({
         key: c.key,
         icon: c.emoji || '🩺',
         name: c.key,
@@ -117,6 +118,10 @@ Page({
     });
   },
 
+  onCustomCond(e) {
+    this.setData({ customCond: e.detail.value });
+  },
+
   pickSystem(e) {
     const key = e.currentTarget.dataset.key;
     this.setData({
@@ -147,6 +152,11 @@ Page({
     const oldFam = st.family || {};
     const avoid = this.data.allergens.filter(x => x.on).map(x => x.name);
     const conds = this.data.condList.filter(x => x.on).map(x => x.name);
+    // 自定义的：逗号/顿号/空格 分隔多个
+    String(this.data.customCond || '').split(/[,，、;；\s]+/).forEach(s => {
+      const v = s.trim();
+      if (v && conds.indexOf(v) < 0) conds.push(v);
+    });
 
     const fam = {
       openid: oldFam.openid || '',
@@ -211,6 +221,7 @@ Page({
       S.state.family.loggedIn = true;
       if (oldFam.openid) S.state.family.openid = oldFam.openid;
       S.state.family.onboarded = true;
+      S.state.family.firstRun = true;   // 交给开屏做首次欢迎
       S.save();
     } catch (e) {}
     wx.reLaunch({ url: '/pages/splash/index' });

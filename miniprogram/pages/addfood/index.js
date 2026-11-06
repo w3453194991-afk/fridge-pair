@@ -1,101 +1,148 @@
 const G = require('../../lib/shim.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 
+const DAY = 24 * 3600 * 1000;
+
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function ymd(ts) {
+  const d = new Date(ts);
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+}
+function todayYmd() { return ymd(Date.now()); }
+
+const COMMON = ['番茄', '鸡蛋', '牛奶', '菠菜', '土豆', '洋葱', '胡萝卜', '青椒', '豆腐', '苹果', '猪肉', '鸡胸肉'];
+
 Page({
   data: {
-    q: '',
-    cat: 'all',
-    cats: [],
-    list: [],
-    qtyMap: {},
-    picked: 0
+    name: '',
+    qty: 1,
+    unit: '份',
+    shelf: 7,
+    useDate: false,
+    datePicker: '',
+    minDate: '',
+    maxDate: '',
+    matched: null,
+    suggest: [],
+    common: COMMON,
+    recent: []
   },
 
   onLoad() {
-    const db = D.FOOD_DB || [];
-    const catSet = [];
-    db.forEach(f => {
-      const c = f.cat || '其他';
-      if (catSet.indexOf(c) < 0) catSet.push(c);
-    });
-
-    const cats = [{ key: 'all', label: '全部' }].concat(
-      catSet.map(c => ({ key: c, label: c }))
-    );
-
-    this.db = db;
-    this.setData({ cats: cats });
-    this.render();
-  },
-
-  render() {
-    const q = (this.data.q || '').trim();
-    const cat = this.data.cat;
-    const qtyMap = this.data.qtyMap || {};
-
-    let list = this.db || [];
-    if (cat !== 'all') list = list.filter(f => (f.cat || '其他') === cat);
-    if (q) list = list.filter(f => f.name.indexOf(q) >= 0);
-
-    const rows = list.slice(0, 200).map(f => {
-      const meta = E.foodMeta(f.name);
-      const qty = qtyMap[f.name] || 1;
-      const have = (S.state.foods || []).filter(x => x.name === f.name)[0];
-      return {
-        name: f.name,
-        emoji: meta.emoji || f.emoji || '🍽',
-        unit: meta.unit || f.unit || '份',
-        cat: f.cat || '其他',
-        shelf: f.shelf || meta.shelf || 7,
-        qty: qty,
-        have: have ? E.fmtQty(have.qty) + ' ' + (have.unit || '') : ''
-      };
-    });
-
+    const now = Date.now();
     this.setData({
-      list: rows,
-      cats: this.data.cats.map(c => ({
-        key: c.key,
-        label: c.label,
-        cls: c.key === cat ? 'chip on' : 'chip'
-      })),
-      picked: Object.keys(qtyMap).filter(k => qtyMap[k] > 0).length
+      datePicker: ymd(now + 7 * DAY),
+      minDate: todayYmd(),
+      maxDate: ymd(now + 730 * DAY)
     });
+    // 最近添加过的 6 样，方便复用
+    const names = [];
+    (S.state.foods || []).forEach(f => {
+      if (names.indexOf(f.name) < 0) names.push(f.name);
+    });
+    this.setData({ recent: names.slice(0, 6) });
   },
 
-  onSearch(e) {
-    this.setData({ q: e.detail.value }, () => this.render());
+  onName(e) {
+    const v = e.detail.value;
+    this.setData({ name: v });
+    this.lookup(v);
   },
 
-  onClear() {
-    this.setData({ q: '' }, () => this.render());
+  lookup(v) {
+    const q = String(v || '').trim();
+    if (!q) {
+      this.setData({ suggest: [], matched: null });
+      return;
+    }
+    const db = D.FOOD_DB || [];
+    const hit = db.filter(f => f.name === q)[0];
+    const sug = db.filter(f => f.name.indexOf(q) >= 0).slice(0, 8).map(f => {
+      const m = E.foodMeta(f.name);
+      return { name: f.name, emoji: m.emoji, unit: m.unit, shelf: m.shelf };
+    });
+
+    if (hit) {
+      const m = E.foodMeta(hit.name);
+      this.setData({
+        matched: { emoji: m.emoji, unit: m.unit, shelf: m.shelf, cat: hit.cat || '' },
+        unit: m.unit || this.data.unit,
+        shelf: m.shelf || this.data.shelf,
+        suggest: sug
+      });
+    } else {
+      this.setData({ matched: null, suggest: sug });
+    }
   },
 
-  onCat(e) {
-    this.setData({ cat: e.currentTarget.dataset.key }, () => this.render());
+  onPickSuggest(e) {
+    const name = e.currentTarget.dataset.name;
+    this.setData({ name: name });
+    this.lookup(name);
   },
 
   onQty(e) {
-    const name = e.currentTarget.dataset.name;
     const d = Number(e.currentTarget.dataset.d);
-    const qtyMap = Object.assign({}, this.data.qtyMap);
-    qtyMap[name] = Math.max(1, Math.min(30, (qtyMap[name] || 1) + d));
-    this.setData({ qtyMap: qtyMap }, () => this.render());
+    this.setData({ qty: Math.max(1, Math.min(99, this.data.qty + d)) });
   },
 
-  onAdd(e) {
-    const name = e.currentTarget.dataset.name;
-    const qty = (this.data.qtyMap || {})[name] || 1;
+  onQtyInput(e) {
+    const v = parseInt(e.detail.value, 10);
+    this.setData({ qty: isNaN(v) ? 1 : Math.max(1, Math.min(99, v)) });
+  },
+
+  onUnit(e) {
+    this.setData({ unit: e.detail.value || '份' });
+  },
+
+  toggleDate() {
+    this.setData({ useDate: !this.data.useDate });
+  },
+
+  onDate(e) {
+    this.setData({ datePicker: e.detail.value });
+  },
+
+  quickShelf(e) {
+    const d = Number(e.currentTarget.dataset.d);
+    this.setData({ useDate: false, shelf: d });
+  },
+
+  onAdd() {
+    const name = String(this.data.name || '').trim();
+    if (!name) {
+      wx.showToast({ title: '先写个食材名称', icon: 'none' });
+      return;
+    }
+
+    let days = Number(this.data.shelf) || 7;
+    let expireAt = null;
+
+    if (this.data.useDate) {
+      const parts = String(this.data.datePicker).split('-');
+      const end = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 59, 59).getTime();
+      days = Math.max(0, Math.ceil((end - Date.now()) / DAY));
+      expireAt = end;
+    }
+
     const meta = E.foodMeta(name);
     try {
-      S.add(name, qty, meta.shelf || 7, meta.storage || '');
+      const f = S.add(name, this.data.qty, days, meta.storage || '');
+      if (expireAt && f) f.expireAt = expireAt;
+      // 单位允许自定义
+      if (f && this.data.unit) f.unit = this.data.unit;
       S.save();
     } catch (err) {
       wx.showModal({ title: '添加失败', content: String((err && err.message) || err), showCancel: false });
       return;
     }
+
     wx.showToast({ title: '已添加 ' + name, icon: 'success' });
-    this.render();
+    this.setData({ name: '', qty: 1, matched: null, suggest: [] });
+
+    const names = [];
+    (S.state.foods || []).forEach(x => { if (names.indexOf(x.name) < 0) names.push(x.name); });
+    this.setData({ recent: names.slice(0, 6) });
   },
 
   onDone() {

@@ -22,6 +22,10 @@
       <text class="lab">成员 · 忌口 · 健康</text>
       <text class="val">{{memberCount}} 位家人<text class="go">›</text></text>
     </view>
+    <view class="row between line" bindtap="onRestartGuide">
+      <text class="lab">重新走一遍引导</text>
+      <text class="val">含欢迎动画<text class="go">›</text></text>
+    </view>
   </view>
 
   <view class="sec"><view class="bar2"></view><view class="t">数据</view></view>

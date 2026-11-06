@@ -80,3 +80,12 @@ page { background: #F4FBF7; }
 .namesuffix { font-size: 26rpx; color: #7C8B87; margin-left: 10rpx; }
 .namehint { font-size: 20rpx; color: #9AA6A1; margin-top: 10rpx; }
 .divider { height: 1rpx; background: #E9F2ED; margin: 36rpx 0 10rpx; }
+
+.customcond {
+  background: #fff; border: 1rpx solid #E7EFEA; border-radius: 20rpx;
+  height: 92rpx; padding: 0 22rpx; font-size: 25rpx; margin-top: 6rpx;
+}
+.ph2 { color: #C3CFC9; }
+.condnote { font-size: 20rpx; color: #8B9A96; margin-top: 4rpx; }
+.ph-emoji { font-size: 110rpx; }
+.ph-tip { font-size: 22rpx; color: #9BF3FF; margin-top: 14rpx; }
