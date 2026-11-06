@@ -78,3 +78,8 @@
   border-radius: 18rpx; padding: 10rpx 20rpx;
 }
 .sqty { font-size: 21rpx; color: #7C8B87; margin-right: 14rpx; }
+
+.aitag {
+  font-size: 17rpx; font-weight: 700; color: #5B3FA8;
+  background: #F1EBFF; border-radius: 8rpx; padding: 2rpx 10rpx; margin-left: 10rpx;
+}

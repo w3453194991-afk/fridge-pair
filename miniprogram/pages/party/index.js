@@ -91,15 +91,18 @@ Page({
       try {
         // 库里没有这句食材 → 先登记（否则模板会退回五花肉这类默认主料）
         if (E.registerFood) E.registerFood(nm);
-        const meta = E.foodMeta(nm);
+
+        // 只有食材名时，按形态补一个像菜的做法名
         let dishName = nm;
-        if (meta.cat === '蔬菜' || meta.cat === '豆制品') dishName = '清炒' + nm;
-        else if (meta.cat === '肉类' || meta.cat === '水产') dishName = '家常' + nm;
-        else dishName = nm;
+        if (/[笋菜瓜菇豆藕茄椒苗叶根]$/.test(nm)) dishName = '清炒' + nm;
+        else if (/[肉鱼虾鸡鸭牛羊排翅]$/.test(nm)) dishName = '红烧' + nm;
+        else if (/[果莓桃梨橙]$/.test(nm)) dishName = nm + '果盘';
+        else dishName = '家常' + nm;
 
         const draft = E.generateRecipe(dishName, nm);
         if (!draft || !draft.name) return;
         if (D.DISHES.some(d => d.name === draft.name)) return;
+        draft.tags = (draft.tags || []).concat(['AI生成']);
         S.addCustom(draft);
         E.attachCustom([draft]);
         created.push(draft.name);
@@ -130,10 +133,12 @@ Page({
 
     const dishes = (p.dishes || []).map(d => {
       const cost = (d.ingredients || []).reduce((s, i) => s + i.qty * (E.foodMeta(i.name).price || 0), 0);
+      const isAI = (d.tags || []).indexOf('AI生成') >= 0 || !!d.custom;
       return {
         id: d.id, name: d.name, emoji: d.emoji, minutes: d.minutes,
         sub: (d.ingredients || []).map(i => i.name).join(' + '),
-        cost: cost.toFixed(1)
+        cost: cost.toFixed(1),
+        aiTag: isAI
       };
     });
 

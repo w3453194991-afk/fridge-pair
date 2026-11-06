@@ -94,7 +94,7 @@
     <view wx:for="{{dishes}}" wx:key="id" class="dish" data-id="{{item.id}}" bindtap="onDish">
       <view class="dem">{{item.emoji}}</view>
       <view class="dbd">
-        <view class="dnm">{{item.name}}</view>
+        <view class="dnm">{{item.name}}<text wx:if="{{item.aiTag}}" class="aitag">AI 生成</text></view>
         <view class="dds">{{item.sub}}</view>
       </view>
       <view class="dprice">¥{{item.cost}}</view>
