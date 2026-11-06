@@ -6,7 +6,7 @@
     <text class="go" bindtap="onSearchTap">搜索</text>
   </view>
 
-  <view class="hint">搜到的菜谱可以一键加进你的菜谱库</view>
+  <view class="hint">加入后这道菜会出现在「菜谱」里，也能在「聚餐规划 → 想吃的菜」里点名</view>
 
   <view wx:if="{{loading}}" class="state">
     <view class="spin"></view>

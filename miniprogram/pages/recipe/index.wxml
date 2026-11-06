@@ -101,6 +101,7 @@
           <view wx:else class="dcover fallback">{{item.emoji}}</view>
           <view wx:if="{{item.ok}}" class="dbadge">可做</view>
           <view wx:if="{{item.mineTag}}" class="dmine">{{item.mineTag}}</view>
+          <view wx:if="{{item.myDish}}" class="dmy">我的</view>
           <view class="icorow">
             <view class="{{item.pinCls}}" data-id="{{item.id}}" catchtap="onPin"><view class="pin-ic"></view></view>
             <view class="icobtn cam" data-id="{{item.id}}" catchtap="onCover">📷</view>

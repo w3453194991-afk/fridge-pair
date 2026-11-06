@@ -30,6 +30,17 @@ App({
       // 只加载，不自动登录 —— 登录页负责创建家庭档案
       S.load();
 
+      // 把「我的菜谱」（自定义 / 网上抓的）重新挂回菜谱库，
+      // 否则重启后聚餐规划、配餐都看不到它们
+      try {
+        if (G.DD_ENGINE && G.DD_ENGINE.attachCustom && Array.isArray(S.state.custom) && S.state.custom.length) {
+          G.DD_ENGINE.attachCustom(S.state.custom);
+          console.log('[custom] 已恢复菜品', S.state.custom.length, '道');
+        }
+      } catch (e) {
+        console.warn('[custom] 恢复失败', e && e.message);
+      }
+
       // 云开发（可选）：配了环境 ID 才初始化
       if (CFG && CFG.CLOUD_ENV && wx.cloud) {
         try {

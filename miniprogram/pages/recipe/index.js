@@ -138,6 +138,7 @@ Page({
         pinCls: pinned.indexOf(d.id) >= 0 ? 'icobtn on' : 'icobtn',
         photo: mine || (P[d.id] ? ('/img/' + d.id + '.jpg') : ''),
         mineTag: mine ? '我的实拍' : '',
+        myDish: !!d.custom || (d.tags || []).indexOf('网上菜谱') >= 0 || (d.tags || []).indexOf('自定义') >= 0,
         m1: d.minutes + ' 分钟',
         m2: d.level,
         cuisineText: (d.cuisine || []).join(' · ')

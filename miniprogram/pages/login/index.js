@@ -95,6 +95,14 @@ Page({
     const route = () => {
       if (gone) return;
       gone = true;
+
+      // 云端拉回来的「我的菜谱」要重新挂进菜谱库，否则聚餐/配餐看不到
+      try {
+        if (G.DD_ENGINE && G.DD_ENGINE.attachCustom && Array.isArray(S.state.custom) && S.state.custom.length) {
+          G.DD_ENGINE.attachCustom(S.state.custom);
+        }
+      } catch (e) {}
+
       const f = S.state.family || {};
       const isNew = !f.onboarded;
       wx.showToast({ title: '登录成功', icon: 'success' });

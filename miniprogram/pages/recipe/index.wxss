@@ -146,3 +146,10 @@
   background: #EAFBF2; border: 1rpx dashed #8FE0BE; border-radius: 20rpx;
   padding: 16rpx 30rpx;
 }
+
+.dmy {
+  position: absolute; right: 12rpx; bottom: 12rpx;
+  font-size: 17rpx; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg, #8E7BFF, #6E8BFF);
+  padding: 4rpx 12rpx; border-radius: 10rpx;
+}
