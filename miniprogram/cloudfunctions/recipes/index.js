@@ -197,13 +197,21 @@ exports.main = async (event) => {
   const action = (event && event.action) || 'search';
 
   if (action === 'config') {
+    const keyLen = (KEY || '').length;
+    let keyWarn = '';
+    if (KEY && SOURCE === 'juhe' && keyLen !== 32) {
+      keyWarn = '聚合 AppKey 应为 32 位，当前 ' + keyLen + ' 位，很可能没复制全';
+    }
     return {
       ok: true,
       configured: !!(SOURCE && KEY && FETCHERS[SOURCE]),
       source: SOURCE || '(未设置)',
       hasKey: !!KEY,
+      keyLen: keyLen,
+      keyWarn: keyWarn,
       hint: !SOURCE ? '未设置 RECIPE_SOURCE（juhe / tianapi / jisu）'
-        : (!KEY ? '未设置 RECIPE_KEY' : (FETCHERS[SOURCE] ? '' : '不支持的 RECIPE_SOURCE'))
+        : (!KEY ? '未设置 RECIPE_KEY'
+          : (FETCHERS[SOURCE] ? (keyWarn || '') : '不支持的 RECIPE_SOURCE'))
     };
   }
 
