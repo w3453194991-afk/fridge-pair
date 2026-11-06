@@ -10,8 +10,22 @@
     bindtap="onChat"
   >
     <view class="fab">
-      <text class="femic">🤖</text>
-      <text class="femt">问冰箱</text>
+      <view class="glow"></view>
+
+      <view class="bot">
+        <view class="ant"><view class="antdot"></view></view>
+        <view class="shell">
+          <view class="face">
+            <view class="eye l"></view>
+            <view class="eye r"></view>
+            <view class="mouth"></view>
+          </view>
+        </view>
+        <view class="shoulder l"></view>
+        <view class="shoulder r"></view>
+      </view>
+
+      <view class="online"></view>
     </view>
   </movable-view>
 </movable-area>
