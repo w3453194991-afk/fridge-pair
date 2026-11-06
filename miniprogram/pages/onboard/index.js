@@ -21,6 +21,8 @@ Page({
 
   onLoad(q) {
     this.isEdit = !!(q && q.edit === '1');
+    this.fromLogin = !!(q && q.from === 'login');
+    this.isNewUser = !!(q && q.new === '1');
     if (this.isEdit) wx.setNavigationBarTitle({ title: '家庭档案' });
     const st = S.state || {};
     const fam = st.family || {};
@@ -180,6 +182,7 @@ Page({
       S.state.family.loggedIn = true;
       if (oldFam.openid) S.state.family.openid = oldFam.openid;
       S.state.family.onboarded = true;
+      if (this.isNewUser) S.state.family.firstRun = true;   // 只有真新用户播欢迎话术
       // 新用户从空冰箱开始
       if (!Array.isArray(st.foods) || !S.state.family.__hadData) {
         S.state.foods = S.state.foods || [];
@@ -221,7 +224,7 @@ Page({
       S.state.family.loggedIn = true;
       if (oldFam.openid) S.state.family.openid = oldFam.openid;
       S.state.family.onboarded = true;
-      S.state.family.firstRun = true;   // 交给开屏做首次欢迎
+      if (this.isNewUser) S.state.family.firstRun = true;   // 只有真新用户播欢迎话术
       S.save();
     } catch (e) {}
     wx.reLaunch({ url: '/pages/splash/index' });
