@@ -667,6 +667,58 @@
       nutrition: '油菜钙含量在绿叶菜里偏高，比牛奶更好吸收的搭配是少油快炒。', pair: '钙 + 维K → 骨骼友好'
     },
     {
+      id: 'wood-ear-salad', name: '凉拌木耳', emoji: '🥗', minutes: 10, level: '新手',
+      meals: ['午', '晚'], tags: ['凉菜', '解腻', '开胃', '低脂'],
+      ingredients: [{ name: '木耳', qty: 100 }, { name: '香菜', qty: 1 }],
+      seasonings: ['蒜末 3 瓣', '生抽 10 ml', '香醋 10 ml', '香油 3 ml'],
+      prep: ['木耳冷水泡发 30 分钟，撕小朵。', '水开焯 2 分钟，捞出过冷水。'],
+      steps: [
+        { heat: '大火', text: '水开下木耳焯 2 分钟，捞出过凉水沥干。' },
+        { heat: '无火', text: '加蒜末、生抽、香醋、香油、香菜拌匀即可。' }
+      ],
+      tips: ['木耳别泡太久，冷藏不超过 24 小时。'],
+      nutrition: '木耳富含可溶性膳食纤维，聚餐解腻。', pair: '纤维 + 铁 → 清肠'
+    },
+    {
+      id: 'century-egg-tofu', name: '皮蛋豆腐', emoji: '🥚', minutes: 8, level: '新手',
+      meals: ['午', '晚'], tags: ['凉菜', '快手', '零火', '下饭'],
+      ingredients: [{ name: '皮蛋', qty: 2 }, { name: '豆腐', qty: 1 }],
+      seasonings: ['生抽 15 ml', '香油 3 ml', '葱花 少许'],
+      prep: ['豆腐切块摆盘。', '皮蛋切瓣铺在豆腐上。'],
+      steps: [
+        { heat: '无火', text: '皮蛋切瓣摆在嫩豆腐上。' },
+        { heat: '无火', text: '淋生抽香油，撒葱花，冰镇 5 分钟。' }
+      ],
+      tips: ['用内酯豆腐口感更嫩。'],
+      nutrition: '蛋白与钙都不低，做凉菜很省事。', pair: '钙 + 蛋白 → 饱腹'
+    },
+    {
+      id: 'spinach-peanut', name: '凉拌菠菜花生', emoji: '🥜', minutes: 12, level: '新手',
+      meals: ['午', '晚'], tags: ['凉菜', '补铁', '下饭'],
+      ingredients: [{ name: '菠菜', qty: 1 }, { name: '花生', qty: 50 }],
+      seasonings: ['蒜末 2 瓣', '生抽 10 ml', '香醋 5 ml', '盐 少许'],
+      prep: ['菠菜洗净，水开焯 30 秒过冷水。', '花生小火炒香。'],
+      steps: [
+        { heat: '大火', text: '水开焯菠菜 30 秒，过冷水挤干切段。' },
+        { heat: '无火', text: '加花生、蒜末、生抽、香醋、盐拌匀。' }
+      ],
+      tips: ['菠菜焯水能去草酸，别省这一步。'],
+      nutrition: '铁 + 维K 搭配，适合聚餐配一道绿的。', pair: '铁 + 维C → 补血'
+    },
+    {
+      id: 'shredded-chicken-salad', name: '鸡丝凉拌黄瓜', emoji: '🍗', minutes: 18, level: '新手',
+      meals: ['午', '晚'], tags: ['凉菜', '高蛋白', '低脂', '健身'],
+      ingredients: [{ name: '鸡胸肉', qty: 150 }, { name: '黄瓜', qty: 1 }],
+      seasonings: ['蒜末 2 瓣', '生抽 10 ml', '香醋 8 ml', '辣椒油 3 ml'],
+      prep: ['鸡胸冷水下锅煮 10 分钟，撕成丝。', '黄瓜切丝铺底。'],
+      steps: [
+        { heat: '中火', text: '鸡胸冷水煮 10 分钟，捞出晾凉撕丝。' },
+        { heat: '无火', text: '黄瓜丝垫底放鸡丝，淋料汁拌匀。' }
+      ],
+      tips: ['鸡胸煮好泡冰水更嫩。'],
+      nutrition: '高蛋白低脂，聚餐里最不负担的一道。', pair: '蛋白 + 纤维 → 饱腹不腻'
+    },
+    {
       id: 'cucumber-salad', name: '凉拌黄瓜', emoji: '🥒', minutes: 6, level: '新手',
       meals: ['午', '晚'], tags: ['凉菜', '解腻', '零火'],
       ingredients: [{ name: '黄瓜', qty: 2 }],

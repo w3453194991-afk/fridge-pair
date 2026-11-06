@@ -345,13 +345,22 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       if (hard) picked[picked.length - 1] = hard;
     }
 
-    // 朋友点名的菜：能在菜谱库里找到的，直接排进这一桌
+    // 朋友点名的菜：菜名 → 标签（凉菜/下饭…）→ 食材 → 菜系，逐级匹配
     const wishHit = [], wishMiss = [];
+    function wishMatch(nm) {
+      let hits = D.DISHES.filter(d => d.name.indexOf(nm) >= 0 || nm.indexOf(d.name) >= 0);
+      if (!hits.length) hits = D.DISHES.filter(d => (d.tags || []).some(t => t.indexOf(nm) >= 0 || nm.indexOf(t) >= 0));
+      if (!hits.length) hits = D.DISHES.filter(d => (d.ingredients || []).some(i => i.name.indexOf(nm) >= 0 || nm.indexOf(i.name) >= 0));
+      if (!hits.length) hits = D.DISHES.filter(d => (d.cuisine || []).some(c => c.indexOf(nm) >= 0 || nm.indexOf(c) >= 0));
+      return hits;
+    }
     wishNames.forEach(function (nm) {
-      const hit = D.DISHES.filter(d => d.name.indexOf(nm) >= 0 || nm.indexOf(d.name) >= 0)[0];
-      if (hit) {
-        if (!wishHit.some(x => x.id === hit.id)) wishHit.push(hit);
-        if (!picked.some(p => p.id === hit.id)) picked.unshift(hit);
+      const hits = wishMatch(nm);
+      if (hits.length) {
+        hits.slice(0, 2).forEach(function (hit) {
+          if (!wishHit.some(x => x.id === hit.id)) wishHit.push(hit);
+          if (!picked.some(p => p.id === hit.id)) picked.unshift(hit);
+        });
       } else {
         wishMiss.push(nm);
       }
@@ -388,6 +397,7 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       while (totalCost > budget && picked.length > 3 && guard++ < 6) {
         let worst = 0, worstCost = -1;
         picked.forEach(function (d, i) {
+          if (wishHit.some(w => w.id === d.id)) return;   // 点名的菜不删
           const c = ingredientState(d, foods).filter(s => !s.ok)
             .reduce((s, x) => s + Math.max(0, x.qty - x.haveQty) * (foodMeta(x.name).price || 0), 0);
           if (c > worstCost) { worstCost = c; worst = i; }

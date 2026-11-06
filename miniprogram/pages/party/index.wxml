@@ -8,7 +8,7 @@
       <view class="cl">
         <text class="ce">👨</text>
         <view>
-          <view class="cn">男生</view>
+          <view class="cn">男士</view>
           <view class="cs">每人 1.2 份</view>
         </view>
       </view>
@@ -23,7 +23,7 @@
       <view class="cl">
         <text class="ce">👩</text>
         <view>
-          <view class="cn">女生</view>
+          <view class="cn">女士</view>
           <view class="cs">每人 1.0 份</view>
         </view>
       </view>
@@ -82,7 +82,7 @@
       <view class="row between">
         <view>
           <view class="stitle">{{dateText}} · {{total}} 人</view>
-          <view class="ssub">男 {{men}} · 女 {{women}} · 小孩 {{kids}} · {{dishCount}} 道菜</view>
+          <view class="ssub">男士 {{men}} · 女士 {{women}} · 小孩 {{kids}} · {{dishCount}} 道菜</view>
         </view>
         <text class="cost">约 ¥{{cost}}</text>
       </view>

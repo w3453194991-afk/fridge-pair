@@ -159,7 +159,7 @@ Page({
 
   onCopy() {
     const lines = ['聚餐 ' + this.data.dateText + ' · ' + this.data.total + ' 人',
-      '男 ' + this.data.men + ' · 女 ' + this.data.women + ' · 小孩 ' + this.data.kids];
+      '男士 ' + this.data.men + ' · 女士 ' + this.data.women + ' · 小孩 ' + this.data.kids];
     this.data.dishes.forEach(d => lines.push('· ' + d.name + '（约 ¥' + d.cost + '）'));
     if (this.data.missing.length) {
       lines.push('需要采购：');
