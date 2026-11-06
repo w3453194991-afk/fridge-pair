@@ -143,3 +143,8 @@
   background: #EAFBF2; border: 1rpx dashed #8FE0BE;
 }
 .addbig:active { transform: scale(.99); }
+
+.quickrow .quick.batch {
+  flex: 1; margin-right: 0;
+  color: #B45309; background: #FFF7E8; border-color: #FBE3CF;
+}

@@ -1,0 +1,58 @@
+.tabs { display: flex; background: #EFF5F2; border-radius: 22rpx; padding: 8rpx; margin-bottom: 16rpx; }
+.tab {
+  flex: 1; text-align: center; font-size: 25rpx; font-weight: 700; color: #6C7F78;
+  padding: 16rpx 0; border-radius: 16rpx;
+}
+.tab.on { background: #fff; color: #0E8F63; box-shadow: 0 4rpx 10rpx -6rpx rgba(16,120,90,.5); }
+
+.toolbar { display: flex; align-items: center; margin-bottom: 14rpx; }
+.tb {
+  font-size: 22rpx; font-weight: 700; color: #0E8F63;
+  background: #EAFBF2; border: 1rpx solid #CBEFE0;
+  border-radius: 16rpx; padding: 10rpx 22rpx; margin-right: 12rpx;
+}
+.tbinfo { margin-left: auto; font-size: 21rpx; color: #8B9A96; }
+
+.pickrow {
+  display: flex; align-items: center;
+  background: #fff; border: 1rpx solid #EDF3F0; border-radius: 24rpx;
+  padding: 20rpx; margin-bottom: 14rpx;
+}
+.ck {
+  width: 42rpx; height: 42rpx; border-radius: 12rpx; flex: none;
+  border: 2rpx solid #CBDBD4; text-align: center; line-height: 38rpx;
+  font-size: 24rpx; color: #fff; margin-right: 16rpx;
+}
+.ck.on { background: #12A576; border-color: #12A576; }
+.emo {
+  width: 76rpx; height: 76rpx; border-radius: 22rpx; font-size: 38rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: #F6FBF8; margin-right: 16rpx;
+}
+.mid { flex: 1; min-width: 0; }
+.nm { font-size: 28rpx; font-weight: 800; }
+.sub { font-size: 20rpx; color: #8B9A96; margin-top: 4rpx; }
+.right { text-align: right; }
+.day { font-size: 20rpx; color: #8B9A96; margin-top: 6rpx; }
+
+.empty { margin-top: 120rpx; text-align: center; color: #8B9A96; font-size: 24rpx; }
+.empty .e { font-size: 100rpx; margin-bottom: 16rpx; }
+
+.bottomspace { height: 160rpx; }
+
+.actionbar {
+  position: fixed; left: 24rpx; right: 24rpx; bottom: calc(24rpx + env(safe-area-inset-bottom));
+  display: flex; padding: 16rpx; border-radius: 28rpx;
+  background: rgba(255, 255, 255, .96);
+  border: 1rpx solid #EDF3F0;
+  box-shadow: 0 12rpx 30rpx -16rpx rgba(16, 120, 90, .5);
+}
+.ab {
+  flex: 1; height: 88rpx; border-radius: 22rpx; margin-right: 14rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 27rpx; font-weight: 800;
+}
+.ab:last-child { margin-right: 0; }
+.ab.ghost { color: #4E6B61; background: #F5FAF7; border: 1rpx solid #E7EFEA; }
+.ab.primary { color: #fff; background: linear-gradient(135deg, #2FD79E, #12A576); }
+.ab.danger { color: #fff; background: linear-gradient(135deg, #FF8080, #E53935); }

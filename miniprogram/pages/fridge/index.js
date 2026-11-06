@@ -54,6 +54,10 @@ Page({
     wx.navigateTo({ url: '/pages/addfood/index' });
   },
 
+  onBatch() {
+    wx.navigateTo({ url: '/pages/batch/index' });
+  },
+
   refresh() {
     try {
       const st = S.state;

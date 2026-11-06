@@ -1,0 +1,48 @@
+<view class="wrap">
+
+  <view class="tabs">
+    <view class="{{tabFoods}}" data-tab="foods" bindtap="onTab">冰箱食材 {{tabFoodsN}}</view>
+    <view class="{{tabCart}}" data-tab="cart" bindtap="onTab">采购清单</view>
+  </view>
+
+  <view class="toolbar">
+    <view class="tb" bindtap="onAll">全选</view>
+    <view class="tb" bindtap="onClearSel">取消全选</view>
+    <view class="tbinfo">已选 {{checkedCount}} / {{total}}</view>
+  </view>
+
+  <view wx:if="{{rows.length}}">
+    <view wx:for="{{rows}}" wx:key="key" class="{{item.cls}} pickrow" data-key="{{item.key}}" bindtap="onToggle">
+      <view class="ck {{item.on ? 'on' : ''}}">{{item.on ? '✓' : ''}}</view>
+      <view class="emo">{{item.emoji}}</view>
+      <view class="mid">
+        <view class="nm">{{item.name}}</view>
+        <view class="sub">{{item.sub}}</view>
+      </view>
+      <view class="right">
+        <view wx:if="{{item.pillText}}" class="{{item.pillCls}}">{{item.pillText}}</view>
+        <view class="day">{{item.right}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty">
+    <view class="e">{{tab == 'foods' ? '🧺' : '🛒'}}</view>
+    <view>{{tab == 'foods' ? '冰箱是空的' : '采购清单是空的'}}</view>
+    <view class="muted">{{tab == 'foods' ? '先去添加或拍照入库' : '在配餐页生成菜单后会自动生成清单'}}</view>
+  </view>
+
+  <view class="bottomspace"></view>
+
+  <view class="actionbar">
+    <block wx:if="{{tab == 'foods'}}">
+      <view class="ab ghost" bindtap="onConsume">批量吃掉</view>
+      <view class="ab danger" bindtap="onTrash">批量丢掉</view>
+    </block>
+    <block wx:else>
+      <view class="ab ghost" bindtap="onRemoveCart">移出清单</view>
+      <view class="ab primary" bindtap="onBuy">批量购入入库</view>
+    </block>
+  </view>
+
+</view>
