@@ -26,6 +26,8 @@ Page({
     fitCount: 0,
     cuisine: 'all',
     cuisineChips: [],
+    meal: 'all',
+    mealChips: [],
     filterTitle: ''
   },
 
@@ -87,11 +89,28 @@ Page({
       cls: c.key === curCuisine ? 'chip on' : 'chip'
     }));
 
+    // 餐次筛选：全部 / 早 / 午 / 晚
+    const curMeal = this.data.meal || 'all';
+    const mealDefs = [
+      { key: 'all', label: '全部餐次' },
+      { key: '早', label: '🌅 早餐' },
+      { key: '午', label: '☀️ 午餐' },
+      { key: '晚', label: '🌙 晚餐' }
+    ];
+    const mealChips = mealDefs.map(m => ({
+      key: m.key,
+      label: m.label,
+      cls: m.key === curMeal ? 'chip on' : 'chip'
+    }));
+
     let list = D.DISHES.slice();
     if (curCuisine === '@foreign') {
       list = list.filter(d => (d.cuisine || []).some(c => FOREIGN.indexOf(c) >= 0));
     } else if (curCuisine !== 'all') {
       list = list.filter(d => (d.cuisine || []).indexOf(curCuisine) >= 0);
+    }
+    if (curMeal !== 'all') {
+      list = list.filter(d => (d.meals || []).indexOf(curMeal) >= 0);
     }
     const q = (this.data.q || '').trim();
     if (q) list = list.filter(d => d.name.indexOf(q) >= 0 || d.ingredients.some(i => i.name.indexOf(q) >= 0));
@@ -101,9 +120,10 @@ Page({
       return pb - pa;
     });
 
-    const filterTitle = curCuisine === 'all'
-      ? ''
-      : (curCuisine === '@foreign' ? '外国菜' : curCuisine) + ' · ' + list.length + ' 道';
+    const parts = [];
+    if (curCuisine !== 'all') parts.push(curCuisine === '@foreign' ? '外国菜' : curCuisine);
+    if (curMeal !== 'all') parts.push(curMeal + '餐');
+    const filterTitle = parts.length ? (parts.join(' · ') + ' · ' + list.length + ' 道') : '';
 
     const allRows = list.slice(0, 120).map(d => {
       const ok = E.ingredientState(d, foods).every(s => s.ok);
@@ -149,8 +169,13 @@ Page({
       cuisineCount: Object.keys(allCuisines).length,
       fitCount: cookable.length,
       cuisineChips: cuisineChips,
+      mealChips: mealChips,
       filterTitle: filterTitle
     });
+  },
+
+  onMeal(e) {
+    this.setData({ meal: e.currentTarget.dataset.key }, () => this.render());
   },
 
   onCuisine(e) {

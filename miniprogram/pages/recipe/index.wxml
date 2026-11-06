@@ -82,6 +82,16 @@
       </view>
     </scroll-view>
 
+    <view class="chips mealrow">
+      <view
+        wx:for="{{mealChips}}"
+        wx:key="key"
+        class="{{item.cls}}"
+        data-key="{{item.key}}"
+        bindtap="onMeal"
+      >{{item.label}}</view>
+    </view>
+
     <view wx:if="{{filterTitle}}" class="filterline">{{filterTitle}}</view>
 
     <view wx:if="{{allRows.length}}" class="cardgrid">

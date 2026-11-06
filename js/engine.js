@@ -341,20 +341,34 @@
       if (hard) picked[picked.length - 1] = hard;
     }
 
-    // 朋友点名的菜：菜名 → 标签（凉菜/下饭…）→ 食材 → 菜系，逐级匹配
+    // 朋友点名的菜：按相关度打分（菜名 > 标签 > 主料 > 辅料 > 菜系）
     const wishHit = [], wishMiss = [];
-    function wishMatch(nm) {
-      let hits = D.DISHES.filter(d => d.name.indexOf(nm) >= 0 || nm.indexOf(d.name) >= 0);
-      if (!hits.length) hits = D.DISHES.filter(d => (d.tags || []).some(t => t.indexOf(nm) >= 0 || nm.indexOf(t) >= 0));
-      if (!hits.length) hits = D.DISHES.filter(d => (d.ingredients || []).some(i => i.name.indexOf(nm) >= 0 || nm.indexOf(i.name) >= 0));
-      if (!hits.length) hits = D.DISHES.filter(d => (d.cuisine || []).some(c => c.indexOf(nm) >= 0 || nm.indexOf(c) >= 0));
-      return hits;
+    function wishScore(d, nm) {
+      let s = 0;
+      if (d.name.indexOf(nm) >= 0) s = 100;                     // 菜名直接命中
+      else if (nm.indexOf(d.name) >= 0) s = 90;
+      if ((d.tags || []).some(t => t.indexOf(nm) >= 0)) s = Math.max(s, 70);   // 品类/标签
+      const ings = d.ingredients || [];
+      const idx = ings.findIndex(i => i.name.indexOf(nm) >= 0 || nm.indexOf(i.name) >= 0);
+      if (idx === 0) s = Math.max(s, 60);                        // 主料
+      else if (idx > 0) s = Math.max(s, Math.max(20, 45 - idx * 8));  // 辅料，越靠后越弱
+      if ((d.cuisine || []).some(c => c.indexOf(nm) >= 0)) s = Math.max(s, 30);
+      if (s > 0) {
+        // 早餐/凉菜这类场景菜，在做正餐时压一压
+        if ((d.meals || []).length === 1 && d.meals[0] === '早') s -= 15;
+      }
+      return s;
     }
     wishNames.forEach(function (nm) {
-      const hits = wishMatch(nm);
-      if (hits.length) {
-        hits.slice(0, 2).forEach(function (hit) {
-          if (!wishHit.some(x => x.id === hit.id)) wishHit.push(hit);
+      const scored = D.DISHES
+        .map(d => ({ d: d, s: wishScore(d, nm) }))
+        .filter(x => x.s > 0)
+        .sort((a, b) => b.s - a.s)
+        .filter(x => x.s >= 40);          // 只接受够相关的（排除只有边角辅料命中的菜）
+      if (scored.length) {
+        scored.slice(0, 2).forEach(function (x) {
+          const hit = x.d;
+          if (!wishHit.some(y => y.id === hit.id)) wishHit.push(hit);
           if (!picked.some(p => p.id === hit.id)) picked.unshift(hit);
         });
       } else {
