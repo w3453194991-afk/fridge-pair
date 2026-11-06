@@ -163,6 +163,14 @@ Page({
     if (wishHit) wishText += (wishText ? '；' : '') + '已排进菜单：' + wishHit;
     if (wishMiss) wishText += (wishText ? '；' : '') + '菜谱库里没有：' + wishMiss;
 
+    // 小孩相关的说明
+    const kidN = this.data.kids;
+    let kidText = '';
+    if (kidN > 0) {
+      const n = p.kidDishes || 0;
+      kidText = '👶 有 ' + kidN + ' 位小孩，已安排 ' + n + ' 道适合孩子的菜（不辣、好嚼）';
+    }
+
     this.setData({
       result: true,
       dishes: dishes,
@@ -170,6 +178,7 @@ Page({
       missing: missing,
       missingCount: missing.length,
       wishText: wishText,
+      kidText: kidText,
       cost: (p.totalCost || 0).toFixed(1),
       costText: P.yuan(p.totalCost || 0),
       over: !!p.overBudget,

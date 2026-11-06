@@ -103,6 +103,7 @@
       <view class="dprice">{{item.costText}}</view>
     </view>
 
+    <view wx:if="{{kidText}}" class="kidline">{{kidText}}</view>
     <view wx:if="{{wishText}}" class="wishline">{{wishText}}</view>
 
     <view wx:if="{{missingCount}}" class="card buycard">

@@ -87,3 +87,9 @@
 .costbox { text-align: right; }
 .cost { display: block; font-size: 34rpx; font-weight: 800; color: #12A576; }
 .costhint { font-size: 18rpx; color: #9AA6A1; }
+
+.kidline {
+  margin: 0 0 16rpx; font-size: 22rpx; font-weight: 700; line-height: 1.6;
+  color: #C2410C; background: #FFF4E8; border: 1rpx solid #FFE0C2;
+  border-radius: 16rpx; padding: 14rpx 18rpx;
+}

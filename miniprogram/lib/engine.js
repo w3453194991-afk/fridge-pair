@@ -296,6 +296,28 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     D.DISHES.forEach(function (d) { jitter[d.id] = Math.random() * 12; });
     const exclude = opts.exclude || [];
 
+    /* ---------- 小孩偏好 ---------- */
+    const kidRatio = people > 0 ? kids / people : 0;
+    function isKidFriendly(d) {
+      const tags = d.tags || [];
+      if (tags.some(t => /孩子爱吃|酸甜|甜口/.test(t))) return true;
+      if (/蒸蛋|鸡蛋羹|酸奶|果盘|玉米|南瓜|土豆泥|三明治|饼|丸子|羹|奶酪|牛奶/.test(d.name)) return true;
+      return false;
+    }
+    function isSpicy(d) {
+      const tags = d.tags || [];
+      if (tags.some(t => /辣|麻辣|香辣|酸辣|川味|湘菜|浓油/.test(t))) return true;
+      return /辣/.test(d.name);
+    }
+    function kidBonus(d) {
+      if (!kids) return 0;
+      let s = 0;
+      if (isKidFriendly(d)) s += 12 + kidRatio * 25;       // 小孩越多，越偏向儿童友好
+      if (isSpicy(d)) s -= 10 + kidRatio * 50;             // 小孩越多，越避开辣
+      if (kidRatio >= 0.5 && /排骨|鸡翅|整只|鱼头|带壳/.test(d.name)) s -= 14;
+      return s;
+    }
+
     const sorted = D.DISHES.slice()
       .filter(d => dishAllowed(d, opts.avoid))
       .filter(d => conditionPenalty(d, opts.conditions) > -100)
@@ -303,8 +325,8 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
         const ca = cuisine && a.cuisine.indexOf(cuisine) >= 0 ? 1 : 0;
         const cb = cuisine && b.cuisine.indexOf(cuisine) >= 0 ? 1 : 0;
         if (ca !== cb) return cb - ca;
-        const ka = dishScore(a, foods) + jitter[a.id] - (exclude.indexOf(a.id) >= 0 ? 30 : 0);
-        const kb = dishScore(b, foods) + jitter[b.id] - (exclude.indexOf(b.id) >= 0 ? 30 : 0);
+        const ka = dishScore(a, foods) + jitter[a.id] - (exclude.indexOf(a.id) >= 0 ? 30 : 0) + kidBonus(a);
+        const kb = dishScore(b, foods) + jitter[b.id] - (exclude.indexOf(b.id) >= 0 ? 30 : 0) + kidBonus(b);
         return kb - ka;
       });
     const cuisineHit = cuisine ? sorted.filter(d => d.cuisine.indexOf(cuisine) >= 0).length : 0;
@@ -381,6 +403,31 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       }
     });
 
+    /* 有小孩时，保证桌上有儿童友好的菜（不辣、软一点、酸甜口） */
+    const kidNeeded = kids > 0 ? (kidRatio >= 0.5 ? 2 : 1) : 0;
+    let kidAdded = 0;
+    if (kidNeeded) {
+      let have = picked.filter(isKidFriendly).length;
+      if (have < kidNeeded) {
+        const pool = sorted.filter(d => isKidFriendly(d) && !isSpicy(d) && !picked.some(p => p.id === d.id));
+        for (const cand of pool) {
+          if (have >= kidNeeded) break;
+          let idx = -1;
+          for (let i = picked.length - 1; i >= 0; i--) {
+            const d = picked[i];
+            if (wishHit.some(w => w.id === d.id)) continue;   // 点名的菜不换
+            if (isKidFriendly(d)) continue;
+            idx = i;
+            break;
+          }
+          if (idx < 0) break;
+          picked[idx] = cand;
+          have++;
+          kidAdded++;
+        }
+      }
+    }
+
     // 缺料汇总（按份量放大）
     const scale = Math.max(1, portions / 3);
     function missingOf(list) {
@@ -430,6 +477,8 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       men: men, women: women, kids: kids,
       cuisine: cuisine, dateLabel: opts.dateLabel || '',
       taste: opts.taste || '',
+      kidDishes: picked.filter(isKidFriendly).filter(d => !isSpicy(d)).length,
+      kidAdded: kidAdded,
       wishHit: wishHit.map(d => d.name),
       wishMiss: wishMiss,
       cuisineHit: cuisineHit,
