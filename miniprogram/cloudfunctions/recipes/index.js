@@ -74,22 +74,62 @@ function splitLines(str) {
     .filter(Boolean);
 }
 
+/* 把「生猪里脊丝300克，红椒末少许」拆成 {name, qty} */
+function parseMaterials(str) {
+  const UNIT = '(?:克|g|千克|kg|毫升|ml|升|L|匙|小匙|中匙|大匙|汤匙|茶匙|个|根|颗|枚|片|块|把|勺|杯|碗|少许|适量)';
+  const out = [];
+  String(str || '')
+    .split(/[，,\n;；]/)                       // 只在逗号/换行处切
+    .map(s => s.trim().replace(/[。.]$/, ''))
+    .filter(Boolean)
+    .forEach(seg => {
+      let name = seg;
+      const m = seg.match(new RegExp('^(.+?)\\s*(\\d+(?:\\.\\d+)?\\s*' + UNIT + '?)\\s*$'));
+      if (m && m[1]) name = m[1].trim();
+      name = name.replace(/[（(][^）)]*[)）]$/, '').replace(/[、,，]$/, '').trim();
+      // 一长串「葱、蒜末、豆瓣酱、酱油」这种，按顿号再拆
+      if (name.length > 12 && name.indexOf('、') > 0) {
+        name.split('、').forEach(x => {
+          const v = x.trim();
+          if (v && v.length <= 12) out.push({ name: v, qty: 1 });
+        });
+      } else if (name) {
+        out.push({ name: name, qty: 1 });
+      }
+    });
+  return out;
+}
+
+/* 做法是一大段文字，按换行或「1.」切步骤 */
+function parseZuofa(str) {
+  const s = String(str || '').replace(/\r/g, '').trim();
+  if (!s) return [];
+  let parts = s.split(/\n+/).map(x => x.trim()).filter(Boolean);
+  if (parts.length <= 1) {
+    parts = s.split(/(?=\d{1,2}[.、)）])/).map(x => x.trim()).filter(Boolean);
+  }
+  return parts
+    .map(x => ({ heat: '', text: x.replace(/^\d{1,2}[.、)）:：]\s*/, '').trim() }))
+    .filter(x => x.text.length > 1);
+}
+
+/* 聚合「菜谱查询」fapigx 接口的真实结构 */
 function normJuhe(item) {
-  const ing = splitLines(item.ingredients).map(s => ({ name: s.replace(/[\d.]+.*$/, '').trim() || s, qty: 1 }));
-  const sea = splitLines(item.burden);
+  const typeName = item.type_name || '';
   return {
-    name: item.title || '',
+    name: item.cp_name || item.name || '',
     emoji: '🍽',
     minutes: 20,
     level: '进阶',
-    cuisine: (item.tags || '').split(',').filter(Boolean).slice(0, 2),
-    tags: ['网上菜谱'],
-    ingredients: ing,
-    seasonings: sea,
+    cuisine: typeName ? [typeName] : ['家常'],
+    tags: ['网上菜谱'].concat(typeName ? [typeName] : []),
+    ingredients: parseMaterials(item.yuanliao),
+    seasonings: splitLines(item.tiaoliao),
     prep: [],
-    steps: toSteps(item.steps),
-    tips: [item.imtro || ''].filter(Boolean),
-    source: 'juhe',
+    steps: parseZuofa(item.zuofa),
+    tips: [item.texing, item.tishi].filter(Boolean),
+    nutrition: '来自网上菜谱，营养值按主要食材估算。',
+    pair: '网上菜谱 · 仅供参考',
     sourceId: String(item.id || '')
   };
 }
@@ -133,43 +173,33 @@ function normJisu(item) {
 /* ---------- 各平台请求 ---------- */
 
 async function fetchJuhe(keyword) {
-  const base = 'https://apis.juhe.cn/cook/query';
-  const q = '?key=' + encodeURIComponent(KEY) +
-    '&menu=' + encodeURIComponent(keyword) + '&rn=10&pn=1';
+  // 真实接口（API Explorer 里确认的）：/fapigx/caipu/query，参数 key/word/num/page
+  const API = 'https://apis.juhe.cn/fapigx/caipu/query';
 
-  // 聚合的路径有带 .php 和不带两种，两个都试
-  let r = null;
-  let rawText = '';
-  let lastErr = null;
+  const tryWord = async (w) => {
+    const url = API + '?key=' + encodeURIComponent(KEY) +
+      '&word=' + encodeURIComponent(w) + '&num=10&page=1';
+    return await request(url);
+  };
 
-  for (const path of [base, base + '.php']) {
-    try {
-      r = await request(path + q);
-      rawText = JSON.stringify(r).slice(0, 300);
-      if (r && (r.resultcode === '200' || r.error_code === 0 || (r.result && r.result.data))) break;
-      // 返回了明确错误码，直接透出原因
-      if (r && (r.error_code || r.resultcode)) {
-        throw new Error('聚合返回：' + (r.reason || r.reason_text || rawText) + juheHint(r.reason));
-      }
-      r = null;
-    } catch (e) {
-      lastErr = e;
-      if (e && /聚合返回/.test(e.message)) throw e;
+  let r = await tryWord(keyword);
+
+  if (r && r.error_code) {
+    // 273303 = 数据返回为空：换更短的关键词再试一次
+    if (Number(r.error_code) === 273303) {
+      const short = keyword.length > 2 ? keyword.slice(-2) : '';
+      if (short && short !== keyword) r = await tryWord(short);
     }
   }
 
-  if (!r) {
-    throw new Error('聚合接口无响应' +
-      (lastErr ? ('：' + lastErr.message) : '') +
-      (rawText ? (' | 原始返回：' + rawText) : ''));
+  if (!r) throw new Error('聚合接口无响应');
+
+  if (r.error_code && Number(r.error_code) !== 0) {
+    if (Number(r.error_code) === 273303) return [];   // 确实没有这道菜
+    throw new Error('聚合返回：' + (r.reason || '') + juheHint(r.reason));
   }
 
-  const code = r.resultcode !== undefined ? Number(r.resultcode) : Number(r.error_code);
-  if (code && code !== 200 && code !== 0) {
-    throw new Error('聚合接口错误：' + (r.reason || r.reason_text || rawText) + juheHint(r.reason));
-  }
-
-  const list = (r.result && r.result.data) || [];
+  const list = (r.result && (r.result.list || r.result.data)) || [];
   return list.map(normJuhe);
 }
 
