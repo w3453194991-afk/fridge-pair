@@ -739,35 +739,6 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       nutrition: '低热量、高水分，饭前一碗帮助控制食量。', pair: '水分 + 醋 → 开胃解腻'
     },
     {
-      id: 'tomato-egg-soup', name: '西红柿鸡蛋汤', emoji: '🍅', minutes: 12, level: '新手',
-      meals: ['午', '晚'], tags: ['汤羹','家常','快手'],
-      ingredients: [{"name":"番茄","qty":2},{"name":"鸡蛋","qty":2}],
-      seasonings: ['盐 2 g','香油 3 ml','葱花 少许'],
-      prep: ['番茄顶部划十字，开水烫 30 秒去皮切块。','鸡蛋打散。'],
-      steps: [
-        { heat: '中火', text: '少油下番茄块炒 2 分钟，炒出红油。' },
-        { heat: '大火', text: '加 600 ml 热水煮开，煮 3 分钟。' },
-        { heat: '小火', text: '转小火淋蛋液，静置后轻推成蛋花。' },
-        { heat: '关火', text: '加盐，淋香油，撒葱花。' }
-      ],
-      tips: ['番茄先炒出沙，汤才够红够鲜。'],
-      nutrition: '番茄红素加热后更好吸收，配鸡蛋补充蛋白。', pair: '番茄红素 + 蛋白 → 互补'
-    },
-    {
-      id: 'dry-fried-beans', name: '干煸豆角', emoji: '🫘', minutes: 18, level: '进阶',
-      meals: ['午', '晚'], tags: ['下饭','川味','微辣'],
-      ingredients: [{"name":"豆角","qty":300},{"name":"猪里脊","qty":80}],
-      seasonings: ['干辣椒 5 个','花椒 1 g','蒜末 3 瓣','生抽 10 ml','盐 2 g'],
-      prep: ['豆角掐头去尾撕筋，掰成 5 cm 段，洗净完全沥干。','肉沫用少许生抽抓匀。'],
-      steps: [
-        { heat: '中火', text: '锅里多放油，下豆角煸 5 分钟至表皮起皱发白，盛出。' },
-        { heat: '大火', text: '留底油下肉沫炒散，加干辣椒、花椒、蒜末炒香。' },
-        { heat: '大火', text: '倒回豆角，加生抽、盐翻炒 1 分钟出锅。' }
-      ],
-      tips: ['豆角必须煸透，没熟容易不适。','沥干水分再下锅，不然会爆油。'],
-      nutrition: '豆角纤维丰富，干煸做法油偏多，配清淡汤更好。', pair: '纤维 + 辣味 → 开胃下饭'
-    },
-    {
       id: 'wood-ear-salad', name: '凉拌木耳', emoji: '🥗', minutes: 10, level: '新手',
       meals: ['午', '晚'], tags: ['凉菜', '解腻', '开胃', '低脂'],
       ingredients: [{ name: '木耳', qty: 100 }, { name: '香菜', qty: 1 }],

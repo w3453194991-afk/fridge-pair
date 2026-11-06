@@ -151,3 +151,7 @@
   color: #B45309; background: #FFF7E8; border: 1rpx solid #FBE3CF;
   border-radius: 18rpx; padding: 16rpx 20rpx;
 }
+
+.btn.danger {
+  color: #B91C1C; background: #FFF5F5; border: 1rpx solid #FADADA;
+}

@@ -96,6 +96,10 @@ Page({
       custom: true
     };
 
+    // 用主料的 emoji，别一律用盘子
+    const firstIng = (draft.ingredients || [])[0];
+    if (firstIng) draft.emoji = E.foodMeta(firstIng.name).emoji || draft.emoji;
+
     try {
       S.addCustom(draft);
       E.attachCustom([draft]);

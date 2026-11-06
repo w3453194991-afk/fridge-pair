@@ -62,6 +62,7 @@
   <view class="btns">
     <view class="btn primary" bindtap="onCook" hover-class="btn-hover">开始做菜 · 拍照记录</view>
     <view class="btn ghost mt" bindtap="onVideo" hover-class="btn-hover">▶ 看视频教程</view>
+    <view wx:if="{{dish.custom}}" class="btn danger mt" bindtap="onRemove" hover-class="btn-hover">从菜谱库移除</view>
   </view>
 
   <view class="bottomspace"></view>

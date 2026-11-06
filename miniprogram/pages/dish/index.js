@@ -204,5 +204,32 @@ Page({
 
   onVideo() {
     wx.navigateTo({ url: '/pages/video/index?q=' + encodeURIComponent(this.data.dish.name) });
+  },
+
+  /* 删除自定义/网上菜谱 */
+  onRemove() {
+    const d = this.data.dish;
+    if (!d) return;
+    wx.showModal({
+      title: '移除这道菜',
+      content: '「' + d.name + '」会从你的菜谱库删除，冰箱和家庭档案不受影响。',
+      confirmText: '移除',
+      confirmColor: '#B91C1C',
+      success: (r) => {
+        if (!r.confirm) return;
+        try {
+          if (S.removeCustom) S.removeCustom(d.id);
+          for (let i = D.DISHES.length - 1; i >= 0; i--) {
+            if (D.DISHES[i].id === d.id) D.DISHES.splice(i, 1);
+          }
+          S.save();
+        } catch (e) {
+          wx.showModal({ title: '移除失败', content: String((e && e.message) || e), showCancel: false });
+          return;
+        }
+        wx.showToast({ title: '已移除', icon: 'none' });
+        setTimeout(() => wx.navigateBack(), 400);
+      }
+    });
   }
 });

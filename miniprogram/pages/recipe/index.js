@@ -113,7 +113,7 @@ Page({
       list = list.filter(d => (d.meals || []).indexOf(curMeal) >= 0);
     }
     const q = (this.data.q || '').trim();
-    if (q) list = list.filter(d => d.name.indexOf(q) >= 0 || d.ingredients.some(i => i.name.indexOf(q) >= 0));
+    if (q) list = list.filter(d => d.name.indexOf(q) >= 0 || d.ingredients.some(i => i.name.indexOf(q) >= 0) || (d.tags || []).some(t => t.indexOf(q) >= 0));
     list = list.slice().sort((a, b) => {
       const pa = pinned.indexOf(a.id) >= 0 ? 1 : 0;
       const pb = pinned.indexOf(b.id) >= 0 ? 1 : 0;

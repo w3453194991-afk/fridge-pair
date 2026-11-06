@@ -1129,21 +1129,36 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     return '炒';
   }
 
+  /* 名字片段 → 具体食材；allowSingle 时才允许「蛋/鸡/鱼」这种单字 */
+  function fragMatch(str, allowSingle) {
+    const keys = Object.keys(NAME_FRAG).sort((a, b) => b.length - a.length);
+    for (const k of keys) {
+      if (!allowSingle && k.length < 2) continue;
+      if (str.indexOf(k) >= 0) return NAME_FRAG[k];
+    }
+    return '';
+  }
+
   function guessMain(name) {
     const n = String(name || '');
-    const names = D.FOOD_DB.map(f => f.name).sort((a, b) => b.length - a.length);
+    const names = D.FOOD_DB
+      .filter(f => f.cat !== '调味')                 // 调味料不能当主料（糖醋里脊 ≠ 醋）
+      .map(f => f.name)
+      .sort((a, b) => b.length - a.length);
 
     // 「土豆炖鸡」这类：做法词右边才是主料，先看右半边
     const m = n.match(/(?:炖|炒|烧|焖|蒸|煎|拌|烤|煸|爆|煮|卤)(.+)$/);
     if (m && m[1]) {
       const right = m[1];
       for (const x of names) if (right.indexOf(x) >= 0) return x;
-      for (const k in NAME_FRAG) if (right.indexOf(k) >= 0) return NAME_FRAG[k];
+      const f1 = fragMatch(right, true);
+      if (f1) return f1;
     }
 
     // 再按食材库具体名字匹配（口蘑/金针菇 优先于「菇→香菇」模糊规则）
     for (const x of names) if (n.indexOf(x) >= 0) return x;
-    for (const k in NAME_FRAG) if (n.indexOf(k) >= 0) return NAME_FRAG[k];
+    const f2 = fragMatch(n, true);
+    if (f2) return f2;
     return '';
   }
 
@@ -1294,7 +1309,20 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
 
   function generateRecipe(name, mainName) {
     const nm = String(name || '').trim();
-    const main = mainName || guessMain(nm) || '五花肉';
+    let main = mainName || guessMain(nm);
+
+    // 名字里找不到已知食材（如「拔丝地瓜」）→ 把去做法后的词当食材登记，别退回五花肉
+    if (!main) {
+      const stripped = nm.replace(/^(拔丝|清炒|清蒸|红烧|凉拌|干煸|爆炒|蒜蓉|香煎|糖醋|水煮|麻辣|酱焖|小炒|炖|煎|蒸|炒|拌|烧|烤)+/, '').trim();
+      const guess = stripped || nm;
+      if (guess && guess.length <= 6) {
+        const isMeat = /肉|鱼|虾|鸡|鸭|牛|羊|猪|排|翅/.test(guess);
+        registerFood(guess, { cat: isMeat ? '肉类' : '蔬菜' });
+        main = guess;
+      } else {
+        main = '五花肉';
+      }
+    }
     const m = detectMethod(nm);
     const tpl = METHOD_TPL[m] || METHOD_TPL['炒'];
     const meta = foodMeta(main);
@@ -1302,9 +1330,34 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     const fill = s => s.replace(/\{main\}/g, main);
 
     const ing = [{ name: main, qty: unitQty(main) }];
-    // 配菜只在炒/红烧的猪牛鸡肉上加，鱼虾和鸡翅不加
-    const companion = { 猪里脊: '青椒', 五花肉: '青椒', 牛里脊: '洋葱', 鸡胸肉: '青椒' }[main];
-    if (companion && (m === '炒' || m === '红烧')) ing.push({ name: companion, qty: 1 });
+
+    // 菜名里出现的**所有**食材都算进去（番茄炒蛋 → 番茄 + 鸡蛋，不能只留一个）
+    // 但「醋/白糖/淀粉」这类调味料不算主料
+    const sortedNames = D.FOOD_DB.map(f => f.name).sort((a, b) => b.length - a.length);
+    function isSeasoning(n) {
+      const f = D.FOOD_DB.filter(x => x.name === n)[0];
+      return !!(f && f.cat === '调味');
+    }
+    sortedNames.forEach(function (n) {
+      if (ing.length >= 4) return;
+      if (n === main) return;
+      if (nm.indexOf(n) < 0) return;
+      if (isSeasoning(n)) return;
+      if (ing.some(x => x.name === n)) return;
+      ing.push({ name: n, qty: unitQty(n) });
+    });
+    // 名字里只有「蛋」「肉」这类片段时，补一个常见搭配
+    if (ing.length <= 2) {
+      const extra = fragMatch(nm, true);
+      if (extra && extra !== main && !ing.some(x => x.name === extra) && ing.length < 4) {
+        ing.push({ name: extra, qty: unitQty(extra) });
+      }
+    }
+    // 还是只有主料时，按做法配一个常见配菜
+    if (ing.length === 1) {
+      const companion = { 猪里脊: '青椒', 五花肉: '青椒', 牛里脊: '洋葱', 鸡胸肉: '青椒' }[main];
+      if (companion && (m === '炒' || m === '红烧')) ing.push({ name: companion, qty: 1 });
+    }
 
     const built = buildCustom(nm, main, m, meta);
     const d = {
