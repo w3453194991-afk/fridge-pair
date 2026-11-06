@@ -252,6 +252,15 @@ exports.main = async (event) => {
     }
     return { ok: true, source: 'online', count: clean.length, items: clean };
   } catch (e) {
-    return { ok: false, error: String((e && e.message) || e) };
+    return {
+      ok: false,
+      error: String((e && e.message) || e),
+      // 诊断信息：让调用方看出这次跑的是哪版代码、读到的 key 有多长
+      build: 'v3-keylen-diagnostic',
+      source: SOURCE,
+      keyLen: (KEY || '').length,
+      keyHead: (KEY || '').slice(0, 4),
+      keyTail: (KEY || '').slice(-4)
+    };
   }
 };
