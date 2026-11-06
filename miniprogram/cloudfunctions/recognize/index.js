@@ -51,7 +51,7 @@ function request(options, body) {
       });
     });
     req.on('error', reject);
-    req.setTimeout(20000, () => req.destroy(new Error('请求超时')));
+    req.setTimeout(8000, () => req.destroy(new Error('请求百度超时（8s）')));
     if (body) req.write(body);
     req.end();
   });
@@ -96,7 +96,18 @@ exports.main = async (event) => {
   let image = String((event && event.image) || '').replace(/^data:image\/\w+;base64,/, '');
 
   if (!image) return { ok: false, error: '缺少 image', items: [] };
-  if (!key || !secret) return { ok: true, source: 'mock', items: mock(), hint: '未配置百度密钥' };
+
+  // 没配密钥就直接说清楚，不要返回假数据
+  if (!key || !secret) {
+    return {
+      ok: false,
+      source: 'mock',
+      error: '云函数没读到百度密钥：请在 云函数 → recognize → 配置 → 环境变量 添加 BAIDU_API_KEY / BAIDU_API_SECRET，保存后重新部署',
+      hasKey: !!key,
+      hasSecret: !!secret,
+      items: []
+    };
+  }
 
   try {
     const token = await getToken(key, secret);
