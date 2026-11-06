@@ -123,10 +123,30 @@ function normJisu(item) {
 /* ---------- 各平台请求 ---------- */
 
 async function fetchJuhe(keyword) {
-  const url = 'https://apis.juhe.cn/cook/query?key=' + encodeURIComponent(KEY) +
+  const base = 'https://apis.juhe.cn/cook/query';
+  const q = '?key=' + encodeURIComponent(KEY) +
     '&menu=' + encodeURIComponent(keyword) + '&rn=10&pn=1';
-  const r = await request(url);
-  if (!r || r.error_code) throw new Error('聚合接口错误：' + JSON.stringify(r && r.reason || r).slice(0, 120));
+
+  // 聚合的路径有带 .php 和不带两种，两个都试
+  let r = null;
+  let lastErr = null;
+  for (const path of [base, base + '.php']) {
+    try {
+      r = await request(path + q);
+      if (r && (r.resultcode === '200' || r.error_code === 0 || (r.result && r.result.data))) break;
+      r = null;
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+
+  if (!r) throw new Error('聚合接口无响应' + (lastErr ? ('：' + lastErr.message) : ''));
+
+  const code = r.resultcode !== undefined ? Number(r.resultcode) : Number(r.error_code);
+  if (code && code !== 200 && code !== 0) {
+    throw new Error('聚合接口错误：' + (r.reason || r.reason_text || JSON.stringify(r).slice(0, 120)));
+  }
+
   const list = (r.result && r.result.data) || [];
   return list.map(normJuhe);
 }
