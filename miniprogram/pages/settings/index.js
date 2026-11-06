@@ -100,7 +100,7 @@ Page({
       S.state.family.firstRun = true;
       S.save();
     } catch (e) {}
-    wx.reLaunch({ url: '/pages/splash/index' });
+    wx.reLaunch({ url: '/pages/welcome/index' });
   },
 
   /* 重新走一遍首次引导（含欢迎开屏） */

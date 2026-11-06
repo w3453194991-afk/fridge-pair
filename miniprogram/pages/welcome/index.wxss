@@ -1,0 +1,143 @@
+page { background: #F4FBF7; }
+
+.welcomemsg {
+  position: relative;
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 80rpx 44rpx calc(60rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  overflow: hidden;
+  background: linear-gradient(165deg, #F6FDFA 0%, #EAF8F1 52%, #F2FBF6 100%);
+}
+
+/* 背景光斑 */
+.bg1 {
+  position: absolute; width: 520rpx; height: 520rpx; border-radius: 50%;
+  left: -140rpx; top: -160rpx;
+  background: radial-gradient(circle, rgba(63,220,164,.28), rgba(63,220,164,0) 70%);
+}
+.bg2 {
+  position: absolute; width: 460rpx; height: 460rpx; border-radius: 50%;
+  right: -120rpx; bottom: 40rpx;
+  background: radial-gradient(circle, rgba(125,235,255,.24), rgba(125,235,255,0) 70%);
+}
+
+.title { position: relative; text-align: center; animation: rise .8s ease-out both; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(-16rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.t1 { font-size: 36rpx; color: #5E7D71; font-weight: 700; letter-spacing: 6rpx; }
+.t2 {
+  font-size: 68rpx; font-weight: 900; letter-spacing: 4rpx; margin-top: 8rpx;
+  background: linear-gradient(120deg, #12A576, #3FDCA4 58%, #0E9E88);
+  -webkit-background-clip: text; color: transparent;
+}
+.t3 { font-size: 24rpx; color: #8B9A96; margin-top: 14rpx; letter-spacing: 1rpx; }
+
+/* ---------- 机器人 ---------- */
+.bot { position: relative; margin-top: 50rpx; animation: float 3.4s ease-in-out infinite; }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12rpx); }
+}
+
+.sprout { position: absolute; left: 50%; top: -34rpx; transform: translateX(-50%); z-index: 3; animation: sway 3.6s ease-in-out infinite; transform-origin: bottom center; }
+@keyframes sway {
+  0%, 100% { transform: translateX(-50%) rotate(-5deg); }
+  50% { transform: translateX(-50%) rotate(6deg); }
+}
+.sprout .stem { width: 5rpx; height: 30rpx; background: #5FBF7C; margin: 0 auto; border-radius: 3rpx; }
+.sprout .lf { position: absolute; top: -6rpx; width: 44rpx; height: 26rpx; border-radius: 50%; }
+.sprout .lf.l { left: -30rpx; background: #6FD08C; transform: rotate(-16deg); }
+.sprout .lf.r { right: -30rpx; background: #8FE0A6; transform: rotate(16deg); }
+
+.head {
+  position: relative; width: 300rpx; height: 254rpx; border-radius: 100rpx;
+  background: linear-gradient(165deg, #FFFFFF, #EFFBF5 76%);
+  border: 3rpx solid #DCF0E7;
+  box-shadow: 0 26rpx 44rpx -26rpx rgba(16,120,90,.55), inset 0 -12rpx 26rpx -18rpx rgba(18,165,118,.5);
+  display: flex; align-items: center; justify-content: center;
+}
+.band {
+  position: absolute; left: 20rpx; right: 20rpx; top: -28rpx; height: 140rpx;
+  border: 10rpx solid #E9F7F1; border-bottom: none; border-radius: 150rpx 150rpx 0 0; z-index: -1;
+}
+.cup { position: absolute; top: 88rpx; width: 28rpx; height: 58rpx; border-radius: 15rpx; background: #fff; border: 3rpx solid #DCF0E7; }
+.cup.l { left: -17rpx; }
+.cup.r { right: -17rpx; }
+
+.screen {
+  position: relative; width: 228rpx; height: 182rpx; border-radius: 68rpx;
+  background: linear-gradient(160deg, #22323C, #101B22 55%, #070D11);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.gloss {
+  position: absolute; top: -40rpx; left: -60rpx; width: 64rpx; height: 280rpx;
+  background: rgba(191,239,255,.16); transform: rotate(16deg);
+  animation: gloss 5.6s cubic-bezier(.4,0,.2,1) infinite;
+}
+@keyframes gloss {
+  0% { transform: translateX(0) rotate(16deg); }
+  42%, 100% { transform: translateX(380rpx) rotate(16deg); }
+}
+.eye {
+  width: 42rpx; height: 24rpx; border: 9rpx solid #7DEBFF; border-bottom: none;
+  border-radius: 40rpx 40rpx 0 0; margin: 0 15rpx;
+  filter: drop-shadow(0 0 10rpx rgba(125,235,255,.9));
+  animation: blink 4.8s ease-in-out infinite;
+}
+@keyframes blink {
+  0%, 88%, 100% { transform: scaleY(1); }
+  92% { transform: scaleY(.12); }
+}
+.mouth {
+  position: absolute; left: 50%; bottom: 36rpx; transform: translateX(-50%);
+  width: 42rpx; height: 20rpx; border: 8rpx solid #7DEBFF; border-top: none;
+  border-radius: 0 0 36rpx 36rpx;
+  filter: drop-shadow(0 0 10rpx rgba(125,235,255,.9));
+}
+
+.torso {
+  position: relative; width: 262rpx; height: 178rpx; margin: -18rpx auto 0;
+  border-radius: 64rpx; background: linear-gradient(160deg, #FFFFFF, #E8F6EF);
+  border: 3rpx solid #DCF0E7;
+  box-shadow: 0 26rpx 40rpx -26rpx rgba(16,120,90,.5);
+  display: flex; align-items: center; justify-content: center;
+}
+.apron {
+  width: 136rpx; height: 136rpx; border-radius: 32rpx;
+  background: linear-gradient(160deg, #8FE6FF, #2E9BD6);
+  display: flex; align-items: center; justify-content: center;
+}
+.chest {
+  width: 78rpx; height: 60rpx; border-radius: 16rpx; background: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 30rpx;
+}
+.arm { position: absolute; bottom: 8rpx; width: 26rpx; height: 82rpx; border-radius: 15rpx; background: #fff; border: 3rpx solid #DCF0E7; transform-origin: top center; }
+.arm.l { left: -20rpx; animation: armL 3s ease-in-out infinite; }
+.arm.r { right: -20rpx; animation: armR 3s ease-in-out infinite; }
+@keyframes armL { 0%,100% { transform: rotate(4deg); } 50% { transform: rotate(-8deg); } }
+@keyframes armR { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(8deg); } }
+
+.hud {
+  position: absolute; left: 50%; bottom: -54rpx; transform: translateX(-50%);
+  width: 270rpx; height: 42rpx; border-radius: 50%;
+  border: 2rpx dashed rgba(79,217,255,.55);
+  animation: hudSpin 6s linear infinite;
+}
+@keyframes hudSpin { to { transform: translateX(-50%) rotate(360deg); } }
+
+/* ---------- 台词 ---------- */
+.words { margin-top: 96rpx; width: 100%; min-height: 200rpx; }
+.ln {
+  font-size: 26rpx; font-weight: 700; line-height: 1.6; color: #12352B;
+  background: rgba(255,255,255,.96); border: 1rpx solid #DDF2E7;
+  border-radius: 24rpx; padding: 16rpx 22rpx; margin-bottom: 12rpx;
+  box-shadow: 0 8rpx 22rpx -18rpx rgba(16,120,90,.6);
+}
+.ln3 { color: #0E8F63; }
+
+.acts { width: 100%; }
+.big { height: 96rpx; font-size: 29rpx; margin-bottom: 18rpx; }
+.actspace { height: 200rpx; }

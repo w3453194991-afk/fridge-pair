@@ -199,7 +199,7 @@ Page({
     if (this.isEdit) {
       setTimeout(() => wx.navigateBack(), 500);
     } else {
-      setTimeout(() => wx.reLaunch({ url: '/pages/splash/index' }), 500);
+      setTimeout(() => wx.reLaunch({ url: '/pages/welcome/index' }), 500);
     }
   },
 
@@ -229,6 +229,6 @@ Page({
       S.state.family.firstRun = true;   // 建好档案后一定播一次欢迎
       S.save();
     } catch (e) {}
-    wx.reLaunch({ url: '/pages/splash/index' });
+    wx.reLaunch({ url: '/pages/welcome/index' });
   }
 });

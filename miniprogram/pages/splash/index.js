@@ -78,9 +78,12 @@ Page({
     this.isWelcome = isWelcome;
 
     if (isWelcome) {
-      this.setData({ phase: 1, canSkip: true, isWelcome: true });
-      this.speak();
-    } else {
+      // 欢迎页是独立页面，这里直接送过去
+      this.leaving = true;
+      wx.redirectTo({ url: '/pages/welcome/index' });
+      return;
+    }
+    {
       // 普通启动：开机阶段 1.65s，随后进入机器人
       this.timers.push(setTimeout(() => {
         this.setData({ phase: 1, canSkip: true });

@@ -1,0 +1,49 @@
+<view class="welcomemsg">
+
+  <view class="bg1"></view>
+  <view class="bg2"></view>
+
+  <view class="title">
+    <view class="t1">欢迎来到</view>
+    <view class="t2">冰箱对对碰</view>
+    <view class="t3">从今天起，你的冰箱有人管了</view>
+  </view>
+
+  <view class="bot">
+    <view class="sprout">
+      <view class="stem"></view>
+      <view class="lf l"></view>
+      <view class="lf r"></view>
+    </view>
+    <view class="head">
+      <view class="band"></view>
+      <view class="cup l"></view>
+      <view class="cup r"></view>
+      <view class="screen">
+        <view class="gloss"></view>
+        <view class="eye l"></view>
+        <view class="eye r"></view>
+        <view class="mouth"></view>
+      </view>
+    </view>
+    <view class="torso">
+      <view class="apron"><view class="chest">🥬</view></view>
+      <view class="arm l"></view>
+      <view class="arm r"></view>
+    </view>
+    <view class="hud"></view>
+  </view>
+
+  <view class="words">
+    <view wx:if="{{line1}}" class="ln">{{line1}}</view>
+    <view wx:if="{{line2}}" class="ln">{{line2}}</view>
+    <view wx:if="{{line3}}" class="ln ln3">{{line3}}</view>
+  </view>
+
+  <view wx:if="{{typed}}" class="acts">
+    <view class="btn primary big" bindtap="onAdd">📷 先加几样食材</view>
+    <view class="btn ghost big" bindtap="onEnter">直接进入冰箱</view>
+  </view>
+  <view wx:else class="actspace"></view>
+
+</view>

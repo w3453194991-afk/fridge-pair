@@ -2,6 +2,7 @@
   "entryPagePath": "pages/splash/index",
   "pages": [
     "pages/splash/index",
+    "pages/welcome/index",
     "pages/login/index",
     "pages/onboard/index",
     "pages/scan/index",
