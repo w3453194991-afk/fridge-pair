@@ -99,10 +99,12 @@ Page({
       const isNew = !f.onboarded;
       wx.showToast({ title: '登录成功', icon: 'success' });
       setTimeout(() => {
-        // 每次登录都先走家庭设置（已填的会预填，点三下「下一步」即可）
-        wx.reLaunch({
-          url: '/pages/onboard/index?from=login' + (isNew ? '&new=1' : '')
-        });
+        // 只有第一次登录（没走过家庭设置）才进引导页
+        if (isNew) {
+          wx.reLaunch({ url: '/pages/onboard/index?from=login&new=1' });
+        } else {
+          wx.reLaunch({ url: '/pages/splash/index' });
+        }
       }, 400);
     };
 
