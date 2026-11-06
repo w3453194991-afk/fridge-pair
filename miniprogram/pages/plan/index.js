@@ -1,4 +1,5 @@
 const G = require('../../lib/shim.js');
+const PRICE = require('../../lib/price.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 
 const RULE = {
@@ -111,10 +112,13 @@ Page({
         name: c.name,
         emoji: c.emoji || meta.emoji,
         qty: E.fmtQty(c.qty) + ' ' + (c.unit || meta.unit),
-        cost: cost.toFixed(1)
+        cost: cost.toFixed(1),
+        costText: PRICE.yuan(cost)
       };
     });
-    const cartTotal = cart.reduce((s, x) => s + parseFloat(x.cost), 0).toFixed(1);
+    const cartSum = cart.reduce((s, x) => s + parseFloat(x.cost), 0);
+    const cartTotal = cartSum.toFixed(1);
+    const cartTotalText = PRICE.yuan(cartSum);
 
     this.setData({
       famName: fam.name || '我',
@@ -132,7 +136,8 @@ Page({
       todayLabel: todayLabel,
       cart: cart,
       cartCount: cart.length,
-      cartTotal: cartTotal
+      cartTotal: cartTotal,
+      cartTotalText: cartTotalText
     });
   },
 

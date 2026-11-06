@@ -84,7 +84,10 @@
           <view class="stitle">{{dateText}} · {{total}} 人</view>
           <view class="ssub">男士 {{men}} · 女士 {{women}} · 小孩 {{kids}} · {{dishCount}} 道菜</view>
         </view>
-        <text class="cost">约 ¥{{cost}}</text>
+        <view class="costbox">
+          <text class="cost">{{costText}}</text>
+          <text class="costhint">行情估算区间</text>
+        </view>
       </view>
       <view wx:if="{{over}}" class="warn">超出预算，建议减一两道</view>
       <view wx:if="{{droppedText}}" class="warn2">{{droppedText}}</view>
@@ -97,7 +100,7 @@
         <view class="dnm">{{item.name}}<text wx:if="{{item.aiTag}}" class="aitag">AI 生成</text></view>
         <view class="dds">{{item.sub}}</view>
       </view>
-      <view class="dprice">¥{{item.cost}}</view>
+      <view class="dprice">{{item.costText}}</view>
     </view>
 
     <view wx:if="{{wishText}}" class="wishline">{{wishText}}</view>
@@ -111,7 +114,7 @@
         <text class="semo">{{item.emoji}}</text>
         <text class="sname">{{item.name}}</text>
         <text class="sqty">{{item.qty}}</text>
-        <text class="sprice">¥{{item.cost}}</text>
+        <text class="sprice">{{item.costText}}</text>
       </view>
     </view>
     <view wx:else class="card">

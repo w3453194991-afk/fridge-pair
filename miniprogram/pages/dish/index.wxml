@@ -32,7 +32,7 @@
       <text class="bemo">{{item.emoji}}</text>
       <text class="bname">{{item.name}}</text>
       <text class="bneed">需 {{item.need}}</text>
-      <text class="bprice">约 ¥{{item.price}}</text>
+      <text class="bprice">{{item.priceText}}</text>
     </view>
   </view>
 

@@ -1,5 +1,6 @@
 const G = require('../../lib/shim.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
+const P = require('../../lib/price.js');
 
 const CUISINES = ['家常', '川菜', '粤菜', '江浙', '鲁菜', '湘菜', '东北', '西北', '西餐', '日韩', '东南亚'];
 
@@ -141,6 +142,7 @@ Page({
         id: d.id, name: d.name, emoji: d.emoji, minutes: d.minutes,
         sub: (d.ingredients || []).map(i => i.name).join(' + '),
         cost: cost.toFixed(1),
+        costText: P.yuan(cost),
         aiTag: isAI
       };
     });
@@ -150,6 +152,7 @@ Page({
       emoji: E.foodMeta(m.name).emoji,
       qty: (m.qty || 0) + (m.unit ? ' ' + m.unit : ''),
       cost: (m.cost || 0).toFixed(1),
+      costText: P.yuan(m.cost || 0),
       price: (E.foodMeta(m.name).price || 0)
     }));
 
@@ -168,6 +171,7 @@ Page({
       missingCount: missing.length,
       wishText: wishText,
       cost: (p.totalCost || 0).toFixed(1),
+      costText: P.yuan(p.totalCost || 0),
       over: !!p.overBudget,
       droppedText: (p.dropped && p.dropped.length) ? ('为控制预算已去掉：' + p.dropped.map(d => (d && d.name) || d).join('、')) : ''
     });

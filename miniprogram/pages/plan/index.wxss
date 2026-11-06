@@ -106,3 +106,5 @@
 .nbu { font-size: 20rpx; color: #8B9A96; font-weight: 600; }
 .nbar { height: 12rpx; background: #F1ECE4; border-radius: 8rpx; overflow: hidden; }
 .nfill { height: 100%; border-radius: 8rpx; }
+
+.ct-hint { font-size: 18rpx; color: #9AA6A1; }

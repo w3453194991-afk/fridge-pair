@@ -1,4 +1,5 @@
 const G = require('../../lib/shim.js');
+const PRICE = require('../../lib/price.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 function validPhoto(p) {
   if (!p || typeof p !== 'string') return false;
@@ -39,11 +40,13 @@ Page({
 
     const missing = raw.filter(s => !s.ok).map(s => {
       const meta = E.foodMeta(s.name);
+      const needQty = Math.max(0, s.qty - s.haveQty);
       return {
         name: s.name,
         emoji: meta.emoji || '🍽',
-        need: E.fmtQty(Math.max(0, s.qty - s.haveQty)) + ' ' + (s.unit || ''),
-        price: meta.price || 0
+        need: E.fmtQty(needQty) + ' ' + (s.unit || ''),
+        price: meta.price || 0,
+        priceText: PRICE.yuan(needQty * (meta.price || 0))
       };
     });
 

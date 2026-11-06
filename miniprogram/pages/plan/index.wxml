@@ -84,7 +84,7 @@
       </view>
     </view>
     <view class="row between carttotal">
-      <text>预估 <text class="ct-val">¥{{cartTotal}}</text></text>
+      <text>预估 <text class="ct-val">{{cartTotalText}}</text> <text class="ct-hint">（行情区间）</text></text>
       <view class="row">
         <text class="linkbtn" bindtap="onClearCart">清空</text>
         <view class="buyall" bindtap="onBuyAll">全部入库</view>
