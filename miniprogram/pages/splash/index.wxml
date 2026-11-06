@@ -22,6 +22,12 @@
   <view wx:else class="robotpage">
     <view class="skip" bindtap="onSkip">跳过</view>
 
+    <view wx:if="{{isWelcome}}" class="welcometitle">
+      <view class="wt1">欢迎来到</view>
+      <view class="wt2">冰箱对对碰</view>
+      <view class="wt3">从今天起，你的冰箱有人管了</view>
+    </view>
+
     <view class="bot">
       <view class="sprout">
         <view class="stem"></view>

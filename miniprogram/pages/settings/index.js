@@ -94,6 +94,15 @@ Page({
     wx.navigateTo({ url: '/pages/onboard/index?edit=1' });
   },
 
+  /* 直接播放欢迎开屏（不影响档案） */
+  onPlayWelcome() {
+    try {
+      S.state.family.firstRun = true;
+      S.save();
+    } catch (e) {}
+    wx.reLaunch({ url: '/pages/splash/index' });
+  },
+
   /* 重新走一遍首次引导（含欢迎开屏） */
   onRestartGuide() {
     wx.showModal({

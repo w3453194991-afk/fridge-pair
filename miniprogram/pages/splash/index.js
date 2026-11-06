@@ -10,7 +10,8 @@ Page({
     hasUrgent: false,
     urgentN: 0,
     canSkip: false,
-    typed: false
+    typed: false,
+    isWelcome: false
   },
 
   onLoad() {
@@ -71,14 +72,24 @@ Page({
       else wx.redirectTo({ url: '/pages/login/index' });
     };
 
-    // 开机阶段 1.65s，随后进入机器人
-    this.timers.push(setTimeout(() => {
-      this.setData({ phase: 1, canSkip: true });
+    // 首次欢迎：跳过开机动画，直接进机器人欢迎页，确保一定看得到
+    let isWelcome = false;
+    try { isWelcome = !!(S.state.family && S.state.family.firstRun); } catch (e) {}
+    this.isWelcome = isWelcome;
+
+    if (isWelcome) {
+      this.setData({ phase: 1, canSkip: true, isWelcome: true });
       this.speak();
-    }, 1650));
+    } else {
+      // 普通启动：开机阶段 1.65s，随后进入机器人
+      this.timers.push(setTimeout(() => {
+        this.setData({ phase: 1, canSkip: true });
+        this.speak();
+      }, 1650));
+    }
 
     // 硬兜底：万一打字卡住，15s 后也要进得去（正常由台词说完触发）
-    this.timers.push(setTimeout(this.goto, 15000));
+    this.timers.push(setTimeout(this.goto, isWelcome ? 20000 : 15000));
   },
 
   onUnload() {
