@@ -183,7 +183,7 @@ Page({
       S.state.family.loggedIn = true;
       if (oldFam.openid) S.state.family.openid = oldFam.openid;
       S.state.family.onboarded = true;
-      if (this.isNewUser) S.state.family.firstRun = true;   // 只有真新用户播欢迎话术
+      S.state.family.firstRun = true;   // 建好档案后一定播一次欢迎
       // 新用户从空冰箱开始
       if (!Array.isArray(st.foods) || !S.state.family.__hadData) {
         S.state.foods = S.state.foods || [];
@@ -226,7 +226,7 @@ Page({
       S.state.family.loggedIn = true;
       if (oldFam.openid) S.state.family.openid = oldFam.openid;
       S.state.family.onboarded = true;
-      if (this.isNewUser) S.state.family.firstRun = true;   // 只有真新用户播欢迎话术
+      S.state.family.firstRun = true;   // 建好档案后一定播一次欢迎
       S.save();
     } catch (e) {}
     wx.reLaunch({ url: '/pages/splash/index' });
