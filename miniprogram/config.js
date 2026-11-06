@@ -25,6 +25,9 @@ module.exports = {
   USE_REMOTE: false,
   TIMEOUT: 15000,
 
+  /* 服务不可用时是否退回本地随机演示（false = 直接报错，不给假结果） */
+  ALLOW_MOCK: false,
+
   /* 每个用户每天最多识别几次（防刷、控成本；0 表示不限制） */
   DAILY_SCAN_LIMIT: 20,
 

@@ -79,3 +79,11 @@ page { background: #04120E; }
 .condnote { font-size: 20rpx; color: #8B9A96; margin-top: 4rpx; }
 .ph-emoji { font-size: 110rpx; }
 .ph-tip { font-size: 22rpx; color: #9BF3FF; margin-top: 14rpx; }
+
+.title.err { font-size: 32rpx; font-weight: 800; color: #B91C1C; }
+.errbox {
+  margin-top: 18rpx; background: #FFF6F6; border: 1rpx solid #F6D6D6;
+  border-radius: 18rpx; padding: 20rpx; font-size: 22rpx; color: #8A4B4B;
+  line-height: 1.7; word-break: break-all;
+}
+.errtip { font-size: 21rpx; color: #9AA6A1; margin-top: 14rpx; }

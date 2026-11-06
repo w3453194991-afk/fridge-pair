@@ -29,6 +29,7 @@ Page({
   data: {
     photo: '',
     imgErr: false,
+    errText: '',
     scanning: true,
     items: [],
     checkedCount: 0,
@@ -66,20 +67,20 @@ Page({
     this.analyze();
   },
 
-  /* 优先走云函数 → HTTP 中转 → 本地演示 */
+  /* 优先走云函数 → HTTP 中转 → （可选）本地演示 */
   analyze() {
     const self = this;
-    this.setData({ scanning: true, sourceText: '' });
+    this.setData({ scanning: true, sourceText: '', errText: '' });
 
     if (!this.data.photo) {
-      setTimeout(() => self.localBuild('演示识别'), 900);
+      this.showError('没拿到照片，请重拍一张');
       return;
     }
 
     let fs = null;
     try { fs = wx.getFileSystemManager(); } catch (e) { fs = null; }
     if (!fs) {
-      this.localBuild('环境不支持读图，已回退');
+      this.showError('当前环境无法读取图片');
       return;
     }
 
@@ -87,12 +88,40 @@ Page({
       filePath: this.data.photo,
       encoding: 'base64',
       success: (r) => self.recognize(r.data),
-      fail: () => self.localBuild('读图失败，已回退')
+      fail: (err) => self.showError('读图失败：' + ((err && err.errMsg) || ''))
     });
+  },
+
+  /* 明确的失败态：不给假结果 */
+  showError(msg) {
+    const allowMock = !!CONFIG.ALLOW_MOCK;
+    if (allowMock) {
+      this.localBuild('演示识别（离线模式）');
+      return;
+    }
+    this.setData({
+      scanning: false,
+      items: [],
+      errText: msg || '识别服务未连接',
+      sourceText: ''
+    });
+  },
+
+  onRetry() {
+    if (!this.data.photo) {
+      this.onRetake();
+      return;
+    }
+    this.analyze();
+  },
+
+  onManualAdd() {
+    wx.navigateTo({ url: '/pages/addfood/index' });
   },
 
   recognize(base64) {
     const self = this;
+    this.lastBase64 = base64;
 
     /* ① 云函数 */
     if (CONFIG.USE_CLOUD && CONFIG.CLOUD_ENV && wx.cloud) {
@@ -102,26 +131,33 @@ Page({
         success: (res) => {
           const d = (res && res.result) || {};
           const list = Array.isArray(d.items) ? d.items : [];
-          if (!list.length) { self.httpOrLocal(base64, '云函数无结果，已回退'); return; }
+          if (!list.length) {
+            self.showError(d.error ? ('识别失败：' + d.error) : '识别没有返回结果');
+            return;
+          }
           self.applyResult(list, d.source === 'baidu' ? '百度 AI 识别（云函数）' : '云函数演示识别');
         },
         fail: (err) => {
-          console.warn('[scan] 云函数失败', err && err.errMsg);
-          self.httpOrLocal(base64, null);
+          const msg = (err && err.errMsg) || '未知错误';
+          console.warn('[scan] 云函数失败', msg);
+          // 有 HTTP 中转就再试一次，否则直接报错
+          if (CONFIG.USE_REMOTE && CONFIG.API_BASE) self.httpTry(base64, msg);
+          else self.showError('云函数调用失败：' + msg);
         }
       });
       return;
     }
 
-    this.httpOrLocal(base64, null);
-  },
-
-  httpOrLocal(base64, fallbackLabel) {
-    const self = this;
-    if (!CONFIG.USE_REMOTE || !CONFIG.API_BASE) {
-      this.localBuild(fallbackLabel || '演示识别（未连服务）');
+    if (CONFIG.USE_REMOTE && CONFIG.API_BASE) {
+      this.httpTry(base64, '');
       return;
     }
+
+    this.showError('没有可用的识别服务（未配置云开发或中转地址）');
+  },
+
+  httpTry(base64, prevErr) {
+    const self = this;
     wx.request({
       url: CONFIG.API_BASE.replace(/\/$/, '') + '/recognize',
       method: 'POST',
@@ -131,12 +167,16 @@ Page({
       success: (res) => {
         const d = (res && res.data) || {};
         const list = Array.isArray(d.items) ? d.items : [];
-        if (!list.length) { self.localBuild(fallbackLabel || '识别无结果，已回退'); return; }
+        if (!list.length) {
+          self.showError(d.error ? ('识别失败：' + d.error) : '识别没有返回结果');
+          return;
+        }
         self.applyResult(list, d.source === 'baidu' ? '百度 AI 识别' : '服务端识别');
       },
       fail: (err) => {
-        console.warn('[scan] 请求失败', err && err.errMsg);
-        self.localBuild('服务未连接，已回退演示');
+        const msg = (err && err.errMsg) || '未知错误';
+        console.warn('[scan] 请求失败', msg);
+        self.showError((prevErr ? ('云函数失败：' + prevErr + '\n') : '') + '中转服务连接失败：' + msg);
       }
     });
   },

@@ -16,7 +16,18 @@
     <view wx:if="{{scanning}}" class="scanmask-tip">🤖 识别中…</view>
   </view>
 
-  <view wx:if="{{!scanning}}" class="panel">
+  <view wx:if="{{!scanning && errText}}" class="panel">
+    <view class="title err">识别服务暂时不可用</view>
+    <view class="errbox">{{errText}}</view>
+    <view class="errtip">可以直接手动添加，或者稍后重试</view>
+    <view class="actions">
+      <view class="btn ghost" bindtap="onManualAdd">手动添加</view>
+      <view class="btn primary" bindtap="onRetry">重试</view>
+    </view>
+    <view class="cancel" bindtap="onCancel">返回冰箱</view>
+  </view>
+
+  <view wx:elif="{{!scanning}}" class="panel">
     <view class="ptitle">识别结果 <text class="pcount">{{checkedCount}}/{{items.length}} 已选</text></view>
     <view wx:if="{{sourceText}}" class="psub">{{sourceText}} · 勾选确认后入库</view>
     <view wx:else class="psub">勾选你实际放进冰箱的东西</view>
