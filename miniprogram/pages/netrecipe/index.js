@@ -123,5 +123,30 @@ Page({
 
   onBack() {
     wx.navigateBack();
+  },
+
+  /* 网上取不到时，用本地规则生成一份（带 AI 生成标记），保证有菜可用 */
+  onLocalGen() {
+    const name = String(this.data.q || '').trim();
+    if (!name) return;
+    wx.showModal({
+      title: '用模板生成',
+      content: '「' + name + '」网上没取到，将按菜名规则生成一份做法（标注为 AI 生成，仅供参考）。',
+      success: (r) => {
+        if (!r.confirm) return;
+        try {
+          const draft = E.generateRecipe(name);
+          draft.tags = (draft.tags || []).concat(['AI生成']);
+          S.addCustom(draft);
+          E.attachCustom([draft]);
+          S.save();
+        } catch (err) {
+          wx.showModal({ title: '生成失败', content: String((err && err.message) || err), showCancel: false });
+          return;
+        }
+        wx.showToast({ title: '已加入菜谱库', icon: 'success' });
+        setTimeout(() => wx.navigateBack(), 600);
+      }
+    });
   }
 });

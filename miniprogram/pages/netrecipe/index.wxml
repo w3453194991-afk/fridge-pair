@@ -21,6 +21,7 @@
       <text class="mono">RECIPE_KEY</text>
     </view>
     <view class="btn ghost mt" bindtap="onBack">返回</view>
+    <view class="btn primary mt" bindtap="onLocalGen">用模板生成「{{q}}」并加入</view>
   </view>
 
   <block wx:elif="{{items.length}}">

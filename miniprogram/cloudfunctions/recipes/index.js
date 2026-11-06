@@ -182,20 +182,35 @@ async function fetchJuhe(keyword) {
     return await request(url);
   };
 
-  let r = await tryWord(keyword);
+  /* 逐级降级的关键词：原名 → 去做法前缀 → 后两字 → 前两字 */
+  const METHOD_PREFIX = /^(拔丝|清炒|清蒸|红烧|凉拌|干煸|爆炒|蒜蓉|香煎|糖醋|水煮|麻辣|酱焖|小炒|炖|煎|蒸|炒|拌|烧)+/;
+  const words = [keyword];
+  const stripped = keyword.replace(METHOD_PREFIX, '');
+  if (stripped && stripped !== keyword) words.push(stripped);
+  if (keyword.length > 2) words.push(keyword.slice(-2));
+  if (keyword.length > 2) words.push(keyword.slice(0, 2));
 
-  if (r && r.error_code) {
-    // 273303 = 数据返回为空：换更短的关键词再试一次
-    if (Number(r.error_code) === 273303) {
-      const short = keyword.length > 2 ? keyword.slice(-2) : '';
-      if (short && short !== keyword) r = await tryWord(short);
+  let r = null;
+  let tried = [];
+  for (const w of words) {
+    if (tried.indexOf(w) >= 0) continue;
+    tried.push(w);
+    let res = await tryWord(w);
+    // 网络超时类错误，等一下重试一次
+    if (res && [273300, 273301].indexOf(Number(res.error_code)) >= 0) {
+      await new Promise(ok => setTimeout(ok, 400));
+      res = await tryWord(w);
     }
+    if (res && (!res.error_code || Number(res.error_code) === 0)) { r = res; break; }
+    r = res;   // 记住最后一次，便于报错
   }
 
   if (!r) throw new Error('聚合接口无响应');
 
   if (r.error_code && Number(r.error_code) !== 0) {
-    if (Number(r.error_code) === 273303) return [];   // 确实没有这道菜
+    const code = Number(r.error_code);
+    if (code === 273303) return [];                 // 库里确实没有这道菜
+    if (code === 273300) throw new Error('聚合接口超时（273300），可能是今日免费次数用完或服务波动，稍后再试');
     throw new Error('聚合返回：' + (r.reason || '') + juheHint(r.reason));
   }
 
