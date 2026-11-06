@@ -106,19 +106,51 @@ Page({
     const missing = (p.missing || []).map(m => ({
       name: m.name,
       emoji: E.foodMeta(m.name).emoji,
-      cost: (m.cost || 0).toFixed(1)
+      qty: (m.qty || 0) + (m.unit ? ' ' + m.unit : ''),
+      cost: (m.cost || 0).toFixed(1),
+      price: (E.foodMeta(m.name).price || 0)
     }));
+
+    const wishHit = (p.wishHit || []).join('、');
+    const wishMiss = (p.wishMiss || []).join('、');
+    let wishText = '';
+    if (wishHit) wishText = '已排进菜单：' + wishHit;
+    if (wishMiss) wishText += (wishText ? '；' : '') + '菜谱库里没有：' + wishMiss + '（可以点「＋ 添加菜谱」自己建）';
 
     this.setData({
       result: true,
       dishes: dishes,
       dishCount: dishes.length,
       missing: missing,
+      missingCount: missing.length,
+      wishText: wishText,
       cost: (p.totalCost || 0).toFixed(1),
       over: !!p.overBudget,
-      droppedText: (p.dropped && p.dropped.length) ? ('为控制预算已去掉：' + p.dropped.join('、')) : ''
+      droppedText: (p.dropped && p.dropped.length) ? ('为控制预算已去掉：' + p.dropped.map(d => (d && d.name) || d).join('、')) : ''
     });
     wx.pageScrollTo({ scrollTop: 400, duration: 260 });
+  },
+
+  /* 把缺的料一次性加入采购清单 */
+  onBuyMissing() {
+    if (!this.data.missing.length) {
+      wx.showToast({ title: '食材齐全，不用买', icon: 'none' });
+      return;
+    }
+    try {
+      S.addCart(this.data.missing.map(m => ({
+        name: m.name,
+        emoji: m.emoji,
+        unit: '',
+        qty: Math.max(1, Math.round(parseFloat(m.qty) || 1)),
+        price: m.price || 0
+      })));
+      S.save();
+    } catch (e) {
+      wx.showModal({ title: '加入失败', content: String((e && e.message) || e), showCancel: false });
+      return;
+    }
+    wx.showToast({ title: '已加入采购清单', icon: 'success' });
   },
 
   onDish(e) {

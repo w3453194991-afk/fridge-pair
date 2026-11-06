@@ -132,3 +132,16 @@
 .cookbtns .btn { flex: 1; margin-right: 16rpx; }
 .cookbtns .btn:last-child { margin-right: 0; }
 .cookcancel { text-align: center; font-size: 22rpx; color: #9AA6A1; margin-top: 18rpx; }
+
+.buycard { border-color: #FBE3CF; background: linear-gradient(120deg,#FFF9F2,#FFFFFF); }
+.btitle { font-size: 27rpx; font-weight: 800; color: #B45309; }
+.buybtn {
+  font-size: 21rpx; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg,#FF9A5A,#FF6B3D);
+  border-radius: 18rpx; padding: 10rpx 20rpx;
+}
+.buyitem { display: flex; align-items: center; padding: 14rpx 0; border-top: 1rpx solid #F6EFE7; }
+.bemo { font-size: 30rpx; margin-right: 14rpx; }
+.bname { flex: 1; font-size: 26rpx; font-weight: 600; }
+.bneed { font-size: 21rpx; color: #8B6B4A; margin-right: 16rpx; }
+.bprice { font-size: 21rpx; color: #B45309; }

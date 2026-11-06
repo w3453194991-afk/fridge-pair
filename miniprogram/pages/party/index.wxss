@@ -65,3 +65,16 @@
 }
 .sumN { font-size: 30rpx; font-weight: 800; color: #12A576; }
 .ssub { font-size: 21rpx; color: #7C8B87; margin-top: 8rpx; }
+
+.wishline {
+  font-size: 21rpx; color: #5B3FA8; background: #F7F1FF;
+  border-radius: 16rpx; padding: 14rpx 18rpx; margin: 0 0 16rpx;
+  line-height: 1.6;
+}
+.buycard { border-color: #FBE3CF; background: linear-gradient(120deg,#FFF9F2,#FFFFFF); }
+.buybtn {
+  font-size: 21rpx; font-weight: 800; color: #fff;
+  background: linear-gradient(135deg,#FF9A5A,#FF6B3D);
+  border-radius: 18rpx; padding: 10rpx 20rpx;
+}
+.sqty { font-size: 21rpx; color: #7C8B87; margin-right: 14rpx; }

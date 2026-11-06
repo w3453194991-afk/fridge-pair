@@ -28,13 +28,24 @@ Page({
     if (!d) { wx.navigateBack(); return; }
     const st = S.state;
 
-    const states = E.ingredientState(d, st.foods).map(s => ({
+    const raw = E.ingredientState(d, st.foods);
+    const states = raw.map(s => ({
       name: s.name,
       amount: E.fmtQty(s.qty) + ' ' + (s.unit || ''),
       ok: s.ok,
       pillCls: s.ok ? 'pill g' : 'pill b',
       pillText: s.ok ? '库存够' : (s.expired ? '已过期' : '缺料')
     }));
+
+    const missing = raw.filter(s => !s.ok).map(s => {
+      const meta = E.foodMeta(s.name);
+      return {
+        name: s.name,
+        emoji: meta.emoji || '🍽',
+        need: E.fmtQty(Math.max(0, s.qty - s.haveQty)) + ' ' + (s.unit || ''),
+        price: meta.price || 0
+      };
+    });
 
     this.setData({
       dish: {
@@ -46,9 +57,34 @@ Page({
       steps: (d.steps || []).map((s, i) => ({ no: i + 1, heat: s.heat, text: s.text })),
       prep: d.prep || [],
       states: states,
+      missing: missing,
+      missingCount: missing.length,
       can: states.every(s => s.ok)
     });
     this.dish = d;
+  },
+
+  /* 缺的料一次加进采购清单 */
+  onBuyMissing() {
+    const list = this.data.missing || [];
+    if (!list.length) {
+      wx.showToast({ title: '食材齐全', icon: 'none' });
+      return;
+    }
+    try {
+      S.addCart(list.map(m => ({
+        name: m.name,
+        emoji: m.emoji,
+        unit: '',
+        qty: Math.max(1, Math.round(parseFloat(m.need) || 1)),
+        price: m.price || 0
+      })));
+      S.save();
+    } catch (e) {
+      wx.showModal({ title: '加入失败', content: String((e && e.message) || e), showCancel: false });
+      return;
+    }
+    wx.showToast({ title: '已加入采购清单', icon: 'success' });
   },
 
   /* ========== 第一步：拍照 ========== */

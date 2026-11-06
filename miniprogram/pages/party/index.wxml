@@ -100,13 +100,22 @@
       <view class="dprice">¥{{item.cost}}</view>
     </view>
 
-    <view wx:if="{{missing.length}}" class="card">
-      <view class="tt">🛒 需要补购</view>
+    <view wx:if="{{wishText}}" class="wishline">{{wishText}}</view>
+
+    <view wx:if="{{missingCount}}" class="card buycard">
+      <view class="row between">
+        <view class="tt">🛒 冰箱里缺 {{missingCount}} 样</view>
+        <view class="buybtn" bindtap="onBuyMissing">全部加入采购清单</view>
+      </view>
       <view wx:for="{{missing}}" wx:key="name" class="shop">
         <text class="semo">{{item.emoji}}</text>
         <text class="sname">{{item.name}}</text>
+        <text class="sqty">{{item.qty}}</text>
         <text class="sprice">¥{{item.cost}}</text>
       </view>
+    </view>
+    <view wx:else class="card">
+      <view class="tt">✅ 这些菜的食材冰箱里都有</view>
     </view>
 
     <view class="btn ghost" bindtap="onCopy">复制这桌菜单</view>

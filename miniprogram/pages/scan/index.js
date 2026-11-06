@@ -295,7 +295,15 @@ Page({
   onConfirm() {
     const picked = (this.data.items || []).filter(i => i.checked);
     if (!picked.length) {
-      wx.showToast({ title: '至少选一样', icon: 'none' });
+      // 全都不对：给三条出路，而不是卡死
+      wx.showActionSheet({
+        itemList: ['都不是，我手动添加', '重拍一张', '换一批结果'],
+        success: (res) => {
+          if (res.tapIndex === 0) this.onManualAdd();
+          else if (res.tapIndex === 1) this.onRetake();
+          else this.onRescan();
+        }
+      });
       return;
     }
     try {

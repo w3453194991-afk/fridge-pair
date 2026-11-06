@@ -200,7 +200,7 @@
       if (usedAt[d.id] === dayIdx) s -= 22;      // 同一天内不重复
       if (usedAt[d.id] === dayIdx - 1) s -= 12;  // 相邻两天也尽量不重复
       s += conditionPenalty(d, conds);
-      return s + Math.random() * 2;
+      return s + Math.random() * 9;
     }
 
     for (let i = 0; i < 7; i++) {

@@ -9,7 +9,7 @@
     <view class="htags">{{dish.tags}}</view>
   </view>
 
-  <view class="sec"><view class="bar2"></view><view class="t">食材用量</view></view>
+  <view class="sec"><view class="bar2"></view><view class="t">食材用量</view><view class="n">{{missingCount ? ('缺 ' + missingCount + ' 样') : '都齐了'}}</view></view>
   <view class="card">
     <view wx:for="{{states}}" wx:key="name" class="line row between">
       <text class="iname">{{item.name}}</text>
@@ -20,6 +20,19 @@
     </view>
     <view wx:if="{{dish.seasonings.length}}" class="season">
       <text wx:for="{{dish.seasonings}}" wx:key="*this" class="tg">{{item}}</text>
+    </view>
+  </view>
+
+  <view wx:if="{{missingCount}}" class="card buycard">
+    <view class="row between">
+      <view class="btitle">🛒 冰箱里缺这几样</view>
+      <view class="buybtn" bindtap="onBuyMissing">加入采购清单</view>
+    </view>
+    <view wx:for="{{missing}}" wx:key="name" class="buyitem">
+      <text class="bemo">{{item.emoji}}</text>
+      <text class="bname">{{item.name}}</text>
+      <text class="bneed">需 {{item.need}}</text>
+      <text class="bprice">约 ¥{{item.price}}</text>
     </view>
   </view>
 
