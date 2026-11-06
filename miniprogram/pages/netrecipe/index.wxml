@@ -1,0 +1,49 @@
+<view class="wrap">
+
+  <view class="searchbar">
+    <text class="mag">🔍</text>
+    <input class="sinput" placeholder="搜网上菜谱，如：松仁玉米" value="{{q}}" bindinput="onInput" confirm-type="search" bindconfirm="onSearchTap" />
+    <text class="go" bindtap="onSearchTap">搜索</text>
+  </view>
+
+  <view class="hint">搜到的菜谱可以一键加进你的菜谱库</view>
+
+  <view wx:if="{{loading}}" class="state">
+    <view class="spin"></view>
+    <view class="stxt">正在从网上取菜谱…</view>
+  </view>
+
+  <view wx:elif="{{err}}" class="card errcard">
+    <view class="etxt">{{err}}</view>
+    <view wx:if="{{needConfig}}" class="ehint">
+      需要在云开发控制台给云函数 <text class="mono">recipes</text> 配置环境变量：
+      <text class="mono">RECIPE_SOURCE</text>（juhe / tianapi / jisu）、
+      <text class="mono">RECIPE_KEY</text>
+    </view>
+    <view class="btn ghost mt" bindtap="onBack">返回</view>
+  </view>
+
+  <block wx:elif="{{items.length}}">
+    <view wx:for="{{items}}" wx:key="name" class="card item">
+      <view class="itop">
+        <view class="iemo">{{item.emoji}}</view>
+        <view class="imid">
+          <view class="iname">{{item.name}}</view>
+          <view class="iing">{{item.ingredients || '主料未标注'}}</view>
+          <view class="istep">{{item.stepCount}} 步 · {{item.firstStep}}</view>
+        </view>
+      </view>
+      <view class="ibtn">
+        <view class="btnmini ghost" data-i="{{index}}" bindtap="onOpen">查看</view>
+        <view class="btnmini primary {{addedIdx == index ? 'done' : ''}}" data-i="{{index}}" bindtap="onAdd">
+          {{addedIdx == index ? '已加入' : '加入我的菜谱'}}
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:else class="state">
+    <view class="stxt">输入菜名，搜索网上的做法</view>
+  </view>
+
+</view>

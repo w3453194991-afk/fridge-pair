@@ -15,7 +15,8 @@
     "pages/video/index",
     "pages/party/index",
     "pages/addfood/index",
-    "pages/settings/index"
+    "pages/settings/index",
+    "pages/netrecipe/index"
   ],
   "window": {
     "navigationBarTitleText": "冰箱对对碰",

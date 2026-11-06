@@ -1,0 +1,54 @@
+.searchbar {
+  display: flex; align-items: center;
+  background: #fff; border: 1rpx solid #E7EFEA; border-radius: 24rpx;
+  padding: 0 20rpx; height: 88rpx;
+}
+.mag { font-size: 28rpx; opacity: .55; margin-right: 12rpx; }
+.sinput { flex: 1; font-size: 27rpx; }
+.go {
+  font-size: 24rpx; font-weight: 800; color: #0E8F63;
+  background: #EAFBF2; border-radius: 16rpx; padding: 10rpx 22rpx; margin-left: 10rpx;
+}
+
+.hint { font-size: 21rpx; color: #9AA6A1; margin: 16rpx 4rpx 20rpx; }
+
+.state { margin-top: 120rpx; text-align: center; }
+.spin {
+  width: 56rpx; height: 56rpx; margin: 0 auto 20rpx;
+  border: 5rpx solid #DFF0E7; border-top-color: #12A576; border-radius: 50%;
+  animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.stxt { font-size: 24rpx; color: #8B9A96; }
+
+.errcard { background: #FFF6F6; border-color: #F6D6D6; }
+.etxt { font-size: 25rpx; color: #B91C1C; line-height: 1.7; word-break: break-all; }
+.ehint { font-size: 21rpx; color: #8A4B4B; line-height: 1.8; margin-top: 14rpx; }
+.mono { font-family: monospace; color: #B91C1C; }
+.mt { margin-top: 20rpx; }
+
+.item { padding: 22rpx 24rpx; }
+.itop { display: flex; }
+.iemo {
+  width: 84rpx; height: 84rpx; border-radius: 24rpx; font-size: 40rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: #F6FBF8; margin-right: 18rpx; flex: none;
+}
+.imid { flex: 1; min-width: 0; }
+.iname { font-size: 29rpx; font-weight: 800; }
+.iing { font-size: 21rpx; color: #7C8B87; margin-top: 6rpx; }
+.istep {
+  font-size: 20rpx; color: #9AA6A1; margin-top: 8rpx; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.ibtn { display: flex; margin-top: 18rpx; }
+.btnmini {
+  flex: 1; height: 72rpx; border-radius: 20rpx; margin-right: 14rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24rpx; font-weight: 800;
+}
+.btnmini:last-child { margin-right: 0; flex: 1.5; }
+.btnmini.ghost { color: #4E6B61; background: #F5FAF7; border: 1rpx solid #E7EFEA; }
+.btnmini.primary { color: #fff; background: linear-gradient(135deg, #2FD79E, #12A576); }
+.btnmini.primary.done { background: #B7C4BE; }

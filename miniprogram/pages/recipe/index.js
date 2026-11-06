@@ -245,6 +245,15 @@ Page({
     });
   },
 
+  onNetSearch() {
+    const q = (this.data.q || '').trim();
+    if (!q) {
+      wx.showToast({ title: '先输入菜名', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({ url: '/pages/netrecipe/index?q=' + encodeURIComponent(q) });
+  },
+
   onAdd() {
     wx.showModal({
       title: '添加菜谱',
@@ -254,15 +263,25 @@ Page({
         if (!res.confirm) return;
         const name = String(res.content || '').trim();
         if (!name) { wx.showToast({ title: '请输入菜名', icon: 'none' }); return; }
-        try {
-          const draft = E.generateRecipe(name);
-          S.addCustom(draft);
-          E.attachCustom([draft]);
-          wx.showToast({ title: '已加入：' + name, icon: 'none' });
-          this.setData({ tab: 'all' }, () => this.render());
-        } catch (e) {
-          wx.showToast({ title: '生成失败', icon: 'none' });
-        }
+        // 先问要不要从网上找真做法，避免直接套模板
+        wx.showActionSheet({
+          itemList: ['从网上找真做法', '用模板快速生成'],
+          success: (r) => {
+            if (r.tapIndex === 0) {
+              wx.navigateTo({ url: '/pages/netrecipe/index?q=' + encodeURIComponent(name) });
+              return;
+            }
+            try {
+              const draft = E.generateRecipe(name);
+              S.addCustom(draft);
+              E.attachCustom([draft]);
+              wx.showToast({ title: '已加入：' + name, icon: 'none' });
+              this.setData({ tab: 'all' }, () => this.render());
+            } catch (e) {
+              wx.showToast({ title: '生成失败', icon: 'none' });
+            }
+          }
+        });
       }
     });
   }

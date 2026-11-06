@@ -113,7 +113,12 @@
         </view>
       </view>
     </view>
-    <view wx:else class="empty"><view class="e">🔍</view><view>没找到相关菜谱</view></view>
+    <view wx:else class="empty">
+      <view class="e">🔍</view>
+      <view>没找到「{{q}}」</view>
+      <view class="muted">可以去网上找找看</view>
+      <view class="netbtn" bindtap="onNetSearch">🌐 从网上搜「{{q}}」</view>
+    </view>
   </block>
 
   <!-- 相生相克 -->

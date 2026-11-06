@@ -140,3 +140,9 @@
 
 .mealrow { margin: 0 0 10rpx; }
 .mealrow .chip { font-size: 22rpx; padding: 12rpx 22rpx; margin: 0 12rpx 12rpx 0; }
+
+.netbtn {
+  margin-top: 20rpx; font-size: 24rpx; font-weight: 800; color: #0E8F63;
+  background: #EAFBF2; border: 1rpx dashed #8FE0BE; border-radius: 20rpx;
+  padding: 16rpx 30rpx;
+}
