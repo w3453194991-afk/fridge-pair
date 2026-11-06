@@ -16,6 +16,17 @@ Page({
     this.timers = [];
     this.leaving = false;
 
+    // 没登录过 → 直接去登录页，不放开场动画
+    try {
+      S.load();
+      const logged = S.state && S.state.family && S.state.family.loggedIn;
+      if (!logged) {
+        this.leaving = true;
+        wx.redirectTo({ url: '/pages/login/index' });
+        return;
+      }
+    } catch (e) {}
+
     this.goto = () => {
       if (this.leaving) return;
       this.leaving = true;

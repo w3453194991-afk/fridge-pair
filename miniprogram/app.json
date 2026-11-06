@@ -1,8 +1,8 @@
 {
-  "entryPagePath": "pages/login/index",
+  "entryPagePath": "pages/splash/index",
   "pages": [
-    "pages/login/index",
     "pages/splash/index",
+    "pages/login/index",
     "pages/onboard/index",
     "pages/scan/index",
     "pages/fridge/index",
