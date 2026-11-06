@@ -26,6 +26,16 @@ const SOURCE = (process.env.RECIPE_SOURCE || '').toLowerCase();
 const KEY = process.env.RECIPE_KEY || '';
 const API_ID = process.env.RECIPE_API_ID || '';
 
+/* 把平台错误翻译成人话 */
+function juheHint(reason) {
+  const r = String(reason || '');
+  if (/KEY|密钥/i.test(r)) return '（AppKey 不对：去 聚合控制台 → 我的数据 → 菜谱查询 复制 AppKey，填到云函数 recipes 的 RECIPE_KEY，保存后重新部署）';
+  if (/次数|限制|超过/i.test(r)) return '（今天的免费次数用完了，明天再试，或在聚合后台升级套餐）';
+  if (/未开通|无权限|没有权限/i.test(r)) return '（这个接口还没申请：回聚合详情页点「申请数据」）';
+  if (/实名|认证/i.test(r)) return '（聚合账号需要先完成实名认证）';
+  return '';
+}
+
 function request(urlStr, method) {
   return new Promise((resolve, reject) => {
     const u = new URL(urlStr);
@@ -139,7 +149,7 @@ async function fetchJuhe(keyword) {
       if (r && (r.resultcode === '200' || r.error_code === 0 || (r.result && r.result.data))) break;
       // 返回了明确错误码，直接透出原因
       if (r && (r.error_code || r.resultcode)) {
-        throw new Error('聚合返回：' + (r.reason || r.reason_text || rawText));
+        throw new Error('聚合返回：' + (r.reason || r.reason_text || rawText) + juheHint(r.reason));
       }
       r = null;
     } catch (e) {
@@ -156,7 +166,7 @@ async function fetchJuhe(keyword) {
 
   const code = r.resultcode !== undefined ? Number(r.resultcode) : Number(r.error_code);
   if (code && code !== 200 && code !== 0) {
-    throw new Error('聚合接口错误：' + (r.reason || r.reason_text || rawText));
+    throw new Error('聚合接口错误：' + (r.reason || r.reason_text || rawText) + juheHint(r.reason));
   }
 
   const list = (r.result && r.result.data) || [];
