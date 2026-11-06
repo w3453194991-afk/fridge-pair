@@ -1111,6 +1111,27 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     return NAME_ALIAS[s] || s;
   }
 
+  /* 运行期登记一个新食材（用户写了库里没有的东西时用） */
+  function registerFood(name, opts) {
+    const nm = String(name || '').trim();
+    if (!nm) return null;
+    const hit = (D.FOOD_DB || []).filter(f => f.name === nm)[0];
+    if (hit) return hit;
+    const o = opts || {};
+    const food = {
+      name: nm,
+      emoji: o.emoji || '🍽',
+      cat: o.cat || '其他',
+      unit: o.unit || '份',
+      shelf: o.shelf || 7,
+      price: o.price || 3,
+      storage: o.storage || '冷藏',
+      custom: true
+    };
+    D.FOOD_DB.push(food);
+    return food;
+  }
+
   // 生成一份菜谱草稿
   function generateRecipe(name, mainName) {
     const nm = String(name || '').trim();
@@ -1238,6 +1259,6 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     NUT_KEYS, dishNutrition, dishNutritionPerServing, dailyTarget, dayNutrition, nutritionBars,
     mealNutrition, perMealTarget,
     allergensOf, dishAllowed, conditionPenalty, substitutesFor, zones, assistant, weeklyReport,
-    parseCommand, generateRecipe, guessMain, detectMethod, attachCustom, normalizeFoodName
+    parseCommand, generateRecipe, guessMain, detectMethod, attachCustom, normalizeFoodName, registerFood
   };
 })(window);

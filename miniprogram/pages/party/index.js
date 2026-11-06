@@ -89,15 +89,15 @@ Page({
       );
       if (exists || nm.length < 2) return;
       try {
-        const isFood = (D.FOOD_DB || []).some(f => f.name === nm);
+        // 库里没有这句食材 → 先登记（否则模板会退回五花肉这类默认主料）
+        if (E.registerFood) E.registerFood(nm);
         const meta = E.foodMeta(nm);
         let dishName = nm;
-        if (isFood) {
-          if (meta.cat === '蔬菜' || meta.cat === '豆制品') dishName = '清炒' + nm;
-          else if (meta.cat === '肉类' || meta.cat === '水产') dishName = '家常' + nm;
-          else dishName = nm + '小食';
-        }
-        const draft = E.generateRecipe(dishName, isFood ? nm : undefined);
+        if (meta.cat === '蔬菜' || meta.cat === '豆制品') dishName = '清炒' + nm;
+        else if (meta.cat === '肉类' || meta.cat === '水产') dishName = '家常' + nm;
+        else dishName = nm;
+
+        const draft = E.generateRecipe(dishName, nm);
         if (!draft || !draft.name) return;
         if (D.DISHES.some(d => d.name === draft.name)) return;
         S.addCustom(draft);
