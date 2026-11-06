@@ -95,7 +95,10 @@ exports.main = async (event) => {
   const secret = process.env.BAIDU_API_SECRET || '';
   let image = String((event && event.image) || '').replace(/^data:image\/\w+;base64,/, '');
 
-  if (!image) return { ok: false, error: '缺少 image', items: [] };
+  // 自检模式：只验密钥，不需要图片
+  const isCheck = !!(event && event.action === 'check');
+
+  if (!image && !isCheck) return { ok: false, error: '缺少 image', items: [] };
 
   // 没配密钥就直接说清楚，不要返回假数据
   if (!key || !secret) {
@@ -107,6 +110,36 @@ exports.main = async (event) => {
       hasSecret: !!secret,
       items: []
     };
+  }
+
+  /* ---------- 自检：只换 token ---------- */
+  if (isCheck) {
+    const out = {
+      ok: false,
+      keyLen: key.length,
+      secretLen: secret.length,
+      keyHead: key.slice(0, 4),
+      keyTail: key.slice(-4)
+    };
+    try {
+      const t = await getToken(key, secret);
+      out.ok = true;
+      out.msg = '密钥有效，已成功获取 token';
+      out.tokenLen = t.length;
+      return out;
+    } catch (e) {
+      out.error = e.message;
+      // 试着交换 key / secret，判断是不是填反了
+      try {
+        await getToken(secret, key);
+        out.swapped = true;
+        out.hint = 'API Key 和 Secret Key 填反了（交换后可用）';
+      } catch (e2) {
+        out.swapped = false;
+        out.hint = '两个值交换后也不行：请重新从百度控制台完整复制（用右侧复制按钮，别手动选）';
+      }
+      return out;
+    }
   }
 
   try {
