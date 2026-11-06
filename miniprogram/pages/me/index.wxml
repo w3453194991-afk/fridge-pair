@@ -30,14 +30,14 @@
     <view wx:else class="muted">还没填家庭成员</view>
   </view>
 
-  <view class="sec"><view class="bar2"></view><view class="t">健康档案</view></view>
+  <view class="sec"><view class="bar2"></view><view class="t">饮食偏好</view></view>
   <view class="card" bindtap="onHealth">
     <view class="line row between">
       <text>过敏原</text>
       <text class="muted">{{avoidText}}</text>
     </view>
     <view class="line row between">
-      <text>疾病史</text>
+      <text>饮食注意</text>
       <text class="muted">{{condText}}</text>
     </view>
   </view>

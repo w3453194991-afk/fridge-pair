@@ -1,4 +1,5 @@
 const G = require('../../lib/shim.js');
+const LAB = require('../../lib/labels.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 
 Page({
@@ -35,7 +36,7 @@ Page({
         age: m.age + ' 岁'
       })),
       avoidText: avoid.length ? avoid.join('、') : '未设置',
-      condText: conds.length ? conds.join('、') : '未设置',
+      condText: conds.length ? LAB.condText(conds) : '未设置',
       cooked: (st.stats && st.stats.cooked) || 0,
       saved: (st.stats && Math.round(st.stats.saved)) || 0,
       health: health,
@@ -131,8 +132,8 @@ Page({
 
   onHealth() {
     wx.showModal({
-      title: '健康档案',
-      content: '过敏原：' + this.data.avoidText + '\n疾病史：' + this.data.condText,
+      title: '饮食偏好',
+      content: '过敏原：' + this.data.avoidText + '\n饮食注意：' + this.data.condText,
       showCancel: false
     });
   },

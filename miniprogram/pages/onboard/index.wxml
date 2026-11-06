@@ -68,10 +68,10 @@
     <view class="note">没有就点「下一步」，之后也能在「我的」里改</view>
   </block>
 
-  <!-- 第 3 步：疾病史 -->
+  <!-- 第 3 步：饮食注意 -->
   <block wx:if="{{step == 2}}">
-    <view class="title">有需要注意的健康情况吗？</view>
-    <view class="sub">这里只是几个常见例子，不是全部</view>
+    <view class="title">有什么饮食上要注意的吗？</view>
+    <view class="sub">选几个常见的，也可以在下面自己加</view>
     <view class="condlist">
       <view
         wx:for="{{condList}}"
@@ -89,10 +89,10 @@
       </view>
     </view>
 
-    <view class="title2">还有其他情况？（可不填）</view>
+    <view class="title2">还有别的吗？（可不填）</view>
     <input
       class="customcond"
-      placeholder="例如：骨质疏松、贫血、胆囊炎（多个用逗号隔开）"
+      placeholder="例如：不吃辣、少盐、忌生冷（多个用逗号隔开）"
       placeholder-class="ph2"
       value="{{customCond}}"
       bindinput="onCustomCond"

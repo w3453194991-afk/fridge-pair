@@ -1,4 +1,5 @@
 const G = require('../../lib/shim.js');
+const LAB = require('../../lib/labels.js');
 const PRICE = require('../../lib/price.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 
@@ -124,7 +125,7 @@ Page({
       famName: fam.name || '我',
       memberChips: memberChips,
       avoidText: (fam.avoid || []).length ? fam.avoid.join(' · ') : '',
-      condText: (fam.conditions || []).length ? fam.conditions.join(' · ') : '',
+      condText: (fam.conditions || []).length ? LAB.condText(fam.conditions).split('、').join(' · ') : '',
       systems: systems,
       sysName: sys ? sys.name : '中式',
       sysDesc: sys ? (sys.desc || '') : '',
@@ -147,8 +148,8 @@ Page({
 
   onHealth() {
     wx.showModal({
-      title: '健康档案',
-      content: '过敏原：' + (this.data.avoidText || '未设置') + '\n疾病史：' + (this.data.condText || '未设置') + '\n\n在「我的」里可以修改',
+      title: '饮食偏好',
+      content: '过敏原：' + (this.data.avoidText || '未设置') + '\n饮食注意：' + (this.data.condText || '未设置') + '\n\n在「我的」里可以修改',
       showCancel: false
     });
   },

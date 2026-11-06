@@ -15,8 +15,8 @@
       <view wx:for="{{memberChips}}" wx:key="text" class="mchip">{{item.icon}} {{item.text}}</view>
     </view>
     <view wx:if="{{avoidText}}" class="warnline">过敏原：{{avoidText}}</view>
-    <view wx:if="{{condText}}" class="warnline">疾病史：{{condText}}</view>
-    <view class="healthbtn" bindtap="onHealth">🩺 健康档案（过敏原 / 疾病史）</view>
+    <view wx:if="{{condText}}" class="warnline">饮食注意：{{condText}}</view>
+    <view class="healthbtn" bindtap="onHealth">🍽 饮食偏好（忌口 / 饮食注意）</view>
   </view>
 
   <!-- 餐饮体系 -->

@@ -1,4 +1,5 @@
 const G = require('../../lib/shim.js');
+const LAB = require('../../lib/labels.js');
 const D = G.DD_DATA, S = G.DD_STORE;
 
 const ROLES = ['成人', '老人', '幼儿'];
@@ -45,9 +46,9 @@ Page({
       allergens: (D.ALLERGENS || []).map(a => ({ name: a, on: avoid.indexOf(a) >= 0 })),
       condList: (D.CONDITIONS || []).slice(0, 4).map(c => ({
         key: c.key,
-        icon: c.emoji || '🩺',
-        name: c.key,
-        note: c.note || '',
+        icon: LAB.condIcon(c.key),
+        name: LAB.condLabel(c.key),      // 界面显示饮食需求，内部仍存原 key
+        note: LAB.condHint(c.key) || c.note || '',
         on: conds.indexOf(c.key) >= 0
       })),
       systems: (D.MEAL_SYSTEMS || []).map(s => ({
@@ -109,7 +110,7 @@ Page({
     });
   },
 
-  /* ---------- 第 3 步：疾病史 + 体系 ---------- */
+  /* ---------- 第 3 步：饮食注意 + 体系 ---------- */
   toggleCond(e) {
     const i = Number(e.currentTarget.dataset.i);
     const list = this.data.condList.slice();
