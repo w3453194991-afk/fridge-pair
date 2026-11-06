@@ -363,7 +363,8 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       }
       return s;
     }
-    wishNames.forEach(function (nm) {
+    const wishList = wishNames.map(normalizeFoodName);
+    wishList.forEach(function (nm) {
       const scored = D.DISHES
         .map(d => ({ d: d, s: wishScore(d, nm) }))
         .filter(x => x.s > 0)
@@ -1095,6 +1096,21 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     return 2;
   }
 
+  /* 常见叫法归一：西红柿→番茄 等 */
+  const NAME_ALIAS = {
+    '西红柿': '番茄', '洋柿子': '番茄', '圣女果': '番茄',
+    '马铃薯': '土豆', '洋芋': '土豆',
+    '西蓝花': '西兰花',
+    '青瓜': '黄瓜',
+    '包菜': '卷心菜', '圆白菜': '卷心菜', '洋白菜': '卷心菜',
+    '地瓜': '红薯', '白薯': '红薯',
+    '鸡子': '鸡蛋', '洋鸡蛋': '鸡蛋'
+  };
+  function normalizeFoodName(n) {
+    const s = String(n || '').trim();
+    return NAME_ALIAS[s] || s;
+  }
+
   // 生成一份菜谱草稿
   function generateRecipe(name, mainName) {
     const nm = String(name || '').trim();
@@ -1222,6 +1238,6 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     NUT_KEYS, dishNutrition, dishNutritionPerServing, dailyTarget, dayNutrition, nutritionBars,
     mealNutrition, perMealTarget,
     allergensOf, dishAllowed, conditionPenalty, substitutesFor, zones, assistant, weeklyReport,
-    parseCommand, generateRecipe, guessMain, detectMethod, attachCustom
+    parseCommand, generateRecipe, guessMain, detectMethod, attachCustom, normalizeFoodName
   };
 })(window);
