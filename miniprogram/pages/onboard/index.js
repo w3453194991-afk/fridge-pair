@@ -189,6 +189,7 @@ Page({
         S.state.foods = S.state.foods || [];
       }
       S.save();
+      try { require('../../lib/session.js').save(S.state.family, S.state.family.openid || ''); } catch (e) {}
     } catch (e) {
       wx.showModal({ title: '保存失败', content: String((e && e.message) || e), showCancel: false });
       return;

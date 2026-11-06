@@ -1,6 +1,7 @@
 const G = require('../../lib/shim.js');
 const S = G.DD_STORE;
 const SYNC = require('../../lib/sync.js');
+const SESSION = require('../../lib/session.js');
 let CFG = {};
 try { CFG = require('../../config.js') || {}; } catch (e) {}
 
@@ -105,6 +106,10 @@ Page({
 
       const f = S.state.family || {};
       const isNew = !f.onboarded;
+
+      // 额外存一份轻量会话，防止主存储被清后回登录页
+      try { SESSION.save(S.state.family, S.state.family.openid || ''); } catch (e) {}
+
       wx.showToast({ title: '登录成功', icon: 'success' });
       setTimeout(() => {
         // 只有第一次登录（没走过家庭设置）才进引导页

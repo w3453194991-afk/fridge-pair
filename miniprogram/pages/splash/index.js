@@ -1,4 +1,5 @@
 const G = require('../../lib/shim.js');
+const SESSION = require('../../lib/session.js');
 const D = G.DD_DATA, E = G.DD_ENGINE, S = G.DD_STORE;
 
 Page({
@@ -19,6 +20,24 @@ Page({
     // 没登录过 → 直接去登录页，不放开场动画
     try {
       S.load();
+
+      // 主存储丢了登录态时，用轻量会话兜底恢复，避免每次都回登录页
+      if (!(S.state.family && S.state.family.loggedIn)) {
+        const ses = SESSION.read();
+        if (ses) {
+          try {
+            if (ses.fam) {
+              S.state.family = Object.assign({}, S.state.family || {}, ses.fam, { loggedIn: true });
+            } else {
+              S.state.family.loggedIn = true;
+            }
+            if (ses.openid) S.state.family.openid = ses.openid;
+            S.save();
+            console.log('[session] 已用会话恢复登录态');
+          } catch (e) {}
+        }
+      }
+
       const logged = S.state && S.state.family && S.state.family.loggedIn;
       if (!logged) {
         this.leaving = true;

@@ -173,6 +173,7 @@ Page({
       success: (res) => {
         if (!res.confirm) return;
         try { S.logout(); S.save(); } catch (e) {}
+        try { require('../../lib/session.js').clear(); } catch (e) {}
         wx.reLaunch({ url: '/pages/login/index' });
       }
     });
