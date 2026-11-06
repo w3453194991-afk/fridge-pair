@@ -1074,9 +1074,10 @@
 
   function guessMain(name) {
     const n = String(name || '');
-    for (const k in NAME_FRAG) if (n.indexOf(k) >= 0) return NAME_FRAG[k];
+    // 先按食材库里的具体名字匹配（口蘑/金针菇 这类要优先于「菇→香菇」的模糊规则）
     const names = D.FOOD_DB.map(f => f.name).sort((a, b) => b.length - a.length);
     for (const x of names) if (n.indexOf(x) >= 0) return x;
+    for (const k in NAME_FRAG) if (n.indexOf(k) >= 0) return NAME_FRAG[k];
     return '';
   }
 

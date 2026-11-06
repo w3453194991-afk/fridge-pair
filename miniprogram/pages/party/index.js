@@ -74,6 +74,29 @@ Page({
       return;
     }
     const budget = parseFloat(this.data.budget) || 0;
+
+    // 库里没有的点名菜：自动生成一份菜谱并加入（这样能吃到"菜单外"的菜）
+    const created = [];
+    const wishNames = String(this.data.wish || '')
+      .split(/[、,，;；\s+／/]+/).map(s => s.trim()).filter(Boolean).slice(0, 6);
+    wishNames.forEach(nm => {
+      const exists = D.DISHES.some(d =>
+        d.name.indexOf(nm) >= 0 || nm.indexOf(d.name) >= 0 ||
+        (d.tags || []).some(t => t.indexOf(nm) >= 0)
+      );
+      if (exists || nm.length < 2) return;
+      try {
+        const draft = E.generateRecipe(nm);
+        if (!draft || !draft.name) return;
+        if (D.DISHES.some(d => d.name === draft.name)) return;
+        S.addCustom(draft);
+        E.attachCustom([draft]);
+        created.push(draft.name);
+      } catch (e) {
+        console.warn('[party] 自动生成菜谱失败', nm, e && e.message);
+      }
+    });
+
     let p = null;
     try {
       p = E.partyPlan(S.state, {
@@ -114,8 +137,9 @@ Page({
     const wishHit = (p.wishHit || []).join('、');
     const wishMiss = (p.wishMiss || []).join('、');
     let wishText = '';
-    if (wishHit) wishText = '已排进菜单：' + wishHit;
-    if (wishMiss) wishText += (wishText ? '；' : '') + '菜谱库里没有：' + wishMiss + '（可以点「＋ 添加菜谱」自己建）';
+    if (created.length) wishText = '已为你想吃的菜新建菜谱：' + created.join('、');
+    if (wishHit) wishText += (wishText ? '；' : '') + '已排进菜单：' + wishHit;
+    if (wishMiss) wishText += (wishText ? '；' : '') + '菜谱库里没有：' + wishMiss;
 
     this.setData({
       result: true,
