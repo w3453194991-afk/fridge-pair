@@ -80,10 +80,11 @@
 
     <view wx:if="{{!comments.length}}" class="cmempty">还没有评论，来说两句</view>
 
-    <view wx:for="{{comments}}" wx:key="id" class="cmitem">
+    <view wx:for="{{comments}}" wx:key="id" class="cmitem {{item.pending ? 'pendingitem' : ''}}">
       <view class="cmhead">
         <text class="cmnick">{{item.nick}}</text>
         <text class="cmtime">{{item.atText}}</text>
+        <text wx:if="{{item.pending}}" class="pendsign">图片审核中，仅自己可见</text>
       </view>
       <view wx:if="{{item.text}}" class="cmtext">{{item.text}}</view>
       <view wx:if="{{item.images.length}}" class="cmimgs">

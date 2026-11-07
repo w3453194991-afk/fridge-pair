@@ -1,7 +1,8 @@
 <view class="wrap">
 
   <view class="tabs">
-    <view class="{{tab == 'pending' ? 'tab on' : 'tab'}}" data-tab="pending" bindtap="onTab">待审核</view>
+    <view class="{{tab == 'pending' ? 'tab on' : 'tab'}}" data-tab="pending" bindtap="onTab">视频待审</view>
+    <view class="{{tab == 'images' ? 'tab on' : 'tab'}}" data-tab="images" bindtap="onTab">评论图片</view>
     <view class="{{tab == 'all' ? 'tab on' : 'tab'}}" data-tab="all" bindtap="onTab">全部视频</view>
   </view>
 
@@ -23,8 +24,17 @@
         <view class="rstat {{item.status}}">{{item.statusText}}</view>
       </view>
       <view class="rmeta">{{item.dishName}} · {{item.atText}}</view>
+
+      <view wx:if="{{item.isImage && item.images.length}}" class="cmshots">
+        <image
+          wx:for="{{item.images}}" wx:for-item="im" wx:for-index="ii" wx:key="*this"
+          class="cmshot" src="{{im}}" mode="aspectFill"
+          data-id="{{item.id}}" data-i="{{ii}}" bindtap="onPreviewCmImg"
+        />
+      </view>
+
       <view class="rbtns">
-        <view class="btnmini ghost" data-i="{{index}}" bindtap="onPlay">预览</view>
+        <view wx:if="{{!item.isImage}}" class="btnmini ghost" data-i="{{index}}" bindtap="onPlay">预览</view>
         <view wx:if="{{item.status == 'pending' || item.status == 'blocked'}}" class="btnmini primary" data-i="{{index}}" bindtap="onApprove">通过</view>
         <view wx:if="{{item.status == 'pending' || item.status == 'ok'}}" class="btnmini danger" data-i="{{index}}" bindtap="onBlock">驳回</view>
       </view>
@@ -33,7 +43,7 @@
 
   <view wx:else class="state">
     <view class="e">✅</view>
-    <view class="stxt">{{tab == 'pending' ? '没有待审核的视频' : '还没有任何视频'}}</view>
+    <view class="stxt">{{tab == 'pending' ? '没有待审核的视频' : (tab == 'images' ? '没有待审核的评论图片' : '还没有任何视频')}}</view>
   </view>
 
   <view class="note">只有 ADMIN_OPENIDS 里的账号能进这个页面</view>

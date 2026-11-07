@@ -20,6 +20,7 @@ Page({
   },
 
   load(tab) {
+    if (tab === 'images') return this.loadImages();
     if (!wx.cloud) {
       this.setData({ loading: false, err: '未配置云开发' });
       return;
@@ -50,6 +51,45 @@ Page({
         self.setData({ loading: false, err: '调用失败：' + ((e && e.errMsg) || '') });
       }
     });
+  },
+
+  /* 评论图片审核 */
+  loadImages() {
+    if (!wx.cloud) { this.setData({ loading: false, err: '未配置云开发' }); return; }
+    const self = this;
+    this.setData({ loading: true, err: '' });
+    wx.cloud.callFunction({
+      name: 'comments',
+      data: { action: 'pendingImages' },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (!d.ok) {
+          self.setData({ loading: false, err: d.error || '读取失败', rows: [] });
+          return;
+        }
+        const rows = (d.items || []).map(x => ({
+          id: x.id,
+          title: x.text || '（仅图片）',
+          dishName: x.nick,
+          images: x.images || [],
+          status: x.status,
+          statusText: '待审核',
+          atText: self.fmtTime(x.at),
+          isImage: true
+        }));
+        self.setData({ loading: false, rows: rows });
+      },
+      fail: (e) => {
+        self.setData({ loading: false, err: '调用失败：' + ((e && e.errMsg) || '') });
+      }
+    });
+  },
+
+  onPreviewCmImg(e) {
+    const { id, i } = e.currentTarget.dataset;
+    const row = this.data.rows.filter(r => r.id === id)[0];
+    if (!row) return;
+    wx.previewImage({ current: row.images[i], urls: row.images });
   },
 
   fmtTime(t) {
@@ -94,8 +134,10 @@ Page({
     const i = Number(e.currentTarget.dataset.i);
     const it = this.data.rows[i];
     if (!it) return;
+    // 评论图片走 comments 云函数
+    const fn = it.isImage ? 'comments' : 'videos';
     wx.cloud.callFunction({
-      name: 'videos',
+      name: fn,
       data: { action: action, id: it.id },
       success: (res) => {
         const d = (res && res.result) || {};

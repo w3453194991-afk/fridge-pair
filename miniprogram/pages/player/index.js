@@ -314,7 +314,10 @@ Page({
           wx.showToast({ title: d.error || '发送失败', icon: 'none' });
           return;
         }
-        wx.showToast({ title: '已发送', icon: 'none' });
+        wx.showToast({
+          title: d.status === 'pending' ? '已提交，图片审核中' : '已发送',
+          icon: 'none'
+        });
         if (done) done();
         this.loadComments();
       },
@@ -354,7 +357,8 @@ Page({
             images: c.images || [],
             atText: self.fmtTime(c.at),
             replies: rs,
-            mine: c.mine
+            mine: c.mine,
+            pending: c.status === 'pending'
           };
         }).reverse();
 

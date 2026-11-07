@@ -145,3 +145,14 @@ page { background: #0E1A16; }
   font-size: 22rpx; font-weight: 800; color: #0E1A16;
   background: #3FDCA4; border-radius: 14rpx; padding: 12rpx 24rpx;
 }
+
+.cmshots { display: flex; flex-wrap: wrap; margin-top: 14rpx; }
+.cmshot {
+  width: 160rpx; height: 160rpx; border-radius: 16rpx;
+  margin: 0 12rpx 12rpx 0; background: #F3F8F5;
+}
+.pendingitem { opacity: .78; }
+.pendsign {
+  font-size: 18rpx; color: #B45309; background: #FFF3D6;
+  border-radius: 8rpx; padding: 3rpx 10rpx; margin-left: 10rpx;
+}

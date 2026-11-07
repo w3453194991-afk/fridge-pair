@@ -40,3 +40,14 @@
 .btnmini.danger { color: #fff; background: linear-gradient(135deg, #FF8080, #E53935); }
 
 .note { margin-top: 30rpx; text-align: center; font-size: 19rpx; color: #B0BCB7; }
+
+.cmshots { display: flex; flex-wrap: wrap; margin-top: 14rpx; }
+.cmshot {
+  width: 160rpx; height: 160rpx; border-radius: 16rpx;
+  margin: 0 12rpx 12rpx 0; background: #F3F8F5;
+}
+.pendingitem { opacity: .78; }
+.pendsign {
+  font-size: 18rpx; color: #B45309; background: #FFF3D6;
+  border-radius: 8rpx; padding: 3rpx 10rpx; margin-left: 10rpx;
+}
