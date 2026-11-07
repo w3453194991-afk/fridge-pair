@@ -25,11 +25,17 @@
   </view>
 
   <block wx:elif="{{items.length}}">
-    <view wx:for="{{items}}" wx:key="name" class="card item">
+    <view wx:if="{{tipText}}" class="tipline">⚠️ {{tipText}}</view>
+    <view wx:if="{{exactCount}}" class="okline">✅ 找到 {{exactCount}} 道名称吻合的</view>
+
+    <view wx:for="{{items}}" wx:key="name" class="card item {{item.isRef ? 'ref' : ''}}">
       <view class="itop">
         <view class="iemo">{{item.emoji}}</view>
         <view class="imid">
-          <view class="iname">{{item.name}}</view>
+          <view class="iname">
+            {{item.name}}
+            <text class="reltag {{item.isRef ? 'ref' : 'ok'}}">{{item.relText}}</text>
+          </view>
           <view class="iing">{{item.ingredients || '主料未标注'}}</view>
           <view class="istep">{{item.stepCount}} 步 · {{item.firstStep}}</view>
         </view>
@@ -40,6 +46,11 @@
           {{addedIdx == index ? '已加入' : '加入我的菜谱'}}
         </view>
       </view>
+    </view>
+
+    <view wx:if="{{!exactCount}}" class="fallback">
+      <view class="fbtxt">上面都不是「{{q}}」，要不要直接生成一份？</view>
+      <view class="btn primary mt" bindtap="onLocalGen">按菜名生成「{{q}}」</view>
     </view>
   </block>
 

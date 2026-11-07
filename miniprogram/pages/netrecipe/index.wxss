@@ -126,3 +126,26 @@
 .sheetfoot {
   display: flex; padding: 16rpx 26rpx 20rpx; border-top: 1rpx solid #F1F6F3;
 }
+
+.tipline {
+  font-size: 22rpx; line-height: 1.7; color: #B45309;
+  background: #FFF7E8; border: 1rpx solid #FBE3CF;
+  border-radius: 16rpx; padding: 14rpx 18rpx; margin-bottom: 16rpx;
+}
+.okline {
+  font-size: 22rpx; font-weight: 800; color: #0E8F63;
+  background: #EAFBF2; border: 1rpx solid #CBEFE0;
+  border-radius: 16rpx; padding: 12rpx 18rpx; margin-bottom: 16rpx;
+}
+.item.ref { opacity: .72; }
+.reltag {
+  font-size: 18rpx; font-weight: 800; border-radius: 8rpx;
+  padding: 3rpx 10rpx; margin-left: 10rpx; vertical-align: middle;
+}
+.reltag.ok { color: #0E8F63; background: #E4F8EE; }
+.reltag.ref { color: #9A6B3C; background: #FDF1E2; }
+.fallback {
+  margin: 10rpx 0 30rpx; padding: 22rpx;
+  background: #F7FCF9; border: 1rpx dashed #BFE7D5; border-radius: 20rpx;
+}
+.fbtxt { font-size: 23rpx; color: #4E6B61; line-height: 1.6; }

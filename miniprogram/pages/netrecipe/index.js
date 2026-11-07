@@ -51,15 +51,48 @@ Page({
           });
           return;
         }
-        const items = (d.items || []).map(x => ({
-          name: x.name,
-          emoji: x.emoji || '🍽',
-          ingredients: (x.ingredients || []).map(i => i.name).join(' + '),
-          stepCount: (x.steps || []).length,
-          firstStep: (x.steps && x.steps[0] && x.steps[0].text) || '',
-          raw: x
-        }));
-        self.setData({ loading: false, items: items, err: items.length ? '' : '没有找到相关菜谱' });
+
+        /* 只把「真跟这道菜有关」的排在前面，其余降级为参考，避免搜不到就塞别的菜 */
+        const rel = (name) => {
+          const a = String(name || '');
+          if (!a) return 0;
+          if (a === kw) return 3;
+          if (a.indexOf(kw) >= 0 || kw.indexOf(a) >= 0) return 2;
+          let hit = 0;
+          for (const ch of kw) if (a.indexOf(ch) >= 0) hit++;
+          const ratio = hit / kw.length;
+          if (ratio >= 0.7) return 1;
+          return 0;
+        };
+        const label = { 3: '完全一致', 2: '名称吻合', 1: '字面相近', 0: '仅作参考' };
+
+        const items = (d.items || []).map(x => {
+          const s = rel(x.name);
+          return {
+            name: x.name,
+            emoji: x.emoji || '🍽',
+            ingredients: (x.ingredients || []).map(i => i.name).join(' + '),
+            stepCount: (x.steps || []).length,
+            firstStep: (x.steps && x.steps[0] && x.steps[0].text) || '',
+            score: s,
+            relText: label[s],
+            isRef: s === 0,
+            raw: x
+          };
+        }).sort((a, b) => b.score - a.score);
+
+        const exact = items.filter(x => x.score >= 2).length;
+        let tip = '';
+        if (!items.length) tip = '网上也没有这道菜的做法';
+        else if (!exact) tip = '没有找到「' + kw + '」的准确做法，下面这些只是相关参考，别当成本菜谱';
+
+        self.setData({
+          loading: false,
+          items: items,
+          exactCount: exact,
+          tipText: tip,
+          err: items.length ? '' : '没有找到相关菜谱'
+        });
       },
       fail: (err) => {
         self.setData({ loading: false, err: '调用失败：' + ((err && err.errMsg) || '') });
