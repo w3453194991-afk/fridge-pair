@@ -17,6 +17,7 @@ Page({
     steps: [],
     can: false,
     hasVideo: false,
+    sharedCount: 0,
 
     /* 做菜三步 */
     cookStep: 'idle',   // idle / photo / scan / result
@@ -71,6 +72,7 @@ Page({
       can: states.every(s => s.ok)
     });
     this.dish = d;
+    this.loadSharedCount();
   },
 
   /* 缺的料一次加进采购清单 */
@@ -249,9 +251,38 @@ Page({
               S.setDishVideo(d.id, r.fileID);
               const cur = this.data.dish;
               cur.videos = [r.fileID];
-              this.setData({ dish: cur });
+              this.setData({ dish: cur, hasVideo: true });
             } catch (e) {}
-            wx.showToast({ title: '已添加视频', icon: 'success' });
+
+            // 问一句：只自己看，还是发到共享库给别人看
+            wx.showModal({
+              title: '视频已上传',
+              content: '要不要发布到共享视频库？发布后其他用户也能看到这道菜的做法。',
+              confirmText: '发布共享',
+              cancelText: '只自己看',
+              success: (m) => {
+                if (!m.confirm) {
+                  wx.showToast({ title: '只保存在自己账号', icon: 'none' });
+                  return;
+                }
+                wx.cloud.callFunction({
+                  name: 'videos',
+                  data: {
+                    action: 'publish',
+                    dishId: d.id,
+                    dishName: d.name,
+                    title: d.name + ' 的做法',
+                    fileID: r.fileID
+                  },
+                  success: (res) => {
+                    const out = (res && res.result) || {};
+                    if (out.ok) wx.showToast({ title: '已发布到共享库', icon: 'success' });
+                    else wx.showToast({ title: out.error || '发布失败', icon: 'none' });
+                  },
+                  fail: () => wx.showToast({ title: '发布失败', icon: 'none' })
+                });
+              }
+            });
           },
           fail: (err) => {
             wx.hideLoading();
@@ -265,6 +296,28 @@ Page({
   /* 站内直接拉网上的图文做法，不用跳出小程序 */
   onWebRecipe() {
     wx.navigateTo({ url: '/pages/netrecipe/index?q=' + encodeURIComponent(this.data.dish.name) });
+  },
+
+  /* 查共享视频库有没有这道菜的视频 */
+  loadSharedCount() {
+    const d = this.data.dish;
+    if (!d || !wx.cloud) return;
+    let cfg = {};
+    try { cfg = require('../../config.js') || {}; } catch (e) {}
+    if (!cfg.CLOUD_ENV) return;
+    wx.cloud.callFunction({
+      name: 'videos',
+      data: { action: 'list', dishId: d.id },
+      success: (res) => {
+        const out = (res && res.result) || {};
+        if (!out.ok) return;
+        const n = (out.items || []).length;
+        this.setData({
+          sharedCount: n,
+          hasVideo: this.data.hasVideo || n > 0
+        });
+      }
+    });
   },
 
   /* 删除自定义/网上菜谱 */

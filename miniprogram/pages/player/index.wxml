@@ -3,6 +3,7 @@
   <view class="head">
     <view class="hemo">{{dish.emoji || '🎬'}}</view>
     <view class="hname">{{dish.name || '做法视频'}}</view>
+    <view wx:if="{{mine}}" class="mytag">我的</view>
   </view>
 
   <view wx:if="{{src}}" class="playerbox">
@@ -25,11 +26,29 @@
 
   <view wx:elif="{{!loading}}" class="state">
     <view class="e">📹</view>
-    <view class="stxt">这道菜还没有视频</view>
-    <view class="shint">回到菜品详情，点「＋ 添加做法视频」录一段或从相册选一段，会存在你自己的云存储里，只有你能看。</view>
+    <view class="stxt">共享库里还没有这道菜的视频</view>
+    <view class="shint">回到菜品详情，点「📹 添加做法视频」，选「发布到共享库」就能让所有人看到。</view>
     <view class="btn mt" bindtap="onBack">返回</view>
   </view>
 
-  <view class="note">视频在小程序内直接播放，不需要跳转任何 App</view>
+  <!-- 共享库列表 -->
+  <view wx:if="{{list.length}}" class="plist">
+    <view class="ptitle">共享做法视频 · {{list.length}} 个</view>
+    <view
+      wx:for="{{list}}" wx:key="id"
+      class="pitem {{curIdx == index ? 'on' : ''}}"
+      data-i="{{index}}" bindtap="onPick"
+    >
+      <view class="pthumb">🎬</view>
+      <view class="pmid">
+        <view class="pname">{{item.title}}</view>
+        <view class="pmeta">{{item.atText}}{{item.mine ? ' · 我发布的' : ''}}</view>
+      </view>
+      <view wx:if="{{item.mine}}" class="pdel" data-i="{{index}}" catchtap="onRemove">删除</view>
+      <view wx:else class="pplay">▶</view>
+    </view>
+  </view>
+
+  <view class="note">共享视频由用户上传，仅供参考</view>
 
 </view>
