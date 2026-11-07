@@ -167,12 +167,16 @@
     /* 给某道菜挂一个做法视频（存云存储 fileID 或 https 链接） */
     setDishVideo: function (id, fileID) {
       if (!id || !fileID) return;
+      if (!this.state.videos) this.state.videos = {};
+      this.state.videos[id] = [fileID];      // 内置菜也要存下来，否则重启就没了
+
       const d = D.DISHES.filter(x => x.id === id)[0];
-      if (!d) return;
-      d.videos = d.videos || [];
-      if (d.videos.indexOf(fileID) < 0) d.videos.unshift(fileID);
+      if (d) {
+        d.videos = d.videos || [];
+        if (d.videos.indexOf(fileID) < 0) d.videos.unshift(fileID);
+      }
       const c = (this.state.custom || []).filter(x => x.id === id)[0];
-      if (c) { c.videos = d.videos.slice(); }
+      if (c) { c.videos = [fileID]; }
       this.save();
     },
 

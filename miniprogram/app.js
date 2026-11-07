@@ -41,6 +41,19 @@ App({
         console.warn('[custom] 恢复失败', e && e.message);
       }
 
+      // 恢复每道菜挂的做法视频（state.videos: { 菜品id: [fileID] }）
+      try {
+        const vs = S.state.videos || {};
+        let n = 0;
+        Object.keys(vs).forEach(id => {
+          const d = G.DD_DATA.DISHES.filter(x => x.id === id)[0];
+          if (d && Array.isArray(vs[id]) && vs[id].length) { d.videos = vs[id].slice(); n++; }
+        });
+        if (n) console.log('[video] 已恢复视频', n, '个');
+      } catch (e) {
+        console.warn('[video] 恢复失败', e && e.message);
+      }
+
       // 云开发（可选）：配了环境 ID 才初始化
       if (CFG && CFG.CLOUD_ENV && wx.cloud) {
         try {
