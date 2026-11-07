@@ -7,8 +7,10 @@ Page({
   data: {
     loading: true,
     err: '',
-    rows: [],
-    keyword: ''
+    all: [],        // 全部数据
+    rows: [],       // 过滤后展示
+    keyword: '',
+    searching: false
   },
 
   onShow() {
@@ -28,10 +30,10 @@ Page({
       success: (res) => {
         const d = (res && res.result) || {};
         if (!d.ok) {
-          self.setData({ loading: false, err: d.error || '读取失败', rows: [] });
+          self.setData({ loading: false, err: d.error || '读取失败', rows: [], all: [] });
           return;
         }
-        const rows = (d.items || []).map(x => {
+        const all = (d.items || []).map(x => {
           const dish = D.DISHES.filter(y => y.id === x.dishId)[0];
           return {
             dishId: x.dishId,
@@ -42,12 +44,40 @@ Page({
             atText: self.fmtTime(x.at)
           };
         });
-        self.setData({ loading: false, rows: rows, err: rows.length ? '' : '' });
+        self.setData({ loading: false, all: all, err: '' }, () => self.applyFilter());
       },
       fail: (e) => {
         self.setData({ loading: false, err: '调用失败：' + ((e && e.errMsg) || '') });
       }
     });
+  },
+
+  /* 本地筛选：菜名 / 上传者 */
+  applyFilter() {
+    const kw = String(this.data.keyword || '').trim();
+    const all = this.data.all || [];
+    if (!kw) {
+      this.setData({ rows: all });
+      return;
+    }
+    const rows = all.filter(x =>
+      x.name.indexOf(kw) >= 0 ||
+      (x.nick || '').indexOf(kw) >= 0
+    );
+    this.setData({ rows: rows });
+  },
+
+  onInput(e) {
+    this.setData({ keyword: e.detail.value, searching: !!e.detail.value }, () => this.applyFilter());
+  },
+
+  onSearchTap() {
+    this.applyFilter();
+    wx.hideKeyboard && wx.hideKeyboard();
+  },
+
+  onClear() {
+    this.setData({ keyword: '', searching: false }, () => this.applyFilter());
   },
 
   fmtTime(t) {

@@ -5,6 +5,25 @@
     <view class="ht2">大家上传的做法视频都在这里，点开就能看</view>
   </view>
 
+  <!-- 搜索 -->
+  <view class="searchbar">
+    <text class="mag">🔍</text>
+    <input
+      class="sinput"
+      placeholder="搜菜名或上传者，如：番茄炒蛋"
+      value="{{keyword}}"
+      bindinput="onInput"
+      confirm-type="search"
+      bindconfirm="onSearchTap"
+    />
+    <text wx:if="{{keyword}}" class="clear" bindtap="onClear">✕</text>
+    <text class="go" bindtap="onSearchTap">搜索</text>
+  </view>
+
+  <view wx:if="{{keyword && !loading && !err}}" class="resulttip">
+    「{{keyword}}」找到 {{rows.length}} 道菜
+  </view>
+
   <view wx:if="{{loading}}" class="state">
     <view class="spin"></view>
     <view class="stxt">加载中…</view>
@@ -33,6 +52,15 @@
     </view>
   </block>
 
+  <!-- 搜不到 -->
+  <view wx:elif="{{keyword}}" class="state">
+    <view class="e">🔍</view>
+    <view class="stxt">没找到「{{keyword}}」的视频</view>
+    <view class="shint">换个菜名试试，或者去「网上找做法」看看图文步骤</view>
+    <view class="btn ghost mt" bindtap="onSearch">去搜视频教程</view>
+  </view>
+
+  <!-- 空库 -->
   <view wx:else class="state">
     <view class="e">🎬</view>
     <view class="stxt">还没有人上传视频</view>

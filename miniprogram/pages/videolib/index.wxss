@@ -39,3 +39,17 @@
   text-align: center; font-size: 22rpx; color: #7C8B87;
   margin-top: 36rpx; padding: 20rpx;
 }
+
+.searchbar {
+  display: flex; align-items: center;
+  background: #fff; border: 1rpx solid #E7EFEA; border-radius: 24rpx;
+  padding: 0 16rpx; height: 84rpx; margin-bottom: 14rpx;
+}
+.mag { font-size: 26rpx; opacity: .55; margin-right: 10rpx; }
+.sinput { flex: 1; font-size: 26rpx; }
+.clear { font-size: 24rpx; color: #A8B5B0; padding: 0 14rpx; }
+.go {
+  font-size: 23rpx; font-weight: 800; color: #0E8F63;
+  background: #EAFBF2; border-radius: 16rpx; padding: 10rpx 22rpx; margin-left: 8rpx;
+}
+.resulttip { font-size: 21rpx; color: #8B9A96; margin: 0 4rpx 14rpx; }
