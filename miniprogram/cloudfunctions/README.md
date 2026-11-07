@@ -139,11 +139,42 @@ media_checks   权限：仅创建者可读写
 2. 填两处（必须一致）：
    - `miniprogram/config.js` → `COMMENT_TMPL_ID`
    - 云函数 `comments` 环境变量 → `COMMENT_TMPL_ID`
-3. 如果模板字段名和代码里不一样，改 `cloudfunctions/comments/index.js`
-   里 `notifyAuthor` 的 `data` 部分。
+3. 如果模板字段名和代码里不一样，**不用改代码**，用环境变量配映射：
+   `COMMENT_TMPL_FIELDS` = JSON，例如
+
+   ```json
+   {"thing1":"dish","thing2":"who","time3":"time"}
+   ```
+
+   | value | 含义 |
+   | --- | --- |
+   | `dish` | 菜名（视频标题） |
+   | `nick` | 评论人昵称 |
+   | `text` | 评论内容（截 20 字） |
+   | `who` | 「昵称：内容」合并 |
+   | `time` | 当前时间 |
+   | `tips` | 固定文案「点击可查看评论和互动内容」 |
+   | `result` | 固定文案「评论成功」 |
+
+   不填则用默认 `{"thing1":"dish","thing2":"who","time3":"time"}`。
+
+   > 关键词模板（显示「评论用户/温馨提示/评论结果…」那种）字段名多为
+   > `thing1`…`thing5` 或 `keyword1`…`keyword5`，以模板详情页为准。
+   > 带「常量关键词」的模板要先提交枚举值审核，选模板时优先挑没有常量关键词的。
+
 4. 作者发布视频时会弹出一次订阅授权；同意后才会收到通知。
 
 > 用户没授权（或已用掉一次订阅）时，发送会返回 43101，属正常，不影响评论。
+
+**自测**：`comments` 云函数云端测试传
+
+```json
+{ "action": "testNotify" }
+```
+
+- `{"ok":true,"sent":{...}}` → 字段对了，微信里应收到通知
+- `43101` → 还没订阅（先发布一次视频并允许订阅）
+- `47003` → 字段名或长度不符，对着 `sent` 调 `COMMENT_TMPL_FIELDS`
 
 ### 注意
 
