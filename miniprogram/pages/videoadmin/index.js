@@ -63,18 +63,17 @@ Page({
     const i = Number(e.currentTarget.dataset.i);
     const it = this.data.rows[i];
     if (!it) return;
-    if (String(it.fileID).indexOf('cloud://') === 0 && wx.cloud) {
-      wx.cloud.getTempFileURL({
-        fileList: [it.fileID],
-        success: (r) => {
-          const f = (r.fileList || [])[0];
-          if (f && f.tempFileURL) this.preview(f.tempFileURL);
-          else wx.showToast({ title: '取不到视频地址', icon: 'none' });
-        }
-      });
-    } else {
-      this.preview(it.fileID);
-    }
+    // 云函数代取链接（免费版存储仅创建者可读）
+    wx.cloud.callFunction({
+      name: 'videos',
+      data: { action: 'play', id: it.id },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (d.ok && d.url) this.preview(d.url);
+        else wx.showToast({ title: d.error || '取不到视频地址', icon: 'none' });
+      },
+      fail: () => wx.showToast({ title: '预览失败', icon: 'none' })
+    });
   },
 
   preview(url) {

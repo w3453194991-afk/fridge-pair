@@ -58,7 +58,7 @@ Page({
         // 自己没有视频时，自动播共享库第一条
         if (!self.data.src && list.length) {
           self.setData({ curIdx: 0 });
-          self.setSrc(list[0].fileID, false);
+          self.setSrc(list[0].fileID, list[0].mine, list[0].id);
         }
       },
       fail: (e) => {
@@ -73,23 +73,64 @@ Page({
     return (d.getMonth() + 1) + '月' + d.getDate() + '日';
   },
 
-  /* cloud:// 换临时链接后播放 */
-  setSrc(fileOrUrl, mine) {
+  /* 播放：优先让云函数代取链接（免费版存储是"仅创建者可读写"，自己取别人的会失败） */
+  setSrc(fileOrUrl, mine, sharedId) {
     this.setData({ mine: !!mine });
     if (!fileOrUrl) return;
-    if (String(fileOrUrl).indexOf('cloud://') === 0 && wx.cloud) {
-      wx.cloud.getTempFileURL({
-        fileList: [fileOrUrl],
-        success: (r) => {
-          const f = (r.fileList || [])[0];
-          if (f && f.tempFileURL) this.setData({ src: f.tempFileURL, err: '' });
-          else this.setData({ err: '视频链接获取失败' });
-        },
-        fail: () => this.setData({ err: '云存储读取失败，检查存储权限是否为「所有用户可读」' })
-      });
-    } else {
+
+    if (!wx.cloud) {
       this.setData({ src: fileOrUrl, err: '' });
+      return;
     }
+
+    const done = (url, tip) => {
+      if (url) this.setData({ src: url, err: '' });
+      else this.setData({ err: tip || '取不到播放地址' });
+    };
+
+    // 共享库里的视频：用 id 走云函数
+    if (sharedId) {
+      wx.cloud.callFunction({
+        name: 'videos',
+        data: { action: 'play', id: sharedId },
+        success: (res) => {
+          const d = (res && res.result) || {};
+          done(d.ok ? d.url : '', d.error || '云函数取链接失败');
+        },
+        fail: () => {
+          // 云函数不可用时退回客户端直取（自己的视频可以）
+          this.directUrl(fileOrUrl, done);
+        }
+      });
+      return;
+    }
+
+    // 自己的视频：云函数换链接，失败再本地取
+    wx.cloud.callFunction({
+      name: 'videos',
+      data: { action: 'url', fileID: fileOrUrl },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (d.ok && d.url) done(d.url);
+        else this.directUrl(fileOrUrl, done);
+      },
+      fail: () => this.directUrl(fileOrUrl, done)
+    });
+  },
+
+  directUrl(fileOrUrl, done) {
+    if (String(fileOrUrl).indexOf('cloud://') !== 0) {
+      done(fileOrUrl);
+      return;
+    }
+    wx.cloud.getTempFileURL({
+      fileList: [fileOrUrl],
+      success: (r) => {
+        const f = (r.fileList || [])[0];
+        done(f && f.tempFileURL, '存储权限限制，只能看自己上传的视频');
+      },
+      fail: () => done('', '视频链接获取失败')
+    });
   },
 
   onPick(e) {
@@ -97,7 +138,7 @@ Page({
     const it = this.data.list[i];
     if (!it) return;
     this.setData({ curIdx: i });
-    this.setSrc(it.fileID, it.mine);
+    this.setSrc(it.fileID, it.mine, it.id);
   },
 
   onRemove(e) {

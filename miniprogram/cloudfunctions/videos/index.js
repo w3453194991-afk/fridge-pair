@@ -96,6 +96,39 @@ exports.main = async (event) => {
       return { ok: true, id: r._id, status: doc.status };
     }
 
+    /* ---------- 播放：云函数代取临时链接 ----------
+       免费版存储是「仅创建者可读写」，客户端直接 getTempFileURL 别人会失败；
+       云函数有管理员权限，可以替任何人换到可播放链接。 */
+    if (action === 'play') {
+      const id = String(event.id || '');
+      if (!id) return { ok: false, error: '缺少 id' };
+      const got = await db.collection(COL).doc(id).get().catch(() => null);
+      const doc = got && got.data;
+      if (!doc) return { ok: false, error: '视频不存在' };
+      if (doc.status !== 'ok' && doc._openid !== OPENID && !isAdmin) {
+        return { ok: false, error: '这个视频还在审核中' };
+      }
+      const fileID = String(doc.fileID || '');
+      let url = fileID;
+      if (fileID.indexOf('cloud://') === 0) {
+        const r = await cloud.getTempFileURL({ fileList: [fileID] });
+        const f = (r.fileList || [])[0];
+        url = f && f.tempFileURL;
+      }
+      if (!url) return { ok: false, error: '取不到播放地址' };
+      return { ok: true, url: url, title: doc.title || doc.dishName || '' };
+    }
+
+    /* ---------- 直接给 fileID 换链接（自己的视频用） ---------- */
+    if (action === 'url') {
+      const fileID = String(event.fileID || '');
+      if (!fileID) return { ok: false, error: '缺少 fileID' };
+      if (fileID.indexOf('cloud://') !== 0) return { ok: true, url: fileID };
+      const r = await cloud.getTempFileURL({ fileList: [fileID] });
+      const f = (r.fileList || [])[0];
+      return { ok: true, url: (f && f.tempFileURL) || '' };
+    }
+
     if (action === 'remove') {
       const id = String(event.id || '');
       if (!id) return { ok: false, error: '缺少 id' };
