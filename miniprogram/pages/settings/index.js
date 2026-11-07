@@ -94,6 +94,11 @@ Page({
     wx.navigateTo({ url: '/pages/onboard/index?edit=1' });
   },
 
+  /* 共享视频审核（仅管理员可见/可用） */
+  onVideoAdmin() {
+    wx.navigateTo({ url: '/pages/videoadmin/index' });
+  },
+
   /* 直接播放欢迎开屏（不影响档案） */
   onPlayWelcome() {
     try {

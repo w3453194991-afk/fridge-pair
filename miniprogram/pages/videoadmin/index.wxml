@@ -1,0 +1,41 @@
+<view class="wrap">
+
+  <view class="tabs">
+    <view class="{{tab == 'pending' ? 'tab on' : 'tab'}}" data-tab="pending" bindtap="onTab">待审核</view>
+    <view class="{{tab == 'all' ? 'tab on' : 'tab'}}" data-tab="all" bindtap="onTab">全部视频</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="state">
+    <view class="spin"></view>
+    <view class="stxt">加载中…</view>
+  </view>
+
+  <view wx:elif="{{err}}" class="card errcard">
+    <view class="etxt">{{err}}</view>
+    <view class="ehint">需要在云函数 videos 的环境变量里配置 ADMIN_OPENIDS（你的 openid），否则没有审核权限。</view>
+    <view class="btn ghost mt" bindtap="onBack">返回</view>
+  </view>
+
+  <block wx:elif="{{rows.length}}">
+    <view wx:for="{{rows}}" wx:key="id" class="card row">
+      <view class="rtop">
+        <view class="rname">{{item.title}}</view>
+        <view class="rstat {{item.status}}">{{item.statusText}}</view>
+      </view>
+      <view class="rmeta">{{item.dishName}} · {{item.atText}}</view>
+      <view class="rbtns">
+        <view class="btnmini ghost" data-i="{{index}}" bindtap="onPlay">预览</view>
+        <view wx:if="{{item.status == 'pending' || item.status == 'blocked'}}" class="btnmini primary" data-i="{{index}}" bindtap="onApprove">通过</view>
+        <view wx:if="{{item.status == 'pending' || item.status == 'ok'}}" class="btnmini danger" data-i="{{index}}" bindtap="onBlock">驳回</view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:else class="state">
+    <view class="e">✅</view>
+    <view class="stxt">{{tab == 'pending' ? '没有待审核的视频' : '还没有任何视频'}}</view>
+  </view>
+
+  <view class="note">只有 ADMIN_OPENIDS 里的账号能进这个页面</view>
+
+</view>

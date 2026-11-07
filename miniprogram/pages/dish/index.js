@@ -282,7 +282,7 @@ Page({
                     success: (res) => {
                       const out = (res && res.result) || {};
                       if (out.ok) {
-                        wx.showToast({ title: traceId ? '已发布，审核中' : '已发布到共享库', icon: 'none' });
+                        wx.showToast({ title: out.status === 'ok' ? '已发布到共享库' : '已提交，待审核', icon: 'none' });
                       } else {
                         wx.showToast({ title: out.error || '发布失败', icon: 'none' });
                       }

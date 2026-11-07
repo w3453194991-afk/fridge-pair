@@ -1,0 +1,42 @@
+.tabs { display: flex; background: #EFF5F2; border-radius: 22rpx; padding: 8rpx; margin-bottom: 18rpx; }
+.tab { flex: 1; text-align: center; font-size: 25rpx; font-weight: 700; color: #6C7F78; padding: 16rpx 0; border-radius: 16rpx; }
+.tab.on { background: #fff; color: #0E8F63; box-shadow: 0 4rpx 10rpx -6rpx rgba(16,120,90,.5); }
+
+.state { margin-top: 120rpx; text-align: center; }
+.state .e { font-size: 96rpx; margin-bottom: 14rpx; }
+.spin {
+  width: 52rpx; height: 52rpx; margin: 0 auto 18rpx;
+  border: 5rpx solid #DFF0E7; border-top-color: #12A576; border-radius: 50%;
+  animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.stxt { font-size: 24rpx; color: #8B9A96; }
+
+.errcard { background: #FFF6F6; border-color: #F6D6D6; }
+.etxt { font-size: 25rpx; color: #B91C1C; line-height: 1.7; }
+.ehint { font-size: 21rpx; color: #8A4B4B; line-height: 1.7; margin-top: 12rpx; }
+.mt { margin-top: 20rpx; }
+
+.row { padding: 20rpx 22rpx; }
+.rtop { display: flex; align-items: center; }
+.rname { flex: 1; font-size: 27rpx; font-weight: 800; }
+.rstat {
+  font-size: 19rpx; font-weight: 800; border-radius: 8rpx; padding: 4rpx 12rpx;
+  color: #8B6A00; background: #FFF3D6;
+}
+.rstat.ok { color: #0E8F63; background: #E4F8EE; }
+.rstat.blocked { color: #B91C1C; background: #FEEAEA; }
+.rstat.deleted { color: #8B9A96; background: #F0F3F1; }
+.rmeta { font-size: 20rpx; color: #8B9A96; margin-top: 8rpx; }
+.rbtns { display: flex; margin-top: 16rpx; }
+.btnmini {
+  flex: 1; height: 72rpx; border-radius: 18rpx; margin-right: 12rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 23rpx; font-weight: 800;
+}
+.btnmini:last-child { margin-right: 0; }
+.btnmini.ghost { color: #4E6B61; background: #F5FAF7; border: 1rpx solid #E7EFEA; }
+.btnmini.primary { color: #fff; background: linear-gradient(135deg, #2FD79E, #12A576); }
+.btnmini.danger { color: #fff; background: linear-gradient(135deg, #FF8080, #E53935); }
+
+.note { margin-top: 30rpx; text-align: center; font-size: 19rpx; color: #B0BCB7; }
