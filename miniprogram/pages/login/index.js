@@ -140,6 +140,12 @@ Page({
       S.load();
       S.state.family.loggedIn = true;
       if (!S.state.family.openid) S.state.family.openid = 'demo-' + Date.now();
+      // 体验模式直接给一个默认档案，避免被开屏又拉去「家庭设置」
+      if (!S.state.family.members || !S.state.family.members.length) {
+        S.state.family.members = [{ role: '成人', age: 30, name: '我' }];
+        S.state.family.name = S.state.family.name || '我';
+        S.state.family.onboarded = true;
+      }
       S.save();
     } catch (e) {}
     wx.showToast({ title: '已进入体验模式', icon: 'none' });

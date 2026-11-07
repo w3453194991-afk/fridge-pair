@@ -300,11 +300,33 @@ Page({
     this.setData({ cmImages: arr });
   },
 
+  /* 预览评论图片：cloud:// 需要先换临时链接，否则 previewImage 失败 */
   onPreviewImg(e) {
     const { id, i } = e.currentTarget.dataset;
     const cm = this.data.comments.filter(c => c.id === id)[0];
-    if (!cm) return;
-    wx.previewImage({ current: cm.images[i], urls: cm.images });
+    if (!cm || !cm.images.length) return;
+
+    const imgs = cm.images;
+    const cur = imgs[i];
+    if (String(cur).indexOf('cloud://') !== 0) {
+      wx.previewImage({ current: cur, urls: imgs });
+      return;
+    }
+    wx.showLoading({ title: '打开中…', mask: true });
+    wx.cloud.getTempFileURL({
+      fileList: imgs,
+      success: (r) => {
+        wx.hideLoading();
+        const urls = (r.fileList || []).map(f => f.tempFileURL).filter(Boolean);
+        const curUrl = (r.fileList || []).map((f, k) => (k === i ? f.tempFileURL : '')).filter(Boolean)[0];
+        if (!urls.length) { wx.showToast({ title: '图片读取失败', icon: 'none' }); return; }
+        wx.previewImage({ current: curUrl || urls[0], urls: urls });
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({ title: '图片读取失败', icon: 'none' });
+      }
+    });
   },
 
   onReply(e) {

@@ -88,8 +88,28 @@ Page({
   onPreviewCmImg(e) {
     const { id, i } = e.currentTarget.dataset;
     const row = this.data.rows.filter(r => r.id === id)[0];
-    if (!row) return;
-    wx.previewImage({ current: row.images[i], urls: row.images });
+    if (!row || !row.images.length) return;
+
+    const imgs = row.images;
+    if (String(imgs[i]).indexOf('cloud://') !== 0) {
+      wx.previewImage({ current: imgs[i], urls: imgs });
+      return;
+    }
+    wx.showLoading({ title: '打开中…', mask: true });
+    wx.cloud.getTempFileURL({
+      fileList: imgs,
+      success: (r) => {
+        wx.hideLoading();
+        const urls = (r.fileList || []).map(f => f.tempFileURL).filter(Boolean);
+        if (!urls.length) { wx.showToast({ title: '图片读取失败', icon: 'none' }); return; }
+        const cur = urls[Math.min(i, urls.length - 1)];
+        wx.previewImage({ current: cur, urls: urls });
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({ title: '图片读取失败', icon: 'none' });
+      }
+    });
   },
 
   fmtTime(t) {

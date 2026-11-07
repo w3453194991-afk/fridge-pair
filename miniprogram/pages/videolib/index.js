@@ -30,7 +30,11 @@ Page({
       success: (res) => {
         const d = (res && res.result) || {};
         if (!d.ok) {
-          self.setData({ loading: false, err: d.error || '读取失败', rows: [], all: [] });
+          const raw = d.error || '读取失败';
+          const friendly = raw === '未知 action'
+            ? '视频库服务还没部署：请在开发者工具里右键 cloudfunctions/videos 点「创建并部署」'
+            : raw;
+          self.setData({ loading: false, err: friendly, rows: [], all: [] });
           return;
         }
         const all = (d.items || []).map(x => {
