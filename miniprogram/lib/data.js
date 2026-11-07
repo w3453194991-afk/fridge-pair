@@ -23,6 +23,9 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     { name: '胡萝卜', emoji: '🥕', cat: '蔬菜',   unit: '根',  shelf: 14,  price: 1,    storage: '冷藏' },
     { name: '大蒜',   emoji: '🧄', cat: '蔬菜',   unit: '头',  shelf: 30,  price: 1.5,  storage: '阴凉' },
     { name: '香菇',   emoji: '🍄', cat: '蔬菜',   unit: '朵',  shelf: 5,   price: 0.8,  storage: '冷藏' },
+    { name: '可乐',   emoji: '🥤', cat: '饮料',   unit: '瓶',  shelf: 180, price: 3.5,  storage: '常温' },
+    { name: '酸菜',   emoji: '🥬', cat: '蔬菜',   unit: '袋',  shelf: 30,  price: 5,    storage: '冷藏' },
+    { name: '蒜',     emoji: '🧄', cat: '调味',   unit: '头',  shelf: 30,  price: 1.5,  storage: '常温' },
     { name: '松仁',   emoji: '🌰', cat: '干货',   unit: 'g',   shelf: 90,  price: 0.6,   storage: '常温' },
     { name: '青豆',   emoji: '🫛', cat: '蔬菜',   unit: 'g',   shelf: 5,   price: 0.025, storage: '冷藏' },
     { name: '牛肉',   emoji: '🥩', cat: '肉类',   unit: 'g',   shelf: 3,   price: 0.1,   storage: '冷藏' },
@@ -676,6 +679,139 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       ],
       tips: ['大火快炒是保色的关键。', '油菜钙含量不低，别煮太久。'],
       nutrition: '油菜钙含量在绿叶菜里偏高，比牛奶更好吸收的搭配是少油快炒。', pair: '钙 + 维K → 骨骼友好'
+    },
+    {
+      id: 'cola-chicken-wings', name: '可乐鸡翅', emoji: '🍗', minutes: 25, level: '新手',
+      meals: ['午', '晚'], tags: ['家常','酸甜','孩子爱吃'],
+      ingredients: [{"name":"鸡翅","qty":8},{"name":"可乐","qty":1}],
+      seasonings: ['生抽 15 ml','老抽 5 ml','料酒 10 ml','姜片 3 片'],
+      prep: ['鸡翅两面各划两刀，便于入味。','冷水下锅加姜片、料酒焯 2 分钟，捞出擦干。'],
+      steps: [
+        { heat: '中火', text: '少油下鸡翅，两面煎至金黄。' },
+        { heat: '中火', text: '加生抽、老抽翻匀上色。' },
+        { heat: '大火', text: '倒可乐没过鸡翅，烧开。' },
+        { heat: '小火', text: '盖盖焖 12 分钟，开盖大火收汁至浓稠。' }
+      ],
+      tips: ['可乐要没过鸡翅，收汁时勤翻动防糊。','不用额外放糖，可乐本身够甜。'],
+      nutrition: '鸡翅蛋白质丰富，可乐版含糖偏高，配清淡蔬菜更好。', pair: '蛋白 + 蔬菜 → 平衡'
+    },
+    {
+      id: 'sauerkraut-fish', name: '酸菜鱼', emoji: '🐟', minutes: 40, level: '进阶',
+      meals: ['午', '晚'], tags: ['川味','酸辣','宴客'],
+      ingredients: [{"name":"草鱼","qty":1},{"name":"酸菜","qty":200}],
+      seasonings: ['泡椒 5 个','姜片 3 片','蒜末 4 瓣','料酒 15 ml','淀粉 10 g','白胡椒粉 2 g'],
+      prep: ['鱼去骨片成薄片，鱼骨切段。','鱼片加料酒、盐、淀粉抓匀腌 10 分钟。','酸菜切段挤干水分。'],
+      steps: [
+        { heat: '中火', text: '少油下姜蒜、泡椒炒香，加酸菜炒 2 分钟。' },
+        { heat: '大火', text: '加水烧开，放鱼骨煮 8 分钟成汤底。' },
+        { heat: '中小火', text: '鱼片逐片下锅，别搅动，煮 90 秒变白即熟。' },
+        { heat: '大火', text: '撒白胡椒粉，浇一勺热油激香。' }
+      ],
+      tips: ['鱼片下锅后千万别搅，一搅就散。','酸菜本身咸，盐要最后尝了再放。'],
+      nutrition: '鱼肉优质蛋白易消化，酸菜含盐较高，汤少喝。', pair: '蛋白 + 发酵蔬菜 → 开胃'
+    },
+    {
+      id: 'boiled-pork-slices', name: '水煮肉片', emoji: '🌶️', minutes: 30, level: '进阶',
+      meals: ['午', '晚'], tags: ['川味','麻辣','下饭'],
+      ingredients: [{"name":"猪里脊","qty":300},{"name":"生菜","qty":1}],
+      seasonings: ['郫县豆瓣酱 20 g','干辣椒 8 个','花椒 3 g','淀粉 10 g','蒜末 4 瓣'],
+      prep: ['里脊逆纹切薄片，加盐、料酒、淀粉抓匀腌 10 分钟。','生菜洗净垫碗底。'],
+      steps: [
+        { heat: '中火', text: '锅里炒豆瓣酱出红油，加水烧开。' },
+        { heat: '中小火', text: '肉片逐片下锅，煮 60 秒变白。' },
+        { heat: '大火', text: '连汤带肉倒入垫了生菜的碗里。' },
+        { heat: '大火', text: '表面铺蒜末、干辣椒、花椒，浇滚油激香。' }
+      ],
+      tips: ['肉片切薄是关键，冻半小时更好切。','浇油要冒烟才香，注意别溅到。'],
+      nutrition: '高蛋白，但油和盐都偏重，配白饭吃别喝汤。', pair: '蛋白 + 辣 → 下饭'
+    },
+    {
+      id: 'twice-cooked-pork', name: '回锅肉', emoji: '🥓', minutes: 30, level: '进阶',
+      meals: ['午', '晚'], tags: ['川味','下饭','微辣'],
+      ingredients: [{"name":"五花肉","qty":300},{"name":"青椒","qty":2}],
+      seasonings: ['郫县豆瓣酱 20 g','甜面酱 10 g','生抽 10 ml','蒜苗 2 根','糖 5 g'],
+      prep: ['五花肉整块冷水下锅，加姜片煮 20 分钟至筷子能插入。','捞出晾凉切薄片。'],
+      steps: [
+        { heat: '中火', text: '锅里少油，下肉片煸炒 2 分钟至卷曲出油。' },
+        { heat: '中火', text: '把肉推到一边，下豆瓣酱炒出红油。' },
+        { heat: '大火', text: '加甜面酱、生抽、糖，与肉片翻匀。' },
+        { heat: '大火', text: '下青椒和蒜苗炒 1 分钟出锅。' }
+      ],
+      tips: ['肉要煮到七成熟再切，太生切不薄，太烂炒不香。','煸到肉片\'打卷\'才够香。'],
+      nutrition: '五花肉脂肪高，配青椒和蒜苗解腻。', pair: '脂肪 + 蔬菜纤维 → 解腻'
+    },
+    {
+      id: 'garlic-shrimp-vermicelli', name: '蒜蓉粉丝蒸虾', emoji: '🦐', minutes: 20, level: '新手',
+      meals: ['午', '晚'], tags: ['海鲜','清淡','宴客'],
+      ingredients: [{"name":"虾","qty":12},{"name":"粉丝","qty":1}],
+      seasonings: ['蒜末 6 瓣','生抽 15 ml','蒸鱼豉油 10 ml','葱花 少许','食用油 20 ml'],
+      prep: ['粉丝温水泡软铺盘底。','虾开背去虾线，摆粉丝上。'],
+      steps: [
+        { heat: '小火', text: '一半蒜末小火炒至金黄，与生蒜末混合。' },
+        { heat: '中火', text: '蒜末铺虾上，淋生抽和蒸鱼豉油。' },
+        { heat: '大火', text: '水开上汽蒸 6 分钟。' },
+        { heat: '大火', text: '撒葱花，浇一勺热油激香。' }
+      ],
+      tips: ['一半蒜炒香一半生用，蒜味层次才够。','蒸的时间别超 7 分钟，虾会老。'],
+      nutrition: '虾高蛋白低脂，粉丝吸汤汁，注意控油。', pair: '蛋白 + 蒜素 → 鲜香'
+    },
+    {
+      id: 'garlic-broccoli-stir', name: '蒜蓉西兰花', emoji: '🥦', minutes: 12, level: '新手',
+      meals: ['午', '晚'], tags: ['清淡','快手','低卡'],
+      ingredients: [{"name":"西兰花","qty":1},{"name":"蒜","qty":1}],
+      seasonings: ['盐 2 g','蚝油 8 g','食用油 15 ml'],
+      prep: ['西兰花掰小朵，淡盐水泡 10 分钟。','蒜切末。'],
+      steps: [
+        { heat: '大火', text: '水开加几滴油，西兰花焯 60 秒捞出。' },
+        { heat: '大火', text: '热锅下油爆香蒜末。' },
+        { heat: '大火', text: '下西兰花翻炒 40 秒，加盐和蚝油。' },
+        { heat: '关火', text: '翻匀出锅，别久炒保持翠绿。' }
+      ],
+      tips: ['焯水加几滴油，颜色更绿。','焯过水就别久炒，否则变黄发软。'],
+      nutrition: '西兰花维C和膳食纤维高，热量很低。', pair: '维C + 纤维 → 低卡'
+    },
+    {
+      id: 'seaweed-egg-soup', name: '紫菜蛋花汤', emoji: '🥣', minutes: 8, level: '新手',
+      meals: ['午', '晚'], tags: ['汤羹','快手','低卡'],
+      ingredients: [{"name":"紫菜","qty":0.5},{"name":"鸡蛋","qty":1}],
+      seasonings: ['盐 2 g','香油 3 ml','葱花 少许','白胡椒粉 1 g'],
+      prep: ['紫菜撕小块，鸡蛋打散。'],
+      steps: [
+        { heat: '大火', text: '水烧开，下紫菜煮 1 分钟。' },
+        { heat: '小火', text: '转小火缓缓淋蛋液，静置 3 秒再推成蛋花。' },
+        { heat: '关火', text: '加盐、白胡椒粉，淋香油撒葱花。' }
+      ],
+      tips: ['蛋液下锅别急着搅，蛋花才成型。'],
+      nutrition: '紫菜含碘和矿物质，整道汤热量很低。', pair: '碘 + 蛋白 → 快手汤'
+    },
+    {
+      id: 'ants-climbing-tree', name: '蚂蚁上树', emoji: '🍜', minutes: 20, level: '新手',
+      meals: ['午', '晚'], tags: ['川味','下饭','主食'],
+      ingredients: [{"name":"粉丝","qty":1},{"name":"猪肉馅","qty":100}],
+      seasonings: ['郫县豆瓣酱 15 g','生抽 10 ml','蒜末 3 瓣','葱花 少许'],
+      prep: ['粉丝温水泡软，剪短。','肉馅用少许生抽抓匀。'],
+      steps: [
+        { heat: '大火', text: '热锅下油，肉馅炒散至变色。' },
+        { heat: '中火', text: '下豆瓣酱和蒜末炒出红油。' },
+        { heat: '大火', text: '加一碗水烧开，下粉丝翻炒。' },
+        { heat: '中火', text: '汤汁被粉丝吸干即可出锅，撒葱花。' }
+      ],
+      tips: ['粉丝别泡太软，不然一炒就烂。','水要一次加够，中途加会糊。'],
+      nutrition: '粉丝是纯碳水，配肉末补充蛋白。', pair: '碳水 + 蛋白 → 下饭'
+    },
+    {
+      id: 'steamed-egg-custard', name: '蒸蛋羹', emoji: '🥚', minutes: 15, level: '新手',
+      meals: ['午', '晚'], tags: ['清淡','孩子爱吃','易消化'],
+      ingredients: [{"name":"鸡蛋","qty":2}],
+      seasonings: ['盐 1 g','生抽 5 ml','香油 2 ml','葱花 少许'],
+      prep: ['鸡蛋打散，加 1.5 倍温水（约 40℃）和盐搅匀。','过筛两遍去泡沫。'],
+      steps: [
+        { heat: '大火', text: '蛋液倒入碗中，盖保鲜膜扎几个小孔。' },
+        { heat: '中火', text: '水开上锅蒸 10 分钟，关火焖 2 分钟。' },
+        { heat: '关火', text: '淋生抽和香油，撒葱花。' }
+      ],
+      tips: ['水和蛋 1.5:1 最嫩，水太多会散。','过筛 + 盖膜，表面才光滑无蜂窝。'],
+      nutrition: '鸡蛋蛋白吸收率高，老人小孩都适合。', pair: '优质蛋白 → 易吸收'
     },
     {
       id: 'pine-nut-corn', name: '松仁玉米', emoji: '🌽', minutes: 15, level: '新手',
