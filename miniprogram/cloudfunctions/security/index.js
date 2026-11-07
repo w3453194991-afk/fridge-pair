@@ -104,9 +104,25 @@ async function handleCallback(event) {
 }
 
 exports.main = async (event) => {
+  /* ---------- HTTP 访问服务模式：公众平台配 URL 时的握手 ---------- */
+  const q = (event && event.queryStringParameters) || {};
+  const echo = q.echostr || (event && event.echostr);
+  if (echo) return String(echo);              // 原样回显即通过校验
+
   // 媒体检测的异步回调
   if (event && (event.Event === 'wxa_media_check' || event.event === 'wxa_media_check')) {
     return await handleCallback(event);
+  }
+
+  // 云开发消息推送可能把 JSON 放在 body 里
+  if (event && typeof event.body === 'string') {
+    try {
+      const b = JSON.parse(event.body);
+      if (b && (b.Event === 'wxa_media_check' || b.event === 'wxa_media_check')) {
+        return await handleCallback(b);
+      }
+      if (b && b.action) event = Object.assign({}, event, b);
+    } catch (e) {}
   }
 
   const { OPENID } = cloud.getWXContext();
