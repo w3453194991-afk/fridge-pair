@@ -168,6 +168,25 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
     },
 
     /* ---------- 我的实拍（做菜时拍的照片，作为菜品封面） ---------- */
+    /* 给某道菜挂一个做法视频（存云存储 fileID 或 https 链接） */
+    setDishVideo: function (id, fileID) {
+      if (!id || !fileID) return;
+      const d = D.DISHES.filter(x => x.id === id)[0];
+      if (!d) return;
+      d.videos = d.videos || [];
+      if (d.videos.indexOf(fileID) < 0) d.videos.unshift(fileID);
+      const c = (this.state.custom || []).filter(x => x.id === id)[0];
+      if (c) { c.videos = d.videos.slice(); }
+      this.save();
+    },
+
+    removeDishVideo: function (id) {
+      const d = D.DISHES.filter(x => x.id === id)[0];
+      if (d) d.videos = [];
+      const c = (this.state.custom || []).filter(x => x.id === id)[0];
+      if (c) c.videos = [];
+      this.save();
+    },
     setDishPhoto: function (id, dataUrl) {
       if (!id || !dataUrl) return;
       if (!this.state.photos) this.state.photos = {};

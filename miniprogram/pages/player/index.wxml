@@ -1,1 +1,35 @@
-<view class="wrap"><view class="card"><view class="muted">该页面已移除</view></view></view>
+<view class="wrap">
+
+  <view class="head">
+    <view class="hemo">{{dish.emoji || '🎬'}}</view>
+    <view class="hname">{{dish.name || '做法视频'}}</view>
+  </view>
+
+  <view wx:if="{{src}}" class="playerbox">
+    <video
+      class="player"
+      src="{{src}}"
+      controls
+      show-center-play-btn
+      enable-play-gesture
+      object-fit="contain"
+      binderror="onError"
+    ></video>
+  </view>
+
+  <view wx:elif="{{err}}" class="state">
+    <view class="e">🎬</view>
+    <view class="stxt">{{err}}</view>
+    <view class="btn mt" bindtap="onBack">返回</view>
+  </view>
+
+  <view wx:elif="{{!loading}}" class="state">
+    <view class="e">📹</view>
+    <view class="stxt">这道菜还没有视频</view>
+    <view class="shint">回到菜品详情，点「＋ 添加做法视频」录一段或从相册选一段，会存在你自己的云存储里，只有你能看。</view>
+    <view class="btn mt" bindtap="onBack">返回</view>
+  </view>
+
+  <view class="note">视频在小程序内直接播放，不需要跳转任何 App</view>
+
+</view>

@@ -16,6 +16,7 @@ Page({
     prep: [],
     steps: [],
     can: false,
+    hasVideo: false,
 
     /* 做菜三步 */
     cookStep: 'idle',   // idle / photo / scan / result
@@ -50,11 +51,15 @@ Page({
       };
     });
 
+    const playable = (d.videos || []).filter(v => typeof v === 'string' && v);
+
     this.setData({
+      hasVideo: playable.length > 0,
       dish: {
         id: d.id, name: d.name, emoji: d.emoji, minutes: d.minutes,
         level: d.level, cuisine: (d.cuisine || []).join(' / '),
         tags: (d.tags || []).join(' · '), seasonings: d.seasonings || [],
+        videos: playable,
         custom: !!d.custom || (d.tags || []).indexOf('AI生成') >= 0,
         photo: (P[d.id] && !validPhoto(S.getDishPhoto(d.id))) ? ('/img/' + d.id + '.jpg') : (validPhoto(S.getDishPhoto(d.id)) ? S.getDishPhoto(d.id) : '')
       },
@@ -203,7 +208,58 @@ Page({
   },
 
   onVideo() {
-    wx.navigateTo({ url: '/pages/video/index?q=' + encodeURIComponent(this.data.dish.name) });
+    const d = this.data.dish;
+    const playable = (d && d.videos ? d.videos : []).filter(v => typeof v === 'string' && v);
+    if (playable.length) {
+      wx.navigateTo({ url: '/pages/player/index?id=' + d.id + '&v=1' });
+      return;
+    }
+    wx.navigateTo({ url: '/pages/video/index?q=' + encodeURIComponent(d.name) });
+  },
+
+  /* 给这道菜挂一个自己的做法视频（录音/相册），存云存储，站内直接播 */
+  onAddVideo() {
+    const d = this.data.dish;
+    if (!d) return;
+    if (!wx.cloud) {
+      wx.showModal({ title: '需要云开发', content: '上传视频要用云存储，请在 config.js 配置 CLOUD_ENV。', showCancel: false });
+      return;
+    }
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['video'],
+      sourceType: ['album', 'camera'],
+      maxDuration: 60,
+      camera: 'back',
+      success: (res) => {
+        const f = (res.tempFiles || [])[0];
+        if (!f || !f.tempFilePath) return;
+        if (f.size && f.size > 20 * 1024 * 1024) {
+          wx.showToast({ title: '视频别超过 20MB', icon: 'none' });
+          return;
+        }
+        wx.showLoading({ title: '上传中…', mask: true });
+        const ext = (f.tempFilePath.match(/\.(\w+)$/) || [, 'mp4'])[1];
+        wx.cloud.uploadFile({
+          cloudPath: 'dish-videos/' + d.id + '-' + Date.now() + '.' + ext,
+          filePath: f.tempFilePath,
+          success: (r) => {
+            wx.hideLoading();
+            try {
+              S.setDishVideo(d.id, r.fileID);
+              const cur = this.data.dish;
+              cur.videos = [r.fileID];
+              this.setData({ dish: cur });
+            } catch (e) {}
+            wx.showToast({ title: '已添加视频', icon: 'success' });
+          },
+          fail: (err) => {
+            wx.hideLoading();
+            wx.showModal({ title: '上传失败', content: String((err && err.errMsg) || ''), showCancel: false });
+          }
+        });
+      }
+    });
   },
 
   /* 站内直接拉网上的图文做法，不用跳出小程序 */

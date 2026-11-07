@@ -18,7 +18,8 @@
     "pages/addfood/index",
     "pages/settings/index",
     "pages/netrecipe/index",
-    "pages/batch/index"
+    "pages/batch/index",
+    "pages/player/index"
   ],
   "window": {
     "navigationBarTitleText": "冰箱对对碰",
