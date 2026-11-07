@@ -26,7 +26,7 @@
       <text class="lab">重新走一遍引导</text>
       <text class="val">含欢迎动画<text class="go">›</text></text>
     </view>
-    <view class="row between line" bindtap="onVideoAdmin">
+    <view wx:if="{{isAdmin}}" class="row between line" bindtap="onVideoAdmin">
       <text class="lab">视频审核</text>
       <text class="val">共享库待审视频<text class="go">›</text></text>
     </view>

@@ -49,6 +49,10 @@ exports.main = async (event) => {
   const action = (event && event.action) || 'list';
   const isAdmin = admins().indexOf(OPENID) >= 0;
 
+  if (action === 'whoami') {
+    return { ok: true, isAdmin: isAdmin, adminCount: admins().length };
+  }
+
   try {
     /* ---------- 某道菜的视频：已通过 + 自己的待审 ---------- */
     if (action === 'list') {

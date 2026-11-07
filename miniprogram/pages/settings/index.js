@@ -15,11 +15,28 @@ Page({
     scanUsed: 0,
     scanLimit: 0,
     version: '1.0.0',
-    hasAgreement: false
+    hasAgreement: false,
+    isAdmin: false
   },
 
   onShow() {
     this.render();
+    this.checkAdmin();
+  },
+
+  /* 只有管理员才显示「视频审核」入口 */
+  checkAdmin() {
+    if (!wx.cloud || !CFG.CLOUD_ENV) return;
+    const self = this;
+    wx.cloud.callFunction({
+      name: 'videos',
+      data: { action: 'whoami' },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        self.setData({ isAdmin: !!d.isAdmin });
+      },
+      fail: () => {}
+    });
   },
 
   render() {
