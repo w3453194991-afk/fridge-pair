@@ -118,6 +118,33 @@ media_checks   权限：仅创建者可读写
    └─ 不通过  → status = blocked（列表里消失）
 ```
 
+集合一览：
+
+| 集合 | 用途 |
+| --- | --- |
+| `videos` | 共享视频 |
+| `media_checks` | 媒体检测记录 |
+| `video_comments` | 视频评论 / 弹幕 |
+| `users` | 家庭档案 |
+| `recipes` | 菜谱缓存 |
+
+### 评论通知（订阅消息）
+
+让作者知道有人评论了他的视频。
+
+1. 公众平台 → 功能 → 订阅消息 → 选用模板
+   搜索「评论」，挑一个一次性订阅模板，记下：
+   - **模板 ID**
+   - 模板里的字段名（通常是 `thing1` / `thing2` / `time3`）
+2. 填两处（必须一致）：
+   - `miniprogram/config.js` → `COMMENT_TMPL_ID`
+   - 云函数 `comments` 环境变量 → `COMMENT_TMPL_ID`
+3. 如果模板字段名和代码里不一样，改 `cloudfunctions/comments/index.js`
+   里 `notifyAuthor` 的 `data` 部分。
+4. 作者发布视频时会弹出一次订阅授权；同意后才会收到通知。
+
+> 用户没授权（或已用掉一次订阅）时，发送会返回 43101，属正常，不影响评论。
+
 ### 注意
 
 - `msgSecCheck` 需要传 `openid`，云函数里用 `cloud.getWXContext().OPENID`

@@ -284,6 +284,7 @@ Page({
                       const out = (res && res.result) || {};
                       if (out.ok) {
                         wx.showToast({ title: out.status === 'ok' ? '已发布到共享库' : '已提交，待审核', icon: 'none' });
+                        this.askSubscribe();
                       } else {
                         wx.showToast({ title: out.error || '发布失败', icon: 'none' });
                       }
@@ -340,6 +341,24 @@ Page({
   /* 站内直接拉网上的图文做法，不用跳出小程序 */
   onWebRecipe() {
     wx.navigateTo({ url: '/pages/netrecipe/index?q=' + encodeURIComponent(this.data.dish.name) });
+  },
+
+  /* 发布后请求一次订阅授权，有人评论时微信能通知你 */
+  askSubscribe() {
+    let cfg = {};
+    try { cfg = require('../../config.js') || {}; } catch (e) {}
+    const id = cfg.COMMENT_TMPL_ID;
+    if (!id) return;
+    if (!wx.requestSubscribeMessage) return;
+    wx.requestSubscribeMessage({
+      tmplIds: [id],
+      success: (res) => {
+        if (res[id] === 'accept') {
+          wx.showToast({ title: '已开启评论通知', icon: 'none' });
+        }
+      },
+      fail: () => {}
+    });
   },
 
   /* 分享这道菜给好友 */

@@ -31,6 +31,47 @@ function admins() {
     .split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
 }
 
+/* 评论通知：给视频作者发一条订阅消息
+   需要环境变量 COMMENT_TMPL_ID；没配就静默跳过 */
+async function notifyAuthor(videoId, fromOpenid, doc) {
+  const tmplId = String(process.env.COMMENT_TMPL_ID || '').trim();
+  if (!tmplId) return { ok: false, skipped: '未配置模板' };
+
+  const vid = await db.collection('videos').doc(videoId).get().catch(() => null);
+  const video = vid && vid.data;
+  if (!video) return { ok: false, skipped: '视频不存在' };
+  if (video._openid === fromOpenid) return { ok: false, skipped: '自己评论自己' };
+
+  const dishName = String(video.dishName || video.title || '你的视频').slice(0, 20);
+  const who = String(doc.nick || '有人').slice(0, 10);
+  const msg = String(doc.text || (doc.images && doc.images.length ? '[图片]' : '')).slice(0, 20);
+  const now = new Date(Date.now() + 8 * 3600 * 1000);   // 北京时间
+  const timeText = now.getUTCFullYear() + '-' +
+    String(now.getUTCMonth() + 1).padStart(2, '0') + '-' +
+    String(now.getUTCDate()).padStart(2, '0') + ' ' +
+    String(now.getUTCHours()).padStart(2, '0') + ':' +
+    String(now.getUTCMinutes()).padStart(2, '0');
+
+  try {
+    await cloud.openapi.subscribeMessage.send({
+      touser: video._openid,
+      templateId: tmplId,
+      page: 'pages/player/index?id=' + String(video.dishId || ''),
+      miniprogramState: 'formal',
+      // 字段名要和你选的模板一致，见 README 说明
+      data: {
+        thing1: { value: dishName },
+        thing2: { value: who + '：' + msg },
+        time3: { value: timeText }
+      }
+    });
+    return { ok: true };
+  } catch (e) {
+    // 43101 = 用户未订阅；其他错误也不影响评论本身
+    return { ok: false, error: String((e && (e.errMsg || e.message)) || e) };
+  }
+}
+
 async function textCheck(content) {
   const t = String(content || '').trim();
   if (!t) return { pass: true };
@@ -146,6 +187,12 @@ exports.main = async (event) => {
         status: needReview ? 'pending' : 'ok'
       };
       const r = await db.collection(COL).add({ data: doc });
+
+      // 通知视频作者（不阻塞主流程，失败静默）
+      if (doc.status === 'ok' && !doc.replyTo) {
+        notifyAuthor(videoId, OPENID, doc).catch(() => {});
+      }
+
       return { ok: true, id: r._id, status: doc.status };
     }
 
