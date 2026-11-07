@@ -18,6 +18,15 @@
       binderror="onError"
     ></video>
 
+    <!-- 发布者水印（审核通过后显示） -->
+    <view wx:if="{{curApproved}}" class="wmk">
+      <view class="wmkbadge">
+        <text class="wmkico">👤</text>
+        <text class="wmkname">{{curNick || '冰箱用户'}}</text>
+      </view>
+      <view class="wmkline">原创做法 · 请勿盗用</view>
+    </view>
+
     <!-- 弹幕层 -->
     <view class="dmlayer" catchtap="noop">
       <view wx:for="{{dms}}" wx:key="k" class="dmline {{item.mine ? 'mine' : ''}}" style="top:{{item.top}}rpx">

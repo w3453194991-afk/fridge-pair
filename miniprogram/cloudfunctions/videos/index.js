@@ -40,6 +40,7 @@ function mapItem(x, openid) {
     cover: x.cover || '',
     at: x.at || 0,
     status: x.status || 'ok',
+    nick: x.nick || '',
     mine: x._openid === openid
   };
 }
@@ -92,6 +93,7 @@ exports.main = async (event) => {
         title: String(event.title || ''),
         fileID: fileID,
         cover: String(event.cover || ''),
+        nick: String(event.nick || '').slice(0, 20),
         at: Date.now(),
         status: isAdmin ? 'ok' : 'pending',     // 管理员发的一律直接上架
         checkTrace: String(event.traceId || '')

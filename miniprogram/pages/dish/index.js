@@ -277,6 +277,7 @@ Page({
                       dishName: d.name,
                       title: title,
                       fileID: r.fileID,
+                      nick: (S.state.family && S.state.family.name) || '冰箱用户',
                       traceId: traceId || ''
                     },
                     success: (res) => {

@@ -25,7 +25,9 @@ Page({
     cmImages: [],
     replyTo: '',
     replyName: '',
-    curTime: 0
+    curTime: 0,
+    curNick: '',
+    curApproved: false
   },
 
   onLoad(opt) {
@@ -64,6 +66,8 @@ Page({
           id: x.id,
           title: x.title || x.dishName || '做法视频',
           fileID: x.fileID,
+          nick: x.nick || '',
+          status: x.status || 'ok',
           mine: !!x.mine,
           atText: self.fmtTime(x.at)
         }));
@@ -71,7 +75,12 @@ Page({
 
         // 自己没有视频时，自动播共享库第一条
         if (!self.data.src && list.length) {
-          self.setData({ curIdx: 0, curVideoId: list[0].id });
+          self.setData({
+            curIdx: 0,
+            curVideoId: list[0].id,
+            curNick: list[0].nick,
+            curApproved: list[0].status === 'ok'
+          });
           self.setSrc(list[0].fileID, list[0].mine, list[0].id);
           self.loadComments();
         }
@@ -152,7 +161,7 @@ Page({
     const i = Number(e.currentTarget.dataset.i);
     const it = this.data.list[i];
     if (!it) return;
-    this.setData({ curIdx: i, curVideoId: it.id, comments: [], dmAll: [], dms: [] });
+    this.setData({ curIdx: i, curVideoId: it.id, curNick: it.nick || '', curApproved: it.status === 'ok', comments: [], dmAll: [], dms: [] });
     this.setSrc(it.fileID, it.mine, it.id);
     this.loadComments();
   },

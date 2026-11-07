@@ -156,3 +156,26 @@ page { background: #0E1A16; }
   font-size: 18rpx; color: #B45309; background: #FFF3D6;
   border-radius: 8rpx; padding: 3rpx 10rpx; margin-left: 10rpx;
 }
+
+/* 发布者水印 */
+.wmk {
+  position: absolute; left: 18rpx; top: 18rpx; z-index: 5;
+  pointer-events: none; opacity: .92;
+}
+.wmkbadge {
+  display: inline-flex; align-items: center;
+  background: rgba(0, 0, 0, .42);
+  border: 1rpx solid rgba(255, 255, 255, .22);
+  border-radius: 24rpx; padding: 6rpx 18rpx 6rpx 12rpx;
+  backdrop-filter: blur(2px);
+}
+.wmkico { font-size: 20rpx; margin-right: 8rpx; }
+.wmkname {
+  font-size: 21rpx; font-weight: 800; color: #fff;
+  text-shadow: 0 1rpx 4rpx rgba(0,0,0,.6);
+  max-width: 220rpx; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.wmkline {
+  margin-top: 6rpx; font-size: 17rpx; color: rgba(255,255,255,.62);
+  text-shadow: 0 1rpx 4rpx rgba(0,0,0,.7); letter-spacing: 1rpx;
+}
