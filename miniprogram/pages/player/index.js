@@ -11,7 +11,21 @@ Page({
     err: '',
     list: [],          // 共享库视频列表
     curIdx: 0,
-    mine: false
+    mine: false,
+    curVideoId: '',
+
+    /* 弹幕 */
+    dms: [],           // 正在飘的 { k, text, top, mine }
+    dmInput: '',
+    dmAll: [],         // 全部弹幕（带时间点）
+
+    /* 评论 */
+    comments: [],
+    cmInput: '',
+    cmImages: [],
+    replyTo: '',
+    replyName: '',
+    curTime: 0
   },
 
   onLoad(opt) {
@@ -57,8 +71,9 @@ Page({
 
         // 自己没有视频时，自动播共享库第一条
         if (!self.data.src && list.length) {
-          self.setData({ curIdx: 0 });
+          self.setData({ curIdx: 0, curVideoId: list[0].id });
           self.setSrc(list[0].fileID, list[0].mine, list[0].id);
+          self.loadComments();
         }
       },
       fail: (e) => {
@@ -137,8 +152,9 @@ Page({
     const i = Number(e.currentTarget.dataset.i);
     const it = this.data.list[i];
     if (!it) return;
-    this.setData({ curIdx: i });
+    this.setData({ curIdx: i, curVideoId: it.id, comments: [], dmAll: [], dms: [] });
     this.setSrc(it.fileID, it.mine, it.id);
+    this.loadComments();
   },
 
   onRemove(e) {
@@ -172,6 +188,182 @@ Page({
   onError() {
     this.setData({ err: '这个视频打不开，可能是存储权限或链接过期' });
   },
+
+  /* ================= 弹幕 ================= */
+  onTime(e) {
+    const t = Math.floor((e.detail && e.detail.currentTime) || 0);
+    this.setData({ curTime: t });
+
+    const all = this.data.dmAll || [];
+    if (!all.length) return;
+    const shown = this.data.dms || [];
+    const now = Date.now();
+    const fire = all.filter(d => Math.abs(d.t - t) <= 1 && !shown.some(s => s.id === d.id));
+    if (!fire.length) return;
+
+    const add = fire.slice(0, 3).map((d, i) => ({
+      id: d.id,
+      k: 'k' + now + i,
+      text: d.text,
+      top: 12 + (i % 4) * 46,
+      mine: d.mine
+    }));
+    const next = shown.concat(add).slice(-8);
+    this.setData({ dms: next });
+    setTimeout(() => {
+      const cur = (this.data.dms || []).filter(s => !add.some(a => a.k === s.k));
+      this.setData({ dms: cur });
+    }, 9000);
+  },
+
+  onDmInput(e) {
+    this.setData({ dmInput: e.detail.value });
+  },
+
+  sendDm() {
+    const text = String(this.data.dmInput || '').trim();
+    if (!text) { wx.showToast({ title: '输入弹幕内容', icon: 'none' }); return; }
+    this.post({ text: text, type: 'danmaku', t: this.data.curTime }, () => {
+      this.setData({ dmInput: '' });
+    });
+  },
+
+  /* ================= 评论 ================= */
+  onCmInput(e) {
+    this.setData({ cmInput: e.detail.value });
+  },
+
+  onPickImg() {
+    const self = this;
+    const left = 3 - (this.data.cmImages || []).length;
+    if (left <= 0) { wx.showToast({ title: '最多 3 张', icon: 'none' }); return; }
+    wx.chooseMedia({
+      count: left,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const paths = (res.tempFiles || []).map(f => f.tempFilePath);
+        if (!paths.length) return;
+        wx.showLoading({ title: '上传图片…', mask: true });
+        let done = 0;
+        const ids = [];
+        paths.forEach((p, i) => {
+          const ext = (p.match(/\.(\w+)$/) || [, 'jpg'])[1];
+          wx.cloud.uploadFile({
+            cloudPath: 'comment-imgs/' + Date.now() + '-' + i + '.' + ext,
+            filePath: p,
+            success: (r) => { ids.push(r.fileID); },
+            complete: () => {
+              done++;
+              if (done === paths.length) {
+                wx.hideLoading();
+                self.setData({ cmImages: (self.data.cmImages || []).concat(ids) });
+              }
+            }
+          });
+        });
+      }
+    });
+  },
+
+  onRemoveImg(e) {
+    const i = Number(e.currentTarget.dataset.i);
+    const arr = this.data.cmImages.slice();
+    arr.splice(i, 1);
+    this.setData({ cmImages: arr });
+  },
+
+  onPreviewImg(e) {
+    const { id, i } = e.currentTarget.dataset;
+    const cm = this.data.comments.filter(c => c.id === id)[0];
+    if (!cm) return;
+    wx.previewImage({ current: cm.images[i], urls: cm.images });
+  },
+
+  onReply(e) {
+    const { id, nick } = e.currentTarget.dataset;
+    this.setData({ replyTo: id, replyName: nick || '' });
+  },
+
+  cancelReply() {
+    this.setData({ replyTo: '', replyName: '' });
+  },
+
+  sendCm() {
+    const text = String(this.data.cmInput || '').trim();
+    const imgs = this.data.cmImages || [];
+    if (!text && !imgs.length) { wx.showToast({ title: '写点内容', icon: 'none' }); return; }
+    this.post({ text: text, images: imgs, type: 'comment', replyTo: this.data.replyTo }, () => {
+      this.setData({ cmInput: '', cmImages: [], replyTo: '', replyName: '' });
+    });
+  },
+
+  /* 统一提交：评论 / 弹幕 / 回复 */
+  post(payload, done) {
+    const vid = this.data.curVideoId;
+    if (!vid) { wx.showToast({ title: '先选一个视频', icon: 'none' }); return; }
+    const nick = (S.state.family && S.state.family.name) || '冰箱用户';
+    wx.showLoading({ title: '发送中…', mask: true });
+    wx.cloud.callFunction({
+      name: 'comments',
+      data: Object.assign({ action: 'add', videoId: vid, dishId: this.dishId, nick: nick }, payload),
+      success: (res) => {
+        wx.hideLoading();
+        const d = (res && res.result) || {};
+        if (!d.ok) {
+          wx.showToast({ title: d.error || '发送失败', icon: 'none' });
+          return;
+        }
+        wx.showToast({ title: '已发送', icon: 'none' });
+        if (done) done();
+        this.loadComments();
+      },
+      fail: () => {
+        wx.hideLoading();
+        wx.showToast({ title: '发送失败', icon: 'none' });
+      }
+    });
+  },
+
+  loadComments() {
+    const vid = this.data.curVideoId;
+    if (!vid || !wx.cloud) return;
+    const self = this;
+    wx.cloud.callFunction({
+      name: 'comments',
+      data: { action: 'list', videoId: vid },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (!d.ok) return;
+
+        const raw = d.comments || [];
+        const tops = raw.filter(x => !x.replyTo);
+        const replies = raw.filter(x => x.replyTo);
+
+        const comments = tops.map(c => {
+          const rs = replies.filter(r => r.replyTo === c.id).map(r => ({
+            id: r.id,
+            nick: r.nick,
+            text: r.text,
+            atText: self.fmtTime(r.at)
+          }));
+          return {
+            id: c.id,
+            nick: c.nick,
+            text: c.text,
+            images: c.images || [],
+            atText: self.fmtTime(c.at),
+            replies: rs,
+            mine: c.mine
+          };
+        }).reverse();
+
+        self.setData({ comments: comments, dmAll: d.danmaku || [] });
+      }
+    });
+  },
+
+  noop() {},
 
   onBack() {
     wx.navigateBack();

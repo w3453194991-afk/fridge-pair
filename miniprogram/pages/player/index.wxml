@@ -14,8 +14,30 @@
       show-center-play-btn
       enable-play-gesture
       object-fit="contain"
+      bindtimeupdate="onTime"
       binderror="onError"
     ></video>
+
+    <!-- 弹幕层 -->
+    <view class="dmlayer" catchtap="noop">
+      <view wx:for="{{dms}}" wx:key="k" class="dmline {{item.mine ? 'mine' : ''}}" style="top:{{item.top}}rpx">
+        {{item.text}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 弹幕输入 -->
+  <view wx:if="{{src}}" class="dmbar">
+    <input
+      class="dminput"
+      placeholder="发条弹幕…"
+      value="{{dmInput}}"
+      bindinput="onDmInput"
+      confirm-type="send"
+      bindconfirm="sendDm"
+      maxlength="40"
+    />
+    <view class="dmsend" bindtap="sendDm">发送</view>
   </view>
 
   <view wx:elif="{{err}}" class="state">
@@ -49,6 +71,67 @@
     </view>
   </view>
 
+  <!-- 评论 -->
+  <view wx:if="{{curVideoId}}" class="cmsec">
+    <view class="cmtitle">
+      💬 评论 <text class="cmcount">{{comments.length}}</text>
+      <text class="dmtip">· 弹幕 {{dmAll.length}}</text>
+    </view>
+
+    <view wx:if="{{!comments.length}}" class="cmempty">还没有评论，来说两句</view>
+
+    <view wx:for="{{comments}}" wx:key="id" class="cmitem">
+      <view class="cmhead">
+        <text class="cmnick">{{item.nick}}</text>
+        <text class="cmtime">{{item.atText}}</text>
+      </view>
+      <view wx:if="{{item.text}}" class="cmtext">{{item.text}}</view>
+      <view wx:if="{{item.images.length}}" class="cmimgs">
+        <image
+          wx:for="{{item.images}}" wx:for-item="img" wx:for-index="ii" wx:key="*this"
+          class="cmimg" src="{{img}}" mode="aspectFill"
+          data-id="{{item.id}}" data-i="{{ii}}" bindtap="onPreviewImg"
+        />
+      </view>
+      <view class="cmfoot">
+        <text data-id="{{item.id}}" data-nick="{{item.nick}}" bindtap="onReply">回复</text>
+      </view>
+
+      <view wx:if="{{item.replies.length}}" class="cmreplies">
+        <view wx:for="{{item.replies}}" wx:for-item="rp" wx:key="id" class="cmreply">
+          <text class="rpnick">{{rp.nick}}</text>：{{rp.text}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 输入区 -->
+    <view wx:if="{{replyName}}" class="replytip">
+      回复 {{replyName}} <text class="cancel" bindtap="cancelReply">取消</text>
+    </view>
+
+    <view wx:if="{{cmImages.length}}" class="cmimgrow">
+      <view wx:for="{{cmImages}}" wx:key="*this" class="cmimgbox">
+        <image class="cmimg" src="{{item}}" mode="aspectFill" />
+        <view class="cmimgdel" data-i="{{index}}" bindtap="onRemoveImg">✕</view>
+      </view>
+    </view>
+
+    <view class="cminputbar">
+      <input
+        class="cminput"
+        placeholder="{{replyName ? '回复 ' + replyName : '写下你的评论…'}}"
+        value="{{cmInput}}"
+        bindinput="onCmInput"
+        confirm-type="send"
+        bindconfirm="sendCm"
+        maxlength="200"
+      />
+      <view class="cmimgbtn" bindtap="onPickImg">🖼</view>
+      <view class="cmsend" bindtap="sendCm">发送</view>
+    </view>
+  </view>
+
   <view class="note">共享视频由用户上传，仅供参考</view>
+
 
 </view>
