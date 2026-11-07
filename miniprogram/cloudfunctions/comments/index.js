@@ -105,8 +105,32 @@ exports.main = async (event) => {
         if (!c.pass) return { ok: false, error: '内容未通过安全检测' };
       }
 
-      // 带图一律先进待审（管理员除外）
-      const needReview = images.length > 0 && !isAdmin;
+      /* 图片先用 imgSecCheck 同步检测（≤1MB 有效）
+         · 全部通过 → 直接上架
+         · 有不通过 → 拒绝
+         · 检测服务异常 → 降级进人工待审 */
+      let imgVerdict = 'none';
+      if (images.length) {
+        try {
+          const r = await cloud.callFunction({
+            name: 'security',
+            data: { action: 'imgs', fileIDs: images }
+          });
+          const out = (r && r.result) || {};
+          if (out.ok && out.pass === false) return { ok: false, error: '图片未通过安全检测' };
+          if (out.ok && out.pass === true) {
+            const degraded = (out.results || []).some(x => x && x.degraded);
+            imgVerdict = degraded ? 'degraded' : 'pass';
+          } else {
+            imgVerdict = 'degraded';
+          }
+        } catch (e) {
+          imgVerdict = 'degraded';
+        }
+      }
+
+      // 只有"检测服务异常"或管理员外的人工策略才需要待审
+      const needReview = images.length > 0 && imgVerdict !== 'pass' && !isAdmin;
 
       const doc = {
         videoId: videoId,

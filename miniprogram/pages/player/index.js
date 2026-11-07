@@ -244,25 +244,43 @@ Page({
       success: (res) => {
         const paths = (res.tempFiles || []).map(f => f.tempFilePath);
         if (!paths.length) return;
-        wx.showLoading({ title: '上传图片…', mask: true });
-        let done = 0;
-        const ids = [];
-        paths.forEach((p, i) => {
-          const ext = (p.match(/\.(\w+)$/) || [, 'jpg'])[1];
-          wx.cloud.uploadFile({
-            cloudPath: 'comment-imgs/' + Date.now() + '-' + i + '.' + ext,
-            filePath: p,
-            success: (r) => { ids.push(r.fileID); },
-            complete: () => {
-              done++;
-              if (done === paths.length) {
-                wx.hideLoading();
-                self.setData({ cmImages: (self.data.cmImages || []).concat(ids) });
-              }
-            }
+
+        // 先压到 1280 宽、质量 70，保证 <1MB 才能走 imgSecCheck
+        wx.showLoading({ title: '压缩中…', mask: true });
+        Promise.all(paths.map(p => new Promise(ok => {
+          wx.compressImage({
+            src: p,
+            quality: 70,
+            compressedWidth: 1280,
+            success: (r) => ok(r.tempFilePath || p),
+            fail: () => ok(p)
           });
+        }))).then((compressed) => {
+          this.uploadImages(compressed);
         });
       }
+    });
+  },
+
+  uploadImages(paths) {
+    const self = this;
+    wx.showLoading({ title: '上传图片…', mask: true });
+    let done = 0;
+    const ids = [];
+    paths.forEach((p, i) => {
+      const ext = (p.match(/\.(\w+)$/) || [, 'jpg'])[1];
+      wx.cloud.uploadFile({
+        cloudPath: 'comment-imgs/' + Date.now() + '-' + i + '.' + ext,
+        filePath: p,
+        success: (r) => { ids.push(r.fileID); },
+        complete: () => {
+          done++;
+          if (done === paths.length) {
+            wx.hideLoading();
+            self.setData({ cmImages: (self.data.cmImages || []).concat(ids) });
+          }
+        }
+      });
     });
   },
 

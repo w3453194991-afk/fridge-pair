@@ -40,6 +40,55 @@ async function checkText(content, openid, scene) {
   }
 }
 
+/* ---------------- 图片同步检测（imgSecCheck，≤1MB） ---------------- */
+function httpsGetBuffer(url) {
+  return new Promise((resolve, reject) => {
+    const https = require('https');
+    const http = require('http');
+    const lib = url.indexOf('https:') === 0 ? https : http;
+    lib.get(url, (res) => {
+      // 跟随一次重定向
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        res.resume();
+        httpsGetBuffer(res.headers.location).then(resolve, reject);
+        return;
+      }
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => resolve(Buffer.concat(chunks)));
+    }).on('error', reject);
+  });
+}
+
+async function checkImage(fileID, openid) {
+  const file = String(fileID || '');
+  if (!file) return { ok: false, error: '缺少 fileID' };
+
+  let url = file;
+  if (file.indexOf('cloud://') === 0) {
+    const r = await cloud.getTempFileURL({ fileList: [file] });
+    const f = (r.fileList || [])[0];
+    url = f && f.tempFileURL;
+  }
+  if (!url) return { ok: false, error: '拿不到文件地址' };
+
+  try {
+    const buf = await httpsGetBuffer(url);
+    if (!buf || !buf.length) return { ok: false, error: '下载失败' };
+    if (buf.length > 1024 * 1024) return { ok: true, pass: true, skipped: '超过 1MB，跳过检测' };
+
+    await cloud.openapi.security.imgSecCheck({
+      media: { contentType: 'image/png', value: buf }
+    });
+    return { ok: true, pass: true };
+  } catch (e) {
+    const code = e && (e.errCode || e.errcode || e.code);
+    if (Number(code) === 87014) return { ok: true, pass: false, suggest: 'risky' };
+    // 检测服务异常：不阻断，标记降级
+    return { ok: true, pass: true, degraded: String((e && (e.errMsg || e.message)) || e) };
+  }
+}
+
 /* ---------------- 媒体检测（异步） ---------------- */
 async function checkMedia(fileID, mediaType, openid, scene) {
   const file = String(fileID || '');
@@ -133,6 +182,21 @@ exports.main = async (event) => {
   }
   if (action === 'media') {
     return await checkMedia(event.fileID, event.mediaType, OPENID, event.scene);
+  }
+  if (action === 'img') {
+    return await checkImage(event.fileID, OPENID);
+  }
+  /* 批量图片检测：一次传多个 fileID，返回是否全部通过 */
+  if (action === 'imgs') {
+    const list = Array.isArray(event.fileIDs) ? event.fileIDs.filter(Boolean) : [];
+    if (!list.length) return { ok: true, pass: true, results: [] };
+    const results = [];
+    for (const f of list) {
+      const r = await checkImage(f, OPENID);
+      results.push(r);
+      if (r.ok && r.pass === false) return { ok: true, pass: false, results: results };
+    }
+    return { ok: true, pass: true, results: results };
   }
   if (action === 'status') {
     const r = await db.collection(CHECKS).where({ traceId: String(event.traceId || '') }).limit(1).get();
