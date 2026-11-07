@@ -52,6 +52,14 @@
       <text>🧭 附近超市</text>
       <text class="dgo">›</text>
     </view>
+    <view class="line2 row between" bindtap="onMyVideos">
+      <text>📹 我的视频</text>
+      <text class="dgo">›</text>
+    </view>
+    <view class="line2 row between" bindtap="onVideoLib">
+      <text>🎬 视频库</text>
+      <text class="dgo">›</text>
+    </view>
     <view class="line2 row between" bindtap="onSettings">
       <text>⚙️ 设置</text>
       <text class="dgo">›</text>

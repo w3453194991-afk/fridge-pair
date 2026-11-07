@@ -8,6 +8,7 @@
 
   <view wx:if="{{src}}" class="playerbox">
     <video
+      id="vplayer"
       class="player"
       src="{{src}}"
       controls
@@ -28,15 +29,21 @@
     </view>
 
     <!-- 弹幕层 -->
-    <view class="dmlayer" catchtap="noop">
+    <view wx:if="{{showDm}}" class="dmlayer" catchtap="noop">
       <view wx:for="{{dms}}" wx:key="k" class="dmline {{item.mine ? 'mine' : ''}}" style="top:{{item.top}}rpx">
         {{item.text}}
       </view>
     </view>
   </view>
 
+  <!-- 播放控制条 -->
+  <view wx:if="{{src}}" class="ctrlbar">
+    <view class="ctrl {{showDm ? 'on' : ''}}" bindtap="toggleDm">{{showDm ? '💬 弹幕开' : '💬 弹幕关'}}</view>
+    <view class="ctrl" bindtap="onRate">⚡ {{rate}}x</view>
+  </view>
+
   <!-- 弹幕输入 -->
-  <view wx:if="{{src}}" class="dmbar">
+  <view wx:if="{{src && showDm}}" class="dmbar">
     <input
       class="dminput"
       placeholder="发条弹幕…"
@@ -105,6 +112,10 @@
       </view>
       <view class="cmfoot">
         <text data-id="{{item.id}}" data-nick="{{item.nick}}" bindtap="onReply">回复</text>
+        <text
+          wx:if="{{item.mine}}" class="delcm"
+          data-id="{{item.id}}" data-mine="{{item.mine}}" bindtap="onDelComment"
+        >删除</text>
       </view>
 
       <view wx:if="{{item.replies.length}}" class="cmreplies">

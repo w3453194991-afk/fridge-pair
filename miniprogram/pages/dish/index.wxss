@@ -155,3 +155,9 @@
 .btn.danger {
   color: #B91C1C; background: #FFF5F5; border: 1rpx solid #FADADA;
 }
+
+button.btn {
+  width: 100%; padding: 0; margin: 0; line-height: normal;
+  text-align: center; border: none; background: none;
+}
+button.btn::after { border: none; }

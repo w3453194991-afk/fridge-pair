@@ -26,6 +26,8 @@ Page({
     replyTo: '',
     replyName: '',
     curTime: 0,
+    showDm: true,
+    rate: 1,
     curNick: '',
     curApproved: false
   },
@@ -417,6 +419,47 @@ Page({
   },
 
   noop() {},
+
+  toggleDm() {
+    this.setData({ showDm: !this.data.showDm });
+  },
+
+  onRate() {
+    const list = [1, 1.25, 1.5, 2, 0.75];
+    const i = list.indexOf(this.data.rate);
+    const next = list[(i + 1) % list.length];
+    this.setData({ rate: next });
+    try {
+      const ctx = wx.createVideoContext('vplayer', this);
+      ctx.playbackRate(next);
+    } catch (e) {}
+  },
+
+  onDelComment(e) {
+    const id = e.currentTarget.dataset.id;
+    const mine = e.currentTarget.dataset.mine;
+    if (!id) return;
+    if (!mine) { wx.showToast({ title: '只能删自己的评论', icon: 'none' }); return; }
+    wx.showModal({
+      title: '删除这条评论',
+      content: '删除后其他人也看不到了。',
+      confirmColor: '#B91C1C',
+      success: (r) => {
+        if (!r.confirm) return;
+        wx.cloud.callFunction({
+          name: 'comments',
+          data: { action: 'remove', id: id },
+          success: (res) => {
+            const d = (res && res.result) || {};
+            if (!d.ok) { wx.showToast({ title: d.error || '删除失败', icon: 'none' }); return; }
+            wx.showToast({ title: '已删除', icon: 'none' });
+            this.loadComments();
+          },
+          fail: () => wx.showToast({ title: '删除失败', icon: 'none' })
+        });
+      }
+    });
+  },
 
   onBack() {
     wx.navigateBack();

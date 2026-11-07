@@ -1,0 +1,50 @@
+.hero {
+  background: linear-gradient(150deg, #F5F0FF, #FAF7FF);
+  border: 1rpx solid #E4D9FF; border-radius: 26rpx;
+  padding: 26rpx 24rpx; margin-bottom: 22rpx;
+}
+.ht1 { font-size: 32rpx; font-weight: 900; color: #6D28D9; }
+.ht2 { font-size: 22rpx; color: #6C7F78; margin-top: 8rpx; line-height: 1.6; }
+
+.state { margin-top: 110rpx; text-align: center; }
+.state .e { font-size: 96rpx; margin-bottom: 14rpx; }
+.spin {
+  width: 52rpx; height: 52rpx; margin: 0 auto 18rpx;
+  border: 5rpx solid #EDE4FF; border-top-color: #7C3AED; border-radius: 50%;
+  animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.stxt { font-size: 24rpx; color: #8B9A96; }
+.shint { font-size: 21rpx; color: #A8B5B0; line-height: 1.7; padding: 0 40rpx; margin: 10rpx 0 20rpx; }
+
+.errcard { background: #FFF6F6; border-color: #F6D6D6; }
+.etxt { font-size: 25rpx; color: #B91C1C; line-height: 1.7; }
+.mt { margin-top: 20rpx; }
+
+.row { padding: 20rpx 22rpx; }
+.rtop { display: flex; align-items: center; }
+.demo {
+  width: 78rpx; height: 78rpx; border-radius: 20rpx; font-size: 36rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: #F8F5FF; margin-right: 16rpx;
+}
+.rmid { flex: 1; min-width: 0; }
+.rname { font-size: 27rpx; font-weight: 800; }
+.rmeta { font-size: 20rpx; color: #8B9A96; margin-top: 6rpx; }
+.rstat {
+  font-size: 19rpx; font-weight: 800; border-radius: 8rpx; padding: 4rpx 12rpx;
+}
+.rstat.pending { color: #8B6A00; background: #FFF3D6; }
+.rstat.ok { color: #0E8F63; background: #E4F8EE; }
+.rstat.blocked { color: #B91C1C; background: #FEEAEA; }
+.rstat.deleted { color: #8B9A96; background: #F0F3F1; }
+
+.rbtns { display: flex; margin-top: 16rpx; }
+.btnmini {
+  flex: 1; height: 68rpx; border-radius: 18rpx; margin-right: 12rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 23rpx; font-weight: 800;
+}
+.btnmini:last-child { margin-right: 0; }
+.btnmini.ghost { color: #4E6B61; background: #F5FAF7; border: 1rpx solid #E7EFEA; }
+.btnmini.danger { color: #B91C1C; background: #FFF5F5; border: 1rpx solid #FADADA; }

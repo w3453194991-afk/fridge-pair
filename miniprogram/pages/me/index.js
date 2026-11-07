@@ -73,6 +73,14 @@ Page({
     });
   },
 
+  onMyVideos() {
+    wx.navigateTo({ url: '/pages/myvideos/index' });
+  },
+
+  onVideoLib() {
+    wx.navigateTo({ url: '/pages/videolib/index' });
+  },
+
   onNearby() {
     wx.navigateTo({ url: '/pages/nearby/index' });
   },

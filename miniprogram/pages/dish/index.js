@@ -342,6 +342,15 @@ Page({
     wx.navigateTo({ url: '/pages/netrecipe/index?q=' + encodeURIComponent(this.data.dish.name) });
   },
 
+  /* 分享这道菜给好友 */
+  onShareAppMessage() {
+    const d = this.data.dish || {};
+    return {
+      title: (d.emoji || '🍳') + ' 我在冰箱对对碰学做「' + (d.name || '这道菜') + '」',
+      path: '/pages/dish/index?id=' + (d.id || '')
+    };
+  },
+
   /* 查共享视频库有没有这道菜的视频 */
   loadSharedCount() {
     const d = this.data.dish;

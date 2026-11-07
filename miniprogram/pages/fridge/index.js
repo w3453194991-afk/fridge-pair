@@ -17,10 +17,12 @@ Page({
     name: '我',
     members: 0,
     total: 0,
+    isFridgeEmpty: false,
     dateText: '',
     aiA: '', aiB: '', aiWhy: '', aiDishId: '', hasAI: false,
     meals: [],
     hasMenu: false,
+    videoCount: 0,
     err: ''
   },
 
@@ -40,6 +42,25 @@ Page({
   onShow() {
     if (this.getTabBar && this.getTabBar()) this.getTabBar().setSel(0);
     if (this.ready) this.refresh();
+    this.loadVideoCount();
+  },
+
+  /* 视频库有多少个可看的视频 */
+  loadVideoCount() {
+    if (!wx.cloud) return;
+    const self = this;
+    wx.cloud.callFunction({
+      name: 'videos',
+      data: { action: 'dishes' },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (d.ok) {
+          const n = (d.items || []).reduce((s, x) => s + (x.count || 0), 0);
+          self.setData({ videoCount: n });
+        }
+      },
+      fail: () => {}
+    });
   },
 
   onChat() {
@@ -50,8 +71,26 @@ Page({
     wx.navigateTo({ url: '/pages/nearby/index' });
   },
 
+  onScan() {
+    wx.switchTab({ url: '/pages/fridge/index' });
+    wx.showToast({ title: '点中间相机拍照', icon: 'none' });
+  },
+
   onAddFood() {
     wx.navigateTo({ url: '/pages/addfood/index' });
+  },
+
+  onVideoLib() {
+    wx.navigateTo({ url: '/pages/videolib/index' });
+  },
+
+  onDemoFill() {
+    let n = 0;
+    try {
+      n = S.fillDemoFoods();
+    } catch (e) {}
+    wx.showToast({ title: n ? ('已填充，共 ' + n + ' 种') : '填充失败', icon: 'none' });
+    this.refresh();
   },
 
   onBatch() {
@@ -133,6 +172,7 @@ Page({
       this.setData({
         counts: c,
         total: total,
+        isFridgeEmpty: (this.state || S.state).foods.length === 0,
         foods: foods,
         cats: cats,
         hasUrgent: urgent.length > 0,

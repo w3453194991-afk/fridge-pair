@@ -271,6 +271,20 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       this.save();
     },
 
+    // 示例冰箱：放几样常用食材，方便快速体验临期/配餐
+    fillDemoFoods: function () {
+      const demo = [
+        ['番茄', 3, 2], ['鸡蛋', 6, 12], ['菠菜', 1, 3], ['猪里脊', 300, 2],
+        ['土豆', 3, 20], ['牛奶', 1, 4], ['西兰花', 2, 5], ['青椒', 3, 8]
+      ];
+      demo.forEach(function (x) {
+        if (this.state.foods.some(f => f.name === x[0])) return;
+        this.state.foods.push(makeFood(x[0], x[1], x[2]));
+      }, this);
+      this.save();
+      return this.state.foods.length;
+    },
+
     // 跳过注册：填一份示例家庭，保证后续菜单能生成
     demoFamily: function () {
       this.state.family = {

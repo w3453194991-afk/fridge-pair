@@ -1,0 +1,42 @@
+<view class="wrap">
+
+  <view class="hero">
+    <view class="ht1">📹 我的视频</view>
+    <view class="ht2">审核通过的会出现在「视频库」里，所有人都能看</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="state">
+    <view class="spin"></view>
+    <view class="stxt">加载中…</view>
+  </view>
+
+  <view wx:elif="{{err}}" class="card errcard">
+    <view class="etxt">{{err}}</view>
+    <view class="btn ghost mt" bindtap="onBack">返回</view>
+  </view>
+
+  <block wx:elif="{{rows.length}}">
+    <view wx:for="{{rows}}" wx:key="id" class="card row">
+      <view class="rtop" data-i="{{index}}" bindtap="onOpen">
+        <view class="demo">{{item.emoji}}</view>
+        <view class="rmid">
+          <view class="rname">{{item.name}}</view>
+          <view class="rmeta">{{item.atText}}{{item.title ? ' · ' + item.title : ''}}</view>
+        </view>
+        <view class="rstat {{item.statusCls}}">{{item.statusText}}</view>
+      </view>
+      <view class="rbtns">
+        <view class="btnmini ghost" data-i="{{index}}" bindtap="onOpen">查看</view>
+        <view class="btnmini danger" data-i="{{index}}" bindtap="onRemove">删除</view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:else class="state">
+    <view class="e">📹</view>
+    <view class="stxt">你还没有上传过视频</view>
+    <view class="shint">去菜谱选一道菜 → 「📹 添加我的做法视频」→ 发布共享</view>
+    <view class="btn ghost mt" bindtap="onAdd">去菜谱看看</view>
+  </view>
+
+</view>

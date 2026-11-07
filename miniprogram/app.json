@@ -21,7 +21,8 @@
     "pages/batch/index",
     "pages/player/index",
     "pages/videoadmin/index",
-    "pages/videolib/index"
+    "pages/videolib/index",
+    "pages/myvideos/index"
   ],
   "window": {
     "navigationBarTitleText": "冰箱对对碰",
