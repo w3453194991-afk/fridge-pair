@@ -20,7 +20,8 @@
     "pages/netrecipe/index",
     "pages/batch/index",
     "pages/player/index",
-    "pages/videoadmin/index"
+    "pages/videoadmin/index",
+    "pages/videolib/index"
   ],
   "window": {
     "navigationBarTitleText": "冰箱对对碰",

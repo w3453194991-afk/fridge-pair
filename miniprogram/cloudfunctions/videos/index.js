@@ -55,6 +55,27 @@ exports.main = async (event) => {
   }
 
   try {
+    /* ---------- 视频库：有视频的菜（按菜聚合） ---------- */
+    if (action === 'dishes') {
+      const r = await db.collection(COL).where({ status: 'ok' })
+        .orderBy('at', 'desc').limit(200).get();
+      const map = {};
+      (r.data || []).forEach(x => {
+        const k = x.dishId || '';
+        if (!k) return;
+        if (!map[k]) {
+          map[k] = { dishId: k, dishName: x.dishName || '', count: 0, nick: x.nick || '', at: 0 };
+        }
+        map[k].count++;
+        if ((x.at || 0) > map[k].at) {
+          map[k].at = x.at || 0;
+          map[k].nick = x.nick || map[k].nick;
+        }
+      });
+      const items = Object.keys(map).map(k => map[k]).sort((a, b) => b.at - a.at);
+      return { ok: true, items: items };
+    }
+
     /* ---------- 某道菜的视频：已通过 + 自己的待审 ---------- */
     if (action === 'list') {
       const base = { status: 'ok' };

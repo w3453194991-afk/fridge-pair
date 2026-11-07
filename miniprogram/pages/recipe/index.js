@@ -186,7 +186,8 @@ Page({
   onTab(e) {
     const key = e.currentTarget.dataset.key;
     if (key === 'video') {
-      wx.navigateTo({ url: '/pages/video/index' });
+      // 视频库：列出有共享视频的菜，点进去直接看
+      wx.navigateTo({ url: '/pages/videolib/index' });
       return;
     }
     this.setData({ tab: key }, () => this.render());

@@ -1,0 +1,45 @@
+<view class="wrap">
+
+  <view class="hero">
+    <view class="ht1">🎬 视频库</view>
+    <view class="ht2">大家上传的做法视频都在这里，点开就能看</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="state">
+    <view class="spin"></view>
+    <view class="stxt">加载中…</view>
+  </view>
+
+  <view wx:elif="{{err}}" class="card errcard">
+    <view class="etxt">{{err}}</view>
+    <view class="btn ghost mt" bindtap="onBack">返回</view>
+  </view>
+
+  <block wx:elif="{{rows.length}}">
+    <view
+      wx:for="{{rows}}" wx:key="dishId"
+      class="card dcard" data-i="{{index}}" bindtap="onOpen"
+    >
+      <view class="demo">{{item.emoji}}</view>
+      <view class="dmid">
+        <view class="dname">{{item.name}}</view>
+        <view class="dmeta">{{item.nick}} 上传 · {{item.atText}}</view>
+      </view>
+      <view class="dright">
+        <view class="dcount">{{item.count}}</view>
+        <view class="dunit">个视频</view>
+      </view>
+      <view class="dplay">▶</view>
+    </view>
+  </block>
+
+  <view wx:else class="state">
+    <view class="e">🎬</view>
+    <view class="stxt">还没有人上传视频</view>
+    <view class="shint">你可以做第一个：菜谱 → 任意菜 → 「📹 添加我的做法视频」→ 发布共享</view>
+    <view class="btn ghost mt" bindtap="onBack">返回</view>
+  </view>
+
+  <view class="footlink" bindtap="onSearch">找不到想看的？去搜视频教程 ›</view>
+
+</view>

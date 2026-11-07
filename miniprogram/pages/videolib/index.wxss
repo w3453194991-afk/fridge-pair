@@ -1,0 +1,41 @@
+.hero {
+  background: linear-gradient(150deg, #EAFBF2, #F6FDFA);
+  border: 1rpx solid #D9F0E5; border-radius: 26rpx;
+  padding: 26rpx 24rpx; margin-bottom: 22rpx;
+}
+.ht1 { font-size: 32rpx; font-weight: 900; color: #0E8F63; }
+.ht2 { font-size: 22rpx; color: #6C7F78; margin-top: 8rpx; line-height: 1.6; }
+
+.state { margin-top: 110rpx; text-align: center; }
+.state .e { font-size: 96rpx; margin-bottom: 14rpx; }
+.spin {
+  width: 52rpx; height: 52rpx; margin: 0 auto 18rpx;
+  border: 5rpx solid #DFF0E7; border-top-color: #12A576; border-radius: 50%;
+  animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.stxt { font-size: 24rpx; color: #8B9A96; }
+.shint { font-size: 21rpx; color: #A8B5B0; line-height: 1.7; padding: 0 40rpx; margin: 10rpx 0 20rpx; }
+
+.errcard { background: #FFF6F6; border-color: #F6D6D6; }
+.etxt { font-size: 25rpx; color: #B91C1C; line-height: 1.7; }
+.mt { margin-top: 20rpx; }
+
+.dcard { display: flex; align-items: center; padding: 20rpx 22rpx; }
+.demo {
+  width: 86rpx; height: 86rpx; border-radius: 22rpx; font-size: 40rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: #F6FBF8; margin-right: 18rpx;
+}
+.dmid { flex: 1; min-width: 0; }
+.dname { font-size: 28rpx; font-weight: 800; }
+.dmeta { font-size: 20rpx; color: #8B9A96; margin-top: 6rpx; }
+.dright { text-align: right; margin-right: 14rpx; }
+.dcount { font-size: 30rpx; font-weight: 900; color: #12A576; line-height: 1; }
+.dunit { font-size: 17rpx; color: #9AA6A1; margin-top: 4rpx; }
+.dplay { font-size: 26rpx; color: #12A576; }
+
+.footlink {
+  text-align: center; font-size: 22rpx; color: #7C8B87;
+  margin-top: 36rpx; padding: 20rpx;
+}
