@@ -12,11 +12,40 @@ Page({
     cooked: 0,
     saved: 0,
     health: 0,
-    total: 0
+    total: 0,
+    unreadVideos: 0
   },
 
   onShow() {
-    if (this.getTabBar && this.getTabBar()) this.getTabBar().setSel(3); this.render(); },
+    if (this.getTabBar && this.getTabBar()) this.getTabBar().setSel(3);
+    this.render();
+    this.checkUnread();
+  },
+
+  /* 有未读评论 → 底部「我的」标红点 */
+  checkUnread() {
+    if (!wx.cloud) return;
+    const self = this;
+    wx.cloud.callFunction({
+      name: 'videos',
+      data: { action: 'mine' },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (!d.ok) return;
+        const reads = (S.state && S.state.videoReadAt) || {};
+        const n = (d.items || []).filter(x => (x.lastCommentAt || 0) > (reads[x.dishId] || 0)).length;
+        self.setData({ unreadVideos: n });
+        try {
+          if (n > 0) {
+            wx.setTabBarBadge({ index: 3, text: n > 99 ? '99+' : String(n) });
+          } else {
+            wx.removeTabBarBadge({ index: 3 });
+          }
+        } catch (e) {}
+      },
+      fail: () => {}
+    });
+  },
 
   render() {
     const st = S.state;

@@ -53,7 +53,7 @@
       <text class="dgo">›</text>
     </view>
     <view class="line2 row between" bindtap="onMyVideos">
-      <text>📹 我的视频</text>
+      <text>📹 我的视频<text wx:if="{{unreadVideos}}" class="badge">{{unreadVideos}}</text></text>
       <text class="dgo">›</text>
     </view>
     <view class="line2 row between" bindtap="onVideoLib">
