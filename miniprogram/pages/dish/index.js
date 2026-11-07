@@ -206,6 +206,11 @@ Page({
     wx.navigateTo({ url: '/pages/video/index?q=' + encodeURIComponent(this.data.dish.name) });
   },
 
+  /* 站内直接拉网上的图文做法，不用跳出小程序 */
+  onWebRecipe() {
+    wx.navigateTo({ url: '/pages/netrecipe/index?q=' + encodeURIComponent(this.data.dish.name) });
+  },
+
   /* 删除自定义/网上菜谱 */
   onRemove() {
     const d = this.data.dish;

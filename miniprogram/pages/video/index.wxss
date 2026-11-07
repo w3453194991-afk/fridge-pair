@@ -48,3 +48,10 @@
 .tip { background: linear-gradient(120deg, #F7F1FF, #FDF7FF); border-color: #EADFFF; }
 .tipt { font-size: 26rpx; font-weight: 800; color: #5B3FA8; }
 .tipc { font-size: 22rpx; color: #7A6B96; line-height: 1.8; margin-top: 10rpx; }
+
+.inappcard {
+  background: linear-gradient(160deg, #F2FCF7, #E8F8F0);
+  border: 1rpx solid #CBEFE0;
+}
+.iatitle { font-size: 28rpx; font-weight: 900; color: #0E8F63; }
+.iadesc { font-size: 22rpx; color: #6C7F78; line-height: 1.7; margin: 8rpx 0 20rpx; }

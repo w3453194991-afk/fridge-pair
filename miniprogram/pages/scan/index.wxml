@@ -40,6 +40,11 @@
         <view class="mid">
           <view class="nm">{{item.name}}<text wx:if="{{item.unknown}}" class="outdb">库外</text></view>
           <view class="cf">置信度 {{item.conf}}%</view>
+          <view class="shelfline" data-i="{{item.idx}}" catchtap="onShelf">
+            <text class="shelflab">保质</text>
+            <text class="shelfval">{{item.shelfText}}</text>
+            <text class="shelftip">点击修改</text>
+          </view>
         </view>
         <view class="qty">
           <view class="qb" data-i="{{item.idx}}" data-d="-1" catchtap="onQty">−</view>

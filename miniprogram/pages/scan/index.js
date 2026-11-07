@@ -199,13 +199,15 @@ Page({
       const name = String(x.name || '').trim();
       const meta = E.foodMeta(name);
       const score = typeof x.score === 'number' ? x.score : 0.6;
+      const shelf = Number(x.shelf) > 0 ? Number(x.shelf) : (meta.shelf || 7);
       return {
         idx: i,
         name: name,
         emoji: meta.emoji || '🍽',
         unit: meta.unit || '份',
         qty: 1,
-        shelf: meta.shelf || 7,
+        shelf: shelf,
+        shelfText: '约 ' + shelf + ' 天',
         storage: meta.storage || '',
         conf: Math.round(score * 100),
         checked: score >= 0.7,
@@ -220,6 +222,55 @@ Page({
       warnText: isMock ? '以下不是真实识别结果，只是演示数据' : '',
       round: this.data.round + 1
     }, () => this.syncCount());
+  },
+
+  /* 改保质期：可选天数 + 具体日期（保健品/药品这类） */
+  onShelf(e) {
+    const i = Number(e.currentTarget.dataset.i);
+    const it = this.data.items.filter(x => x.idx === i)[0];
+    if (!it) return;
+    const opts = [3, 7, 15, 30, 90, 180, 365, 730];
+    const list = opts.map(d => d + ' 天（约 ' + d + ' 天）').concat(['📅 选具体到期日']);
+    wx.showActionSheet({
+      itemList: ['3 天', '7 天', '15 天', '30 天', '90 天', '180 天', '365 天', '730 天', '📅 选具体到期日'],
+      success: (r) => {
+        const items = this.data.items.slice();
+        const idx = items.findIndex(x => x.idx === i);
+        if (idx < 0) return;
+
+        if (r.tapIndex === opts.length) {
+          // 选具体日期
+          const d = new Date();
+          d.setDate(d.getDate() + 30);
+          const def = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+          wx.showModal({
+            title: '到期日期',
+            editable: true,
+            placeholderText: '如 2027-06-30',
+            content: def,
+            success: (m) => {
+              if (!m.confirm) return;
+              const val = String(m.content || '').trim();
+              const t = new Date(val.replace(/-/g, '/'));
+              if (isNaN(t.getTime())) {
+                wx.showToast({ title: '日期格式不对', icon: 'none' });
+                return;
+              }
+              const days = Math.max(1, Math.round((t.getTime() - Date.now()) / 86400000));
+              items[idx].shelf = days;
+              items[idx].shelfText = val + ' 到期';
+              this.setData({ items: items });
+            }
+          });
+          return;
+        }
+
+        const days = opts[r.tapIndex];
+        items[idx].shelf = days;
+        items[idx].shelfText = days >= 365 ? (Math.round(days / 365 * 10) / 10) + ' 年' : '约 ' + days + ' 天';
+        this.setData({ items: items });
+      }
+    });
   },
 
   /* 本地演示：从场景库取一组 + 少量干扰项 */

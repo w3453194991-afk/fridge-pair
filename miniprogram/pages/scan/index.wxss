@@ -93,3 +93,12 @@ page { background: #04120E; }
   color: #B45309; background: #FFF7E8; border: 1rpx solid #FBE3CF;
   border-radius: 16rpx; padding: 14rpx 18rpx; line-height: 1.6;
 }
+
+.shelfline {
+  display: inline-flex; align-items: center;
+  margin-top: 8rpx; padding: 6rpx 14rpx;
+  background: #EFF9F4; border: 1rpx solid #D9F0E5; border-radius: 12rpx;
+}
+.shelflab { font-size: 18rpx; color: #7C8B87; margin-right: 8rpx; }
+.shelfval { font-size: 19rpx; font-weight: 800; color: #0E8F63; }
+.shelftip { font-size: 17rpx; color: #B7C4BE; margin-left: 10rpx; }

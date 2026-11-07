@@ -47,4 +47,46 @@
     <view class="stxt">输入菜名，搜索网上的做法</view>
   </view>
 
+  <!-- 做法详情（站内查看，不用跳出去） -->
+  <view wx:if="{{detail}}" class="mask" bindtap="onCloseDetail">
+    <view class="sheet" catchtap="noop">
+      <view class="sheethead">
+        <view class="shemo">{{detail.emoji}}</view>
+        <view class="shmid">
+          <view class="shname">{{detail.name}}</view>
+          <view class="shmeta">{{detail.cuisine}} · 约 {{detail.minutes}} 分钟</view>
+        </view>
+        <view class="shclose" bindtap="onCloseDetail">✕</view>
+      </view>
+
+      <scroll-view scroll-y class="sheetbody">
+        <view class="shsec">食材</view>
+        <view class="shings">
+          <text wx:for="{{detail.ingredients}}" wx:key="*this" class="shing">{{item}}</text>
+        </view>
+
+        <view wx:if="{{detail.seasonings.length}}" class="shsec">调料</view>
+        <view wx:if="{{detail.seasonings.length}}" class="shings">
+          <text wx:for="{{detail.seasonings}}" wx:key="*this" class="shsea">{{item}}</text>
+        </view>
+
+        <view class="shsec">做法</view>
+        <view wx:for="{{detail.steps}}" wx:key="*this" class="shstep">
+          <text class="shn">{{index + 1}}</text>
+          <text class="sht">{{item}}</text>
+        </view>
+
+        <view wx:if="{{detail.tips.length}}" class="shsec">小贴士</view>
+        <view wx:for="{{detail.tips}}" wx:key="*this" class="shtip">· {{item}}</view>
+
+        <view class="shnote">内容来自第三方菜谱数据，仅供参考</view>
+      </scroll-view>
+
+      <view class="sheetfoot">
+        <view class="btnmini ghost" bindtap="onCloseDetail">关闭</view>
+        <view class="btnmini primary" bindtap="onAddFromDetail">加入我的菜谱</view>
+      </view>
+    </view>
+  </view>
+
 </view>

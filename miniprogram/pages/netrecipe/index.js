@@ -115,15 +115,36 @@ Page({
   onOpen(e) {
     const i = Number(e.currentTarget.dataset.i);
     const item = this.data.items[i];
-    if (!item) return;
-    // 先在本地库里找到同名菜，再跳详情；找不到就提示先加入
-    const hit = D.DISHES.filter(d => d.name === item.name)[0];
-    if (hit) {
-      wx.navigateTo({ url: '/pages/dish/index?id=' + hit.id });
-    } else {
-      wx.showToast({ title: '先点「加入」再看详情', icon: 'none' });
-    }
+    if (!item || !item.raw) return;
+    const raw = item.raw;
+    this.setData({
+      detail: {
+        name: raw.name,
+        emoji: raw.emoji || '🍽',
+        cuisine: (raw.cuisine || []).join(' · ') || '家常',
+        minutes: raw.minutes || 20,
+        ingredients: (raw.ingredients || []).map(x => x.name),
+        seasonings: raw.seasonings || [],
+        steps: (raw.steps || []).map(s => s.text),
+        tips: raw.tips || []
+      }
+    });
   },
+
+  onCloseDetail() {
+    this.setData({ detail: null });
+  },
+
+  /* 详情里直接加入菜谱库 */
+  onAddFromDetail() {
+    const d = this.data.detail;
+    if (!d) return;
+    const i = this.data.items.findIndex(x => x.name === d.name);
+    if (i >= 0) this.onAdd({ currentTarget: { dataset: { i: i } } });
+    this.setData({ detail: null });
+  },
+
+  noop() {},
 
   onBack() {
     wx.navigateBack();
