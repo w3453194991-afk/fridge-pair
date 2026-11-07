@@ -24,7 +24,7 @@
             {{item.name}}
             <text wx:if="{{item.unread}}" class="reddot">新评论</text>
           </view>
-          <view class="rmeta">{{item.atText}}{{item.title ? ' · ' + item.title : ''}}</view>
+          <view class="rmeta">{{item.atText}}{{item.title ? ' · ' + item.title : ''}} · ▶ {{item.views}} 次播放</view>
           <view wx:if="{{item.lastText}}" class="rlast">{{item.lastText}}</view>
         </view>
         <view class="rstat {{item.statusCls}}">{{item.statusText}}</view>

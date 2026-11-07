@@ -29,6 +29,7 @@ Page({
     showDm: true,
     rate: 1,
     curNick: '',
+    curViews: 0,
     curApproved: false
   },
 
@@ -69,6 +70,7 @@ Page({
           title: x.title || x.dishName || '做法视频',
           fileID: x.fileID,
           nick: x.nick || '',
+          views: x.views || 0,
           status: x.status || 'ok',
           mine: !!x.mine,
           atText: self.fmtTime(x.at)
@@ -81,6 +83,7 @@ Page({
             curIdx: 0,
             curVideoId: list[0].id,
             curNick: list[0].nick,
+            curViews: list[0].views || 0,
             curApproved: list[0].status === 'ok'
           });
           self.setSrc(list[0].fileID, list[0].mine, list[0].id);
@@ -163,9 +166,39 @@ Page({
     const i = Number(e.currentTarget.dataset.i);
     const it = this.data.list[i];
     if (!it) return;
-    this.setData({ curIdx: i, curVideoId: it.id, curNick: it.nick || '', curApproved: it.status === 'ok', comments: [], dmAll: [], dms: [] });
+    this.setData({
+      curIdx: i,
+      curVideoId: it.id,
+      curNick: it.nick || '',
+      curViews: it.views || 0,
+      curApproved: it.status === 'ok',
+      comments: [], dmAll: [], dms: []
+    });
     this.setSrc(it.fileID, it.mine, it.id);
     this.loadComments();
+  },
+
+  /* 真正开播时记一次播放量（同一视频本次会话只记一次） */
+  onPlayStart() {
+    const id = this.data.curVideoId;
+    if (!id) return;
+    this.counted = this.counted || {};
+    if (this.counted[id]) return;
+    this.counted[id] = true;
+    wx.cloud.callFunction({
+      name: 'videos',
+      data: { action: 'view', id: id },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (d.ok && typeof d.views === 'number') {
+          this.setData({ curViews: d.views });
+          // 同步更新列表里的数字
+          const list = (this.data.list || []).map(x => x.id === id ? Object.assign({}, x, { views: d.views }) : x);
+          this.setData({ list: list });
+        }
+      },
+      fail: () => {}
+    });
   },
 
   onRemove(e) {

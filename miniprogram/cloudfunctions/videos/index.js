@@ -41,6 +41,7 @@ function mapItem(x, openid) {
     at: x.at || 0,
     status: x.status || 'ok',
     nick: x.nick || '',
+    views: x.views || 0,
     mine: x._openid === openid
   };
 }
@@ -64,9 +65,10 @@ exports.main = async (event) => {
         const k = x.dishId || '';
         if (!k) return;
         if (!map[k]) {
-          map[k] = { dishId: k, dishName: x.dishName || '', count: 0, nick: x.nick || '', at: 0 };
+          map[k] = { dishId: k, dishName: x.dishName || '', count: 0, views: 0, nick: x.nick || '', at: 0 };
         }
         map[k].count++;
+        map[k].views += (x.views || 0);
         if ((x.at || 0) > map[k].at) {
           map[k].at = x.at || 0;
           map[k].nick = x.nick || map[k].nick;
@@ -159,7 +161,22 @@ exports.main = async (event) => {
         url = f && f.tempFileURL;
       }
       if (!url) return { ok: false, error: '取不到播放地址' };
-      return { ok: true, url: url, title: doc.title || doc.dishName || '' };
+      return { ok: true, url: url, title: doc.title || doc.dishName || '', views: doc.views || 0 };
+    }
+
+    /* ---------- 播放量 +1（前端在真正开播时调用） ---------- */
+    if (action === 'view') {
+      const id = String(event.id || '');
+      if (!id) return { ok: false, error: '缺少 id' };
+      const got = await db.collection(COL).doc(id).get().catch(() => null);
+      const doc = got && got.data;
+      if (!doc) return { ok: false, error: '视频不存在' };
+      if (doc.status !== 'ok' && doc._openid !== OPENID && !isAdmin) {
+        return { ok: false, error: '视频不可播放' };
+      }
+      const _ = db.command;
+      await db.collection(COL).doc(id).update({ data: { views: _.inc(1) } }).catch(() => {});
+      return { ok: true, views: (doc.views || 0) + 1 };
     }
 
     /* ---------- 直接给 fileID 换链接（自己的视频用） ---------- */

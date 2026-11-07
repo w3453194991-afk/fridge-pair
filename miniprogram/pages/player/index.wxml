@@ -4,6 +4,7 @@
     <view class="hemo">{{dish.emoji || '🎬'}}</view>
     <view class="hname">{{dish.name || '做法视频'}}</view>
     <view wx:if="{{mine}}" class="mytag">我的</view>
+    <view class="vcount">▶ {{curViews}} 次播放</view>
   </view>
 
   <view wx:if="{{src}}" class="playerbox">
@@ -15,6 +16,7 @@
       show-center-play-btn
       enable-play-gesture
       object-fit="contain"
+      bindplay="onPlayStart"
       bindtimeupdate="onTime"
       binderror="onError"
     ></video>
@@ -80,7 +82,7 @@
       <view class="pthumb">🎬</view>
       <view class="pmid">
         <view class="pname">{{item.title}}</view>
-        <view class="pmeta">{{item.atText}}{{item.mine ? ' · 我发布的' : ''}}</view>
+        <view class="pmeta">{{item.atText}} · ▶ {{item.views}} 次播放{{item.mine ? ' · 我发布的' : ''}}</view>
       </view>
       <view wx:if="{{item.mine}}" class="pdel" data-i="{{index}}" catchtap="onRemove">删除</view>
       <view wx:else class="pplay">▶</view>

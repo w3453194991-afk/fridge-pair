@@ -42,7 +42,7 @@
       <view class="demo">{{item.emoji}}</view>
       <view class="dmid">
         <view class="dname">{{item.name}}</view>
-        <view class="dmeta">{{item.nick}} 上传 · {{item.atText}}</view>
+        <view class="dmeta">{{item.nick}} 上传 · {{item.atText}} · ▶ {{item.views}} 次播放</view>
       </view>
       <view class="dright">
         <view class="dcount">{{item.count}}</view>

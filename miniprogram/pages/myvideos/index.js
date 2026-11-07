@@ -58,6 +58,7 @@ Page({
             statusText: st.text,
             statusCls: st.cls,
             atText: self.fmtTime(x.at),
+            views: x.views || 0,
             canPlay: x.status === 'ok' || x.status === 'pending',
             unread: last > read,
             lastText: last ? ((x.lastCommentNick || '有人') + '：' + (x.lastCommentText || '')) : ''

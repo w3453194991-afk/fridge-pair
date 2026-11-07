@@ -44,6 +44,7 @@ Page({
             name: (dish && dish.name) || x.dishName || '未知菜',
             emoji: (dish && dish.emoji) || '🍽',
             count: x.count || 1,
+            views: x.views || 0,
             nick: x.nick || '冰箱用户',
             atText: self.fmtTime(x.at)
           };
