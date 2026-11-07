@@ -414,6 +414,13 @@ Page({
         }).reverse();
 
         self.setData({ comments: comments, dmAll: d.danmaku || [] });
+
+        // 记录已读（「我的视频」用未读红点）
+        try {
+          if (!S.state.videoReadAt) S.state.videoReadAt = {};
+          S.state.videoReadAt[self.dishId] = Date.now();
+          S.save();
+        } catch (e) {}
       }
     });
   },

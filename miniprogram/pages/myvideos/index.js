@@ -42,9 +42,12 @@ Page({
           });
           return;
         }
+        const reads = (S.state && S.state.videoReadAt) || {};
         const rows = (d.items || []).map(x => {
           const dish = D.DISHES.filter(y => y.id === x.dishId)[0];
           const st = STATUS[x.status] || STATUS.pending;
+          const last = x.lastCommentAt || 0;
+          const read = reads[x.dishId] || 0;
           return {
             id: x.id,
             dishId: x.dishId,
@@ -55,10 +58,12 @@ Page({
             statusText: st.text,
             statusCls: st.cls,
             atText: self.fmtTime(x.at),
-            canPlay: x.status === 'ok' || x.status === 'pending'
+            canPlay: x.status === 'ok' || x.status === 'pending',
+            unread: last > read,
+            lastText: last ? ((x.lastCommentNick || '有人') + '：' + (x.lastCommentText || '')) : ''
           };
         });
-        self.setData({ loading: false, rows: rows });
+        self.setData({ loading: false, rows: rows, hasUnread: rows.some(r => r.unread) });
       },
       fail: (e) => self.setData({ loading: false, err: '调用失败：' + ((e && e.errMsg) || '') })
     });

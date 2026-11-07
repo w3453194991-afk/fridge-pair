@@ -99,7 +99,23 @@ exports.main = async (event) => {
       const r = await db.collection(COL)
         .where({ _openid: OPENID })
         .orderBy('at', 'desc').limit(50).get();
-      return { ok: true, items: (r.data || []).map(x => mapItem(x, OPENID)) };
+      const items = (r.data || []).map(x => mapItem(x, OPENID));
+
+      // 顺带统计每条视频的评论数 / 最新评论时间（做未读红点用）
+      try {
+        const _ = db.command;
+        for (const it of items) {
+          const cr = await db.collection('video_comments')
+            .where({ videoId: it.id, status: 'ok', type: 'comment' })
+            .orderBy('at', 'desc').limit(1).get().catch(() => ({ data: [] }));
+          const row = (cr.data || [])[0];
+          it.lastCommentAt = row ? (row.at || 0) : 0;
+          it.lastCommentText = row ? String(row.text || '').slice(0, 30) : '';
+          it.lastCommentNick = row ? (row.nick || '') : '';
+        }
+      } catch (e) {}
+
+      return { ok: true, items: items };
     }
 
     /* ---------- 发布：先进待审 ---------- */

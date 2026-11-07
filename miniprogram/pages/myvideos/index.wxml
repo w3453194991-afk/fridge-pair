@@ -16,12 +16,16 @@
   </view>
 
   <block wx:elif="{{rows.length}}">
-    <view wx:for="{{rows}}" wx:key="id" class="card row">
+    <view wx:for="{{rows}}" wx:key="id" class="card row {{item.unread ? 'unread' : ''}}">
       <view class="rtop" data-i="{{index}}" bindtap="onOpen">
         <view class="demo">{{item.emoji}}</view>
         <view class="rmid">
-          <view class="rname">{{item.name}}</view>
+          <view class="rname">
+            {{item.name}}
+            <text wx:if="{{item.unread}}" class="reddot">新评论</text>
+          </view>
           <view class="rmeta">{{item.atText}}{{item.title ? ' · ' + item.title : ''}}</view>
+          <view wx:if="{{item.lastText}}" class="rlast">{{item.lastText}}</view>
         </view>
         <view class="rstat {{item.statusCls}}">{{item.statusText}}</view>
       </view>
