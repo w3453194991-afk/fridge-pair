@@ -265,21 +265,64 @@ Page({
                   wx.showToast({ title: '只保存在自己账号', icon: 'none' });
                   return;
                 }
+                const title = d.name + ' 的做法';
+
+                // ① 文本先检（菜名+标题），② 媒体异步检，③ 拿到 traceId 再发布
+                const doPublish = (traceId) => {
+                  wx.cloud.callFunction({
+                    name: 'videos',
+                    data: {
+                      action: 'publish',
+                      dishId: d.id,
+                      dishName: d.name,
+                      title: title,
+                      fileID: r.fileID,
+                      traceId: traceId || ''
+                    },
+                    success: (res) => {
+                      const out = (res && res.result) || {};
+                      if (out.ok) {
+                        wx.showToast({ title: traceId ? '已发布，审核中' : '已发布到共享库', icon: 'none' });
+                      } else {
+                        wx.showToast({ title: out.error || '发布失败', icon: 'none' });
+                      }
+                    },
+                    fail: () => wx.showToast({ title: '发布失败', icon: 'none' })
+                  });
+                };
+
                 wx.cloud.callFunction({
-                  name: 'videos',
-                  data: {
-                    action: 'publish',
-                    dishId: d.id,
-                    dishName: d.name,
-                    title: d.name + ' 的做法',
-                    fileID: r.fileID
+                  name: 'security',
+                  data: { action: 'text', content: title, scene: 2 },
+                  success: (tres) => {
+                    const t = (tres && tres.result) || {};
+                    if (t.ok === false) {
+                      // 检测服务异常：不阻断，但降级为"审核中"
+                      wx.showToast({ title: '内容检测不可用，已转人工', icon: 'none' });
+                    } else if (t.pass === false) {
+                      wx.showModal({
+                        title: '文案未通过检测',
+                        content: '标题或菜名含有不适合公开展示的内容，已取消发布。',
+                        showCancel: false
+                      });
+                      return;
+                    }
+
+                    // 媒体异步检测
+                    wx.cloud.callFunction({
+                      name: 'security',
+                      data: { action: 'media', fileID: r.fileID, mediaType: 3, scene: 2 },
+                      success: (mres) => {
+                        const m = (mres && mres.result) || {};
+                        doPublish(m.ok ? m.traceId : '');
+                      },
+                      fail: () => doPublish('')
+                    });
                   },
-                  success: (res) => {
-                    const out = (res && res.result) || {};
-                    if (out.ok) wx.showToast({ title: '已发布到共享库', icon: 'success' });
-                    else wx.showToast({ title: out.error || '发布失败', icon: 'none' });
-                  },
-                  fail: () => wx.showToast({ title: '发布失败', icon: 'none' })
+                  fail: () => {
+                    // 文本检测调用失败也允许发布，但只标"审核中"
+                    doPublish('');
+                  }
                 });
               }
             });

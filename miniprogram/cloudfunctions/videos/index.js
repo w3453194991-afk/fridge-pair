@@ -64,7 +64,9 @@ exports.main = async (event) => {
         fileID: fileID,
         cover: String(event.cover || ''),
         at: Date.now(),
-        status: 'ok'
+        // 先上架，等媒体检测回调；不通过时由 security 云函数改成 blocked
+        status: 'ok',
+        checkTrace: String(event.traceId || '')
       };
       const r = await db.collection(COL).add({ data: doc });
       return { ok: true, id: r._id };

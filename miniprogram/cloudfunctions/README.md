@@ -64,6 +64,68 @@ BAIDU_API_SECRET = 你的 Secret Key
 
 ---
 
+## A2. 内容安全（上架必备）
+
+涉及「共享视频库」「自定义菜名公开」的内容，都需要过微信内容安全接口。
+
+### 部署
+
+两个云函数都要部署：
+
+```
+cloudfunctions/security    ← 文本 + 媒体检测
+cloudfunctions/videos      ← 视频库（发布时带 traceId）
+```
+
+数据库新建集合：
+
+```
+videos         权限：所有用户可读，仅创建者可读写
+media_checks   权限：仅创建者可读写
+```
+
+### 配置消息推送（媒体异步检测必须）
+
+`mediaCheckAsync` 是异步的，结果要通过「消息推送」回推。
+
+```
+微信公众平台 → 开发 → 开发管理 → 开发设置 → 消息推送
+  数据格式：JSON
+  URL：留空（勾选「云开发」）
+  云函数：security
+  消息加密方式：明文
+  订阅事件：只勾「内容安全」
+```
+
+回调进 `security` 云函数，判断 `event.Event === 'wxa_media_check'`，
+不通过会把 `videos` 里对应记录置为 `blocked`，不再展示。
+
+### 检测流程
+
+```
+用户上传视频
+   ↓
+① 文本检测 msgSecCheck（菜名 + 标题）
+   ├─ 不通过 → 直接拒绝发布
+   └─ 通过
+        ↓
+② 媒体检测 mediaCheckAsync → 拿 traceId
+        ↓
+③ videos.publish 写入，并记录 checkTrace
+        ↓
+④ 回调到达
+   ├─ pass    → 保持上架
+   └─ 不通过  → status = blocked（列表里消失）
+```
+
+### 注意
+
+- `msgSecCheck` 需要传 `openid`，云函数里用 `cloud.getWXContext().OPENID`
+- 腾讯侧偶发超时会走到降级分支（允许发布但标"审核中"），这是刻意保留的
+- 免费额度充足，正常使用不产生额外费用
+
+---
+
 ## B. 公网 HTTP 中转服务（本机调试 / 有备案域名时）
 
 目录：`server/`
