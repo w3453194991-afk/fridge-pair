@@ -32,17 +32,15 @@ function admins() {
 }
 
 /* 评论通知：给视频作者发一条订阅消息
-   需要环境变量 COMMENT_TMPL_ID；没配就静默跳过 */
-async function notifyAuthor(videoId, fromOpenid, doc) {
-  const tmplId = String(process.env.COMMENT_TMPL_ID || '').trim();
-  if (!tmplId) return { ok: false, skipped: '未配置模板' };
-
-  const vid = await db.collection('videos').doc(videoId).get().catch(() => null);
-  const video = vid && vid.data;
-  if (!video) return { ok: false, skipped: '视频不存在' };
-  if (video._openid === fromOpenid) return { ok: false, skipped: '自己评论自己' };
-
-  const dishName = String(video.dishName || video.title || '你的视频').slice(0, 20);
+   环境变量：
+     COMMENT_TMPL_ID       模板 ID（必填）
+     COMMENT_TMPL_FIELDS   字段映射，JSON，可省略
+       例：{"thing1":"dish","thing2":"text","time3":"time"}
+       可用的值：dish（菜名）nick（评论人）text（评论内容）time（时间）
+                 tips（固定提示语）result（固定"评论成功"）who（评论人前缀）
+   不配则静默跳过 */
+function buildNotifyData(video, doc) {
+  const dish = String(video.dishName || video.title || '你的视频').slice(0, 20);
   const who = String(doc.nick || '有人').slice(0, 10);
   const msg = String(doc.text || (doc.images && doc.images.length ? '[图片]' : '')).slice(0, 20);
   const now = new Date(Date.now() + 8 * 3600 * 1000);   // 北京时间
@@ -52,18 +50,49 @@ async function notifyAuthor(videoId, fromOpenid, doc) {
     String(now.getUTCHours()).padStart(2, '0') + ':' +
     String(now.getUTCMinutes()).padStart(2, '0');
 
+  const dict = {
+    dish: dish,
+    nick: who,
+    text: msg,
+    time: timeText,
+    tips: '点击可查看评论和互动内容',
+    result: '评论成功',
+    who: who + '：' + msg
+  };
+
+  let map = { thing1: 'dish', thing2: 'who', time3: 'time' };
+  try {
+    const raw = String(process.env.COMMENT_TMPL_FIELDS || '').trim();
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') map = parsed;
+    }
+  } catch (e) {}
+
+  const data = {};
+  Object.keys(map).forEach(k => {
+    const v = dict[map[k]];
+    if (v !== undefined && v !== '') data[k] = { value: String(v) };
+  });
+  return data;
+}
+
+async function notifyAuthor(videoId, fromOpenid, doc) {
+  const tmplId = String(process.env.COMMENT_TMPL_ID || '').trim();
+  if (!tmplId) return { ok: false, skipped: '未配置模板' };
+
+  const vid = await db.collection('videos').doc(videoId).get().catch(() => null);
+  const video = vid && vid.data;
+  if (!video) return { ok: false, skipped: '视频不存在' };
+  if (video._openid === fromOpenid) return { ok: false, skipped: '自己评论自己' };
+
   try {
     await cloud.openapi.subscribeMessage.send({
       touser: video._openid,
       templateId: tmplId,
       page: 'pages/player/index?id=' + String(video.dishId || ''),
       miniprogramState: 'formal',
-      // 字段名要和你选的模板一致，见 README 说明
-      data: {
-        thing1: { value: dishName },
-        thing2: { value: who + '：' + msg },
-        time3: { value: timeText }
-      }
+      data: buildNotifyData(video, doc)
     });
     return { ok: true };
   } catch (e) {
@@ -109,6 +138,33 @@ exports.main = async (event) => {
   try {
     if (action === 'whoami') {
       return { ok: true, isAdmin: isAdmin };
+    }
+
+    /* 管理员自测：给自己发一条通知，验证模板字段对不对 */
+    if (action === 'testNotify') {
+      if (!isAdmin) return { ok: false, error: '需要管理员权限' };
+      const tmplId = String(process.env.COMMENT_TMPL_ID || '').trim();
+      if (!tmplId) return { ok: false, error: '未配置 COMMENT_TMPL_ID' };
+      const fakeVideo = { dishName: '番茄炒蛋', dishId: 'tomato-egg', title: '番茄炒蛋 的做法', _openid: OPENID };
+      const fakeDoc = { nick: '小林', text: '这个糖色怎么炒的？', images: [] };
+      const data = buildNotifyData(fakeVideo, fakeDoc);
+      try {
+        await cloud.openapi.subscribeMessage.send({
+          touser: OPENID,
+          templateId: tmplId,
+          page: 'pages/player/index?id=tomato-egg',
+          miniprogramState: 'developer',
+          data: data
+        });
+        return { ok: true, sent: data };
+      } catch (e) {
+        return {
+          ok: false,
+          error: String((e && (e.errMsg || e.message)) || e),
+          sent: data,
+          hint: '43101 = 你还没订阅；47003 = 字段名/长度不符合模板'
+        };
+      }
     }
 
     if (action === 'list') {
