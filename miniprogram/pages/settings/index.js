@@ -181,9 +181,28 @@ Page({
 
   /* 关于 */
   onAbout() {
+    const cfg = (function () { try { return require('../../config.js') || {}; } catch (e) { return {}; } })();
+    const cp = cfg.COPYRIGHT || {};
+    const lines = [
+      '版本 ' + this.data.version,
+      '',
+      'AI 全生命周期 · 家庭食材管理',
+      '四色临期分级 / 营养配餐 / 聚餐规划 / 拍照识别',
+      ''
+    ];
+    if (cp.regNo) {
+      lines.push('软件著作权登记号：' + cp.regNo);
+    }
+    if (cp.owner) {
+      lines.push('著作权人：' + cp.owner);
+    }
+    if (cp.owner || cp.regNo) {
+      lines.push('');
+    }
+    lines.push('菜品与营养建议仅供参考，不构成医疗建议。');
     wx.showModal({
       title: '冰箱对对碰',
-      content: '版本 ' + this.data.version + '\n\nAI 全生命周期 · 家庭食材管理\n四色临期分级 / 营养配餐 / 聚餐规划 / 拍照识别\n\n菜品与营养建议仅供参考，不构成医疗建议。',
+      content: lines.join('\n'),
       showCancel: false
     });
   },
