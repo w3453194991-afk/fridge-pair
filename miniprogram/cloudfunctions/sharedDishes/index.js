@@ -24,24 +24,35 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 const COL = 'shared_dishes';
 
-function admins() {
+
+/* 管理员名单：环境变量 ADMIN_OPENIDS 优先，其次 settings/admin 集合的 openids 数组 */
+const SETTINGS_COL = 'settings';
+
+function adminsFromEnv() {
   return String(process.env.ADMIN_OPENIDS || '')
     .split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
+}
+
+async function getAdminList() {
+  const env = adminsFromEnv();
+  if (env.length) return env;
+  try {
+    const r = await db.collection(SETTINGS_COL).doc('admin').get();
+    const list = (r && r.data && r.data.openids) || [];
+    return Array.isArray(list) ? list.filter(Boolean) : [];
+  } catch (e) {
+    return [];
+  }
 }
 function autoReview() {
   return String(process.env.REVIEW_MODE || 'manual').toLowerCase() === 'auto';
 }
 
-/* 管理员判定：本函数没配 ADMIN_OPENIDS 时，回退到 videos 云函数的 whoami */
+/* 管理员判定：直接比对名单，不跨函数调用 */
 async function isAdminUser(openid) {
-  if (admins().indexOf(openid) >= 0) return true;
-  if (!admins().length) {
-    try {
-      const r = await cloud.callFunction({ name: 'videos', data: { action: 'whoami' } });
-      return !!(r && r.result && r.result.isAdmin);
-    } catch (e) { return false; }
-  }
-  return false;
+  if (!openid) return false;
+  const list = await getAdminList();
+  return list.indexOf(openid) >= 0;
 }
 
 async function textCheck(content) {
