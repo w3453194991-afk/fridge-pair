@@ -149,6 +149,26 @@ exports.main = async (event) => {
   const isAdmin = await isAdminUser(OPENID);
 
   try {
+    /* 诊断：一次看清管理员判定卡在哪一步 */
+    if (action === 'diag') {
+      const self = admins();
+      let vres = null;
+      try {
+        const r = await cloud.callFunction({ name: 'videos', data: { action: 'whoami' } });
+        vres = (r && r.result) || null;
+      } catch (e) {
+        vres = { error: String((e && (e.errMsg || e.message)) || e) };
+      }
+      return {
+        ok: true,
+        openid: OPENID,
+        selfAdminCount: self.length,
+        selfIsAdmin: self.indexOf(OPENID) >= 0,
+        videosWhoami: vres,
+        finalIsAdmin: isAdmin
+      };
+    }
+
     if (action === 'whoami') {
       return { ok: true, isAdmin: isAdmin };
     }
