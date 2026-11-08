@@ -30,6 +30,13 @@ function admins() {
     .split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
 }
 
+/* 审核模式（环境变量 REVIEW_MODE）
+   manual（默认）：非管理员一律进待审
+   auto          ：直接上架，靠机器检测 + 事后下架 */
+function autoReview() {
+  return String(process.env.REVIEW_MODE || 'manual').toLowerCase() === 'auto';
+}
+
 function mapItem(x, openid) {
   return {
     id: x._id,
@@ -134,7 +141,7 @@ exports.main = async (event) => {
         cover: String(event.cover || ''),
         nick: String(event.nick || '').slice(0, 20),
         at: Date.now(),
-        status: isAdmin ? 'ok' : 'pending',     // 管理员发的一律直接上架
+        status: (isAdmin || autoReview()) ? 'ok' : 'pending',
         checkTrace: String(event.traceId || '')
       };
       const r = await db.collection(COL).add({ data: doc });

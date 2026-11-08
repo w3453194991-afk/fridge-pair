@@ -226,8 +226,9 @@ exports.main = async (event) => {
         }
       }
 
-      // 只有"检测服务异常"或管理员外的人工策略才需要待审
-      const needReview = images.length > 0 && imgVerdict !== 'pass' && !isAdmin;
+      // 审核模式：manual（默认）→ 图片未通过机器检测就等人工；auto → 直接上架
+      const autoMode = String(process.env.REVIEW_MODE || 'manual').toLowerCase() === 'auto';
+      const needReview = images.length > 0 && imgVerdict !== 'pass' && !isAdmin && !autoMode;
 
       const doc = {
         videoId: videoId,
