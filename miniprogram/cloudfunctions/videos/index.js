@@ -73,10 +73,24 @@ exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const action = (event && event.action) || 'list';
   const list = await admins();
-  const isAdmin = list.indexOf(OPENID) >= 0;
+  let isAdmin = list.indexOf(OPENID) >= 0;
+  let adminSource = adminsFromEnv().length ? 'env' : 'db';
+
+  /* 额外兜底：users 集合里该账号带 isAdmin: true 也算管理员
+     方便直接在数据库控制台勾选，不用改环境变量、不用重新部署 */
+  if (!isAdmin && OPENID) {
+    try {
+      const ur = await db.collection('users')
+        .where({ openid: OPENID, isAdmin: true }).limit(1).get();
+      if (ur.data && ur.data.length) {
+        isAdmin = true;
+        adminSource = 'users.isAdmin';
+      }
+    } catch (e) {}
+  }
 
   if (action === 'whoami') {
-    return { ok: true, isAdmin: isAdmin, adminCount: list.length, source: adminsFromEnv().length ? 'env' : 'db' };
+    return { ok: true, isAdmin: isAdmin, adminCount: list.length, source: adminSource };
   }
 
   /* 一次性认领管理员：当前没有任何管理员时，调用者成为管理员 */
