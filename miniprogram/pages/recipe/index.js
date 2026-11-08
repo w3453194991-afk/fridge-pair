@@ -44,6 +44,7 @@ Page({
     const tabs = [
       { key: 'fit', label: '用我的食材做' },
       { key: 'all', label: '全部菜谱' },
+      { key: 'shared', label: '大家分享' },
       { key: 'video', label: '视频做菜' },
       { key: 'pair', label: '相生相克' }
     ].map(t => ({ key: t.key, label: t.label, cls: t.key === tab ? 'chip on' : 'chip' }));
@@ -190,7 +191,76 @@ Page({
       wx.navigateTo({ url: '/pages/videolib/index' });
       return;
     }
-    this.setData({ tab: key }, () => this.render());
+    this.setData({ tab: key }, () => {
+      this.render();
+      if (key === 'shared') this.loadShared();
+    });
+  },
+
+  /* 大家分享：从云端拉共享菜谱 */
+  loadShared() {
+    if (!wx.cloud) {
+      this.setData({ sharedErr: '未配置云开发' });
+      return;
+    }
+    const self = this;
+    this.setData({ sharedLoading: true, sharedErr: '' });
+    wx.cloud.callFunction({
+      name: 'sharedDishes',
+      data: { action: 'list' },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (!d.ok) {
+          const raw = d.error || '读取失败';
+          self.setData({
+            sharedLoading: false,
+            sharedErr: raw === '未知 action' ? '共享菜谱服务未部署，请部署 cloudfunctions/sharedDishes' : raw,
+            sharedRows: []
+          });
+          return;
+        }
+        const rows = (d.items || []).map(x => ({
+          id: x.dishId,
+          name: x.name,
+          emoji: x.emoji || '🍽',
+          meta: (x.cuisine || []).join(' / ') || '家常',
+          tags: (x.tags || []).slice(0, 2).join(' · '),
+          nick: x.nick,
+          steps: (x.steps || []).length,
+          raw: x
+        }));
+        self.setData({ sharedLoading: false, sharedRows: rows, sharedErr: '' });
+      },
+      fail: (e) => self.setData({ sharedLoading: false, sharedErr: '调用失败：' + ((e && e.errMsg) || '') })
+    });
+  },
+
+  /* 打开共享菜谱：先注入菜谱库，再进详情 */
+  onSharedDish(e) {
+    const i = Number(e.currentTarget.dataset.i);
+    const row = (this.data.sharedRows || [])[i];
+    if (!row || !row.raw) return;
+    const x = row.raw;
+    const dish = {
+      id: x.dishId,
+      name: x.name,
+      emoji: x.emoji,
+      cuisine: x.cuisine,
+      tags: (x.tags || []).concat(['大家分享']),
+      meals: ['午', '晚'],
+      minutes: x.minutes,
+      level: x.level,
+      ingredients: x.ingredients,
+      seasonings: x.seasonings,
+      prep: x.prep,
+      steps: x.steps,
+      tips: x.tips,
+      nutrition: x.nutrition,
+      pair: x.pair,
+      custom: true
+    };
+    if (!D.DISHES.some(y => y.id === dish.id)) D.DISHES.push(dish);
+    wx.navigateTo({ url: '/pages/dish/index?id=' + dish.id });
   },
 
   onSearch(e) {
@@ -223,27 +293,81 @@ Page({
         camera: 'back',
         success: (res) => {
           const tmp = res.tempFiles[0].tempFilePath;
-          const commit = (p) => {
-            if (!validPhoto(p)) {
-              wx.showToast({ title: '照片保存失败，换一张试试', icon: 'none' });
-              return;
+          const dish = D.DISHES.filter(x => x.id === id)[0] || {};
+
+          // 先压缩再落盘，避免相册原图撑爆本地存储
+          const finish = (compressed) => {
+            const commit = (p) => {
+              if (!validPhoto(p)) {
+                wx.showToast({ title: '照片保存失败，换一张试试', icon: 'none' });
+                return;
+              }
+              S.setDishPhoto(id, p);
+              wx.showToast({ title: '已设为封面', icon: 'none' });
+              self.render();
+              self.askPublishCover(id, dish.name || '', compressed);
+            };
+            try {
+              wx.getFileSystemManager().saveFile({
+                tempFilePath: compressed,
+                success: (r) => commit(r.savedFilePath),
+                fail: () => commit(compressed)
+              });
+            } catch (err) {
+              commit(compressed);
             }
-            S.setDishPhoto(id, p);
-            wx.showToast({ title: '已设为封面', icon: 'none' });
-            self.render();
           };
-          try {
-            wx.getFileSystemManager().saveFile({
-              tempFilePath: tmp,
-              success: (r) => commit(r.savedFilePath),
-              fail: () => commit(tmp)
-            });
-          } catch (err) {
-            commit(tmp);
-          }
+
+          wx.compressImage({
+            src: tmp,
+            quality: 72,
+            compressedWidth: 900,
+            success: (r) => finish(r.tempFilePath || tmp),
+            fail: () => finish(tmp)
+          });
         },
         fail: () => {}
       });
+    });
+  },
+
+  /* 拍完封面，问要不要发到公开实拍图库 */
+  askPublishCover(dishId, dishName, localPath) {
+    if (!wx.cloud || !localPath) return;
+    wx.showModal({
+      title: '分享到实拍图库',
+      content: '把这你张成品照公开给其他人看？大家能在这道菜下面看到你的实拍。',
+      confirmText: '公开',
+      cancelText: '仅自己看',
+      success: (r) => {
+        if (!r.confirm) return;
+        wx.showLoading({ title: '上传中…', mask: true });
+        const ext = (localPath.match(/\.(\w+)$/) || [, 'jpg'])[1];
+        wx.cloud.uploadFile({
+          cloudPath: 'dish-photos/' + dishId + '-' + Date.now() + '.' + ext,
+          filePath: localPath,
+          success: (up) => {
+            wx.cloud.callFunction({
+              name: 'gallery',
+              data: {
+                action: 'publish',
+                dishId: dishId,
+                dishName: dishName,
+                fileID: up.fileID,
+                nick: (S.state.family && S.state.family.name) || '冰箱用户'
+              },
+              success: (res) => {
+                wx.hideLoading();
+                const d = (res && res.result) || {};
+                if (!d.ok) { wx.showToast({ title: d.error || '发布失败', icon: 'none' }); return; }
+                wx.showToast({ title: d.status === 'ok' ? '已公开' : '已提交，待审核', icon: 'none' });
+              },
+              fail: () => { wx.hideLoading(); wx.showToast({ title: '发布失败', icon: 'none' }); }
+            });
+          },
+          fail: () => { wx.hideLoading(); wx.showToast({ title: '上传失败', icon: 'none' }); }
+        });
+      }
     });
   },
 

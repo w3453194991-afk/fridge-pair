@@ -153,3 +153,15 @@
   background: linear-gradient(135deg, #8E7BFF, #6E8BFF);
   padding: 4rpx 12rpx; border-radius: 10rpx;
 }
+
+/* 大家分享 */
+.srow { display: flex; align-items: center; padding: 20rpx 22rpx; }
+.semo {
+  width: 84rpx; height: 84rpx; border-radius: 22rpx; font-size: 40rpx;
+  display: flex; align-items: center; justify-content: center;
+  background: #F6FBF8; margin-right: 18rpx;
+}
+.smid { flex: 1; min-width: 0; }
+.sname { font-size: 28rpx; font-weight: 800; }
+.smeta { font-size: 20rpx; color: #8B9A96; margin-top: 6rpx; }
+.sgo { font-size: 30rpx; color: #C3D0CB; }

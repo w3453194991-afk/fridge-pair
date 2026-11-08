@@ -18,6 +18,8 @@ Page({
     can: false,
     hasVideo: false,
     sharedCount: 0,
+    gallery: [],
+    galleryCount: 0,
 
     /* 做菜三步 */
     cookStep: 'idle',   // idle / photo / scan / result
@@ -73,6 +75,7 @@ Page({
     });
     this.dish = d;
     this.loadSharedCount();
+    this.loadGallery();
   },
 
   /* 缺的料一次加进采购清单 */
@@ -356,6 +359,106 @@ Page({
         if (res[id] === 'accept') {
           wx.showToast({ title: '已开启评论通知', icon: 'none' });
         }
+      },
+      fail: () => {}
+    });
+  },
+
+  /* 把这道自定义菜分享到公共菜谱库 */
+  onShareToLibrary() {
+    const d = this.dish || (this.data && this.data.dish);
+    if (!d) return;
+    if (!wx.cloud) { wx.showToast({ title: '未配置云开发', icon: 'none' }); return; }
+    wx.showModal({
+      title: '分享给大家',
+      content: '「' + d.name + '」会进审核，通过后所有人都能在「大家分享」里看到并按你的做法做。',
+      confirmText: '分享',
+      success: (r) => {
+        if (!r.confirm) return;
+        wx.showLoading({ title: '提交中…', mask: true });
+        wx.cloud.callFunction({
+          name: 'sharedDishes',
+          data: {
+            action: 'publish',
+            dish: {
+              id: d.id,
+              name: d.name,
+              emoji: d.emoji,
+              cuisine: d.cuisine,
+              tags: d.tags,
+              minutes: d.minutes,
+              level: d.level,
+              ingredients: d.ingredients,
+              seasonings: d.seasonings,
+              prep: d.prep,
+              steps: d.steps,
+              tips: d.tips,
+              nutrition: d.nutrition,
+              pair: d.pair,
+              nick: (S.state.family && S.state.family.name) || '冰箱用户'
+            }
+          },
+          success: (res) => {
+            wx.hideLoading();
+            const out = (res && res.result) || {};
+            if (!out.ok) { wx.showToast({ title: out.error || '分享失败', icon: 'none' }); return; }
+            wx.showToast({ title: out.status === 'ok' ? '已分享' : '已提交，待审核', icon: 'none' });
+          },
+          fail: () => { wx.hideLoading(); wx.showToast({ title: '分享失败', icon: 'none' }); }
+        });
+      }
+    });
+  },
+
+  /* 查看大家做的实拍 */
+  onPreviewGallery(e) {
+    const i = Number(e.currentTarget.dataset.i);
+    const list = this.data.gallery || [];
+    const it = list[i];
+    if (!it) return;
+
+    const ids = list.filter(x => x.fileID).map(x => x.fileID);
+    const open = (urls, cur) => {
+      if (!urls.length) { wx.showToast({ title: '图片读取失败', icon: 'none' }); return; }
+      wx.previewImage({ current: cur || urls[0], urls: urls });
+    };
+
+    const needRemote = ids.some(f => String(f).indexOf('cloud://') === 0);
+    if (!needRemote) return open(ids, ids[i]);
+
+    wx.showLoading({ title: '打开中…', mask: true });
+    wx.cloud.getTempFileURL({
+      fileList: ids,
+      success: (r) => {
+        wx.hideLoading();
+        const urls = (r.fileList || []).map(f => f.tempFileURL).filter(Boolean);
+        open(urls, urls[i]);
+      },
+      fail: () => { wx.hideLoading(); wx.showToast({ title: '图片读取失败', icon: 'none' }); }
+    });
+  },
+
+  /* 拉这道菜的公开实拍 */
+  loadGallery() {
+    const d = this.dish;
+    if (!d || !wx.cloud) return;
+    let cfg = {};
+    try { cfg = require('../../config.js') || {}; } catch (e) {}
+    if (!cfg.CLOUD_ENV) return;
+    const self = this;
+    wx.cloud.callFunction({
+      name: 'gallery',
+      data: { action: 'list', dishId: d.id },
+      success: (res) => {
+        const out = (res && res.result) || {};
+        if (!out.ok) return;
+        const items = (out.items || []).slice(0, 12).map(x => ({
+          id: x.id,
+          fileID: x.fileID,
+          nick: x.nick || '冰箱用户',
+          status: x.status
+        }));
+        self.setData({ gallery: items, galleryCount: out.count || 0 });
       },
       fail: () => {}
     });

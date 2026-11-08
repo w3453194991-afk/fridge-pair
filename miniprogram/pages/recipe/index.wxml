@@ -58,6 +58,36 @@
     </block>
   </block>
 
+  <!-- 大家分享 -->
+  <block wx:elif="{{tab == 'shared'}}">
+    <view class="sec"><view class="bar2"></view><view class="t">大家分享</view><view class="n">{{sharedRows.length}} 道</view></view>
+
+    <view wx:if="{{sharedLoading}}" class="empty"><view class="e">⏳</view><view>正在加载…</view></view>
+
+    <view wx:elif="{{sharedErr}}" class="empty">
+      <view class="e">⚠️</view>
+      <view>{{sharedErr}}</view>
+      <view class="netbtn" bindtap="loadShared">重试</view>
+    </view>
+
+    <block wx:elif="{{sharedRows.length}}">
+      <view wx:for="{{sharedRows}}" wx:key="id" class="card srow" data-i="{{index}}" bindtap="onSharedDish">
+        <view class="semo">{{item.emoji}}</view>
+        <view class="smid">
+          <view class="sname">{{item.name}}</view>
+          <view class="smeta">{{item.nick}} 分享 · {{item.meta}} · {{item.steps}} 步</view>
+        </view>
+        <view class="sgo">›</view>
+      </view>
+    </block>
+
+    <view wx:else class="empty">
+      <view class="e">🍲</view>
+      <view>还没有人分享菜谱</view>
+      <view class="muted">你可以做第一个：进任意自定义菜谱 → 「分享给大家」</view>
+    </view>
+  </block>
+
   <!-- 全部菜谱 -->
   <block wx:elif="{{tab == 'all'}}">
     <view class="searchbar">

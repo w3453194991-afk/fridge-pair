@@ -161,3 +161,20 @@ button.btn {
   text-align: center; border: none; background: none;
 }
 button.btn::after { border: none; }
+
+/* 实拍图库 */
+.galrow { white-space: nowrap; margin-bottom: 8rpx; }
+.galitem { display: inline-block; width: 200rpx; margin-right: 14rpx; position: relative; }
+.galimg {
+  width: 200rpx; height: 200rpx; border-radius: 20rpx; background: #F2F8F5;
+}
+.pendingimg { opacity: .55; }
+.galname {
+  font-size: 19rpx; color: #7C8B87; margin-top: 6rpx;
+  overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.galpend {
+  position: absolute; left: 10rpx; top: 10rpx;
+  font-size: 17rpx; font-weight: 800; color: #fff;
+  background: rgba(180,83,9,.85); border-radius: 8rpx; padding: 3rpx 10rpx;
+}

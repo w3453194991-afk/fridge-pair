@@ -21,6 +21,7 @@ Page({
 
   load(tab) {
     if (tab === 'images') return this.loadImages();
+    if (tab === 'dishes') return this.loadDishes();
     if (!wx.cloud) {
       this.setData({ loading: false, err: '未配置云开发' });
       return;
@@ -50,6 +51,42 @@ Page({
       fail: (e) => {
         self.setData({ loading: false, err: '调用失败：' + ((e && e.errMsg) || '') });
       }
+    });
+  },
+
+  /* 共享菜谱审核 */
+  loadDishes() {
+    if (!wx.cloud) { this.setData({ loading: false, err: '未配置云开发' }); return; }
+    const self = this;
+    this.setData({ loading: true, err: '' });
+    wx.cloud.callFunction({
+      name: 'sharedDishes',
+      data: { action: 'pending' },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (!d.ok) {
+          const raw = d.error || '读取失败';
+          self.setData({
+            loading: false,
+            err: raw === '未知 action' ? '共享菜谱服务未部署' : raw,
+            rows: []
+          });
+          return;
+        }
+        const rows = (d.items || []).map(x => ({
+          id: x.id,
+          title: x.name,
+          dishName: (x.cuisine || []).join(' / ') || '家常',
+          status: x.status,
+          statusText: '待审核',
+          atText: self.fmtTime(x.at),
+          isDish: true,
+          steps: (x.steps || []).length,
+          ings: (x.ingredients || []).map(i => i.name).join('、')
+        }));
+        self.setData({ loading: false, rows: rows });
+      },
+      fail: (e) => self.setData({ loading: false, err: '调用失败：' + ((e && e.errMsg) || '') })
     });
   },
 
@@ -154,8 +191,8 @@ Page({
     const i = Number(e.currentTarget.dataset.i);
     const it = this.data.rows[i];
     if (!it) return;
-    // 评论图片走 comments 云函数
-    const fn = it.isImage ? 'comments' : 'videos';
+    // 按来源选云函数
+    const fn = it.isDish ? 'sharedDishes' : (it.isImage ? 'comments' : 'videos');
     wx.cloud.callFunction({
       name: fn,
       data: { action: action, id: it.id },

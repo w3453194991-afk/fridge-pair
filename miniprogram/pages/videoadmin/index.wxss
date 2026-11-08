@@ -51,3 +51,7 @@
   font-size: 18rpx; color: #B45309; background: #FFF3D6;
   border-radius: 8rpx; padding: 3rpx 10rpx; margin-left: 10rpx;
 }
+
+/* 菜谱待审 */
+.dishinfo { margin-top: 10rpx; }
+.dline { font-size: 21rpx; color: #6C7F78; line-height: 1.7; }
