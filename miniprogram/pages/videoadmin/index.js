@@ -245,6 +245,50 @@ Page({
     });
   },
 
+  /* 诊断：带真实用户身份跑一遍管理员判定 */
+  onDiag() {
+    if (!wx.cloud) { wx.showToast({ title: '未配置云开发', icon: 'none' }); return; }
+    wx.showLoading({ title: '诊断中…', mask: true });
+    const self = this;
+    wx.cloud.callFunction({
+      name: 'comments',
+      data: { action: 'diag' },
+      success: (res) => {
+        wx.hideLoading();
+        const d = (res && res.result) || {};
+        if (!d.ok) {
+          wx.showModal({
+            title: '诊断失败',
+            content: 'comments 云函数可能还是旧版本：\n' + (d.error || '未知错误') + '\n\n请先部署 cloudfunctions/comments',
+            showCancel: false
+          });
+          return;
+        }
+        const v = d.videosWhoami || {};
+        const lines = [
+          '你的 openid：' + (d.openid || '(空)'),
+          '',
+          'comments 自己配的管理员数：' + (d.selfAdminCount || 0),
+          'comments 自认管理员：' + (d.selfIsAdmin ? '是' : '否'),
+          '',
+          'videos 返回：' + (v.error ? ('调用失败 ' + v.error) : ('isAdmin=' + (v.isAdmin ? '是' : '否') + '，管理员数=' + (v.adminCount || 0) + (v.source ? '，来源=' + v.source : ''))),
+          '',
+          '最终判定：' + (d.finalIsAdmin ? '✅ 是管理员' : '❌ 不是管理员')
+        ];
+        wx.showModal({
+          title: '权限诊断',
+          content: lines.join('\n'),
+          showCancel: false,
+          confirmText: '知道了'
+        });
+      },
+      fail: (e) => {
+        wx.hideLoading();
+        wx.showModal({ title: '调用失败', content: String((e && e.errMsg) || ''), showCancel: false });
+      }
+    });
+  },
+
   onBack() {
     wx.navigateBack();
   }

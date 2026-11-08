@@ -25,9 +25,25 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 const COL = 'videos';
 
-function admins() {
+/* 管理员名单：环境变量 ADMIN_OPENIDS 优先，其次读 settings/admin 集合
+   这样不想折腾环境变量时，调一次 claimAdmin 就能把自己设成管理员 */
+const SETTINGS = 'settings';
+
+function adminsFromEnv() {
   return String(process.env.ADMIN_OPENIDS || '')
     .split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
+}
+
+async function admins() {
+  const env = adminsFromEnv();
+  if (env.length) return env;
+  try {
+    const r = await db.collection(SETTINGS).doc('admin').get();
+    const list = (r && r.data && r.data.openids) || [];
+    return Array.isArray(list) ? list.filter(Boolean) : [];
+  } catch (e) {
+    return [];
+  }
 }
 
 /* 审核模式（环境变量 REVIEW_MODE）
@@ -56,10 +72,32 @@ function mapItem(x, openid) {
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const action = (event && event.action) || 'list';
-  const isAdmin = admins().indexOf(OPENID) >= 0;
+  const list = await admins();
+  const isAdmin = list.indexOf(OPENID) >= 0;
 
   if (action === 'whoami') {
-    return { ok: true, isAdmin: isAdmin, adminCount: admins().length };
+    return { ok: true, isAdmin: isAdmin, adminCount: list.length, source: adminsFromEnv().length ? 'env' : 'db' };
+  }
+
+  /* 一次性认领管理员：当前没有任何管理员时，调用者成为管理员 */
+  if (action === 'claimAdmin') {
+    if (list.length) {
+      return {
+        ok: false,
+        error: '已有管理员：' + list.join(','),
+        hint: '如需新增，直接改云函数环境变量 ADMIN_OPENIDS，或改 settings/admin 集合的 openids 数组'
+      };
+    }
+    try {
+      await db.collection(SETTINGS).doc('admin').set({ data: { openids: [OPENID], at: Date.now() } });
+      return { ok: true, openid: OPENID, hint: '已设你为管理员，重新进审核页即可' };
+    } catch (e) {
+      return {
+        ok: false,
+        error: String((e && e.message) || e),
+        hint: '集合 settings 可能不存在，去云开发控制台新建一个名为 settings 的集合（权限：所有用户不可读写）'
+      };
+    }
   }
 
   try {
