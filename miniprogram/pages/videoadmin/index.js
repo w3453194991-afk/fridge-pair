@@ -271,7 +271,7 @@ Page({
           'comments 自己配的管理员数：' + (d.selfAdminCount || 0),
           'comments 自认管理员：' + (d.selfIsAdmin ? '是' : '否'),
           '',
-          'videos 返回：' + (v.error ? ('调用失败 ' + v.error) : ('isAdmin=' + (v.isAdmin ? '是' : '否') + '，管理员数=' + (v.adminCount || 0) + (v.source ? '，来源=' + v.source : '）') )),
+          'videos 返回：' + (v.error ? ('调用失败 ' + v.error) : ('isAdmin=' + (v.isAdmin ? '是' : '否') + '，管理员数=' + (v.adminCount || 0) + (v.source ? '，来源=' + v.source : ''))),
           '',
           'users 记录：' + (v.userFound === undefined ? '(旧版videos，读不到)' : (v.userFound ? '已找到' : '未找到')),
           'users.isAdmin 标记：' + (v.userFound === undefined ? '(旧版videos)' : (v.userFlag === null ? '无此字段' : (v.userFlag ? 'true' : 'false'))),
