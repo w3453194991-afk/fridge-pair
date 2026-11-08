@@ -78,19 +78,33 @@ exports.main = async (event) => {
 
   /* 额外兜底：users 集合里该账号带 isAdmin: true 也算管理员
      方便直接在数据库控制台勾选，不用改环境变量、不用重新部署 */
-  if (!isAdmin && OPENID) {
+  let userDoc = { found: false, flag: null, err: '' };
+  if (OPENID) {
     try {
-      const ur = await db.collection('users')
-        .where({ openid: OPENID, isAdmin: true }).limit(1).get();
+      const ur = await db.collection('users').where({ openid: OPENID }).limit(1).get();
       if (ur.data && ur.data.length) {
-        isAdmin = true;
-        adminSource = 'users.isAdmin';
+        userDoc.found = true;
+        userDoc.flag = ur.data[0].isAdmin === true;
+        if (!isAdmin && userDoc.flag) {
+          isAdmin = true;
+          adminSource = 'users.isAdmin';
+        }
       }
-    } catch (e) {}
+    } catch (e) {
+      userDoc.err = String((e && e.message) || e);
+    }
   }
 
   if (action === 'whoami') {
-    return { ok: true, isAdmin: isAdmin, adminCount: list.length, source: adminSource };
+    return {
+      ok: true,
+      isAdmin: isAdmin,
+      adminCount: list.length,
+      source: adminSource,
+      userFound: userDoc.found,
+      userFlag: userDoc.flag,
+      userErr: userDoc.err
+    };
   }
 
   /* 一次性认领管理员：当前没有任何管理员时，调用者成为管理员 */
