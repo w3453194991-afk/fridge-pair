@@ -31,6 +31,19 @@ function admins() {
     .split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
 }
 
+/* 管理员判定：本函数没配 ADMIN_OPENIDS 时，回退到 videos 云函数的 whoami
+   这样只需要在 videos 里配一次，其他函数自动生效 */
+async function isAdminUser(openid) {
+  if (admins().indexOf(openid) >= 0) return true;
+  if (!admins().length) {
+    try {
+      const r = await cloud.callFunction({ name: 'videos', data: { action: 'whoami' } });
+      return !!(r && r.result && r.result.isAdmin);
+    } catch (e) { return false; }
+  }
+  return false;
+}
+
 /* 评论通知：给视频作者发一条订阅消息
    环境变量：
      COMMENT_TMPL_ID       模板 ID（必填）
@@ -133,7 +146,7 @@ function mapRow(x, openid) {
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const action = (event && event.action) || 'list';
-  const isAdmin = admins().indexOf(OPENID) >= 0;
+  const isAdmin = await isAdminUser(OPENID);
 
   try {
     if (action === 'whoami') {

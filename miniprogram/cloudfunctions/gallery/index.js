@@ -30,6 +30,18 @@ function autoReview() {
   return String(process.env.REVIEW_MODE || 'manual').toLowerCase() === 'auto';
 }
 
+/* 管理员判定：本函数没配 ADMIN_OPENIDS 时，回退到 videos 云函数的 whoami */
+async function isAdminUser(openid) {
+  if (admins().indexOf(openid) >= 0) return true;
+  if (!admins().length) {
+    try {
+      const r = await cloud.callFunction({ name: 'videos', data: { action: 'whoami' } });
+      return !!(r && r.result && r.result.isAdmin);
+    } catch (e) { return false; }
+  }
+  return false;
+}
+
 function mapItem(x, openid) {
   return {
     id: x._id,
@@ -58,7 +70,7 @@ async function imgCheck(fileID) {
 exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const action = (event && event.action) || 'list';
-  const isAdmin = admins().indexOf(OPENID) >= 0;
+  const isAdmin = await isAdminUser(OPENID);
 
   try {
     if (action === 'whoami') return { ok: true, isAdmin: isAdmin };
