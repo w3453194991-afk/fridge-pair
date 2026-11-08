@@ -22,6 +22,7 @@ Page({
   load(tab) {
     if (tab === 'images') return this.loadImages();
     if (tab === 'dishes') return this.loadDishes();
+    if (tab === 'photos') return this.loadPhotos();
     if (!wx.cloud) {
       this.setData({ loading: false, err: '未配置云开发' });
       return;
@@ -83,6 +84,41 @@ Page({
           isDish: true,
           steps: (x.steps || []).length,
           ings: (x.ingredients || []).map(i => i.name).join('、')
+        }));
+        self.setData({ loading: false, rows: rows });
+      },
+      fail: (e) => self.setData({ loading: false, err: '调用失败：' + ((e && e.errMsg) || '') })
+    });
+  },
+
+  /* 菜品实拍图审核 */
+  loadPhotos() {
+    if (!wx.cloud) { this.setData({ loading: false, err: '未配置云开发' }); return; }
+    const self = this;
+    this.setData({ loading: true, err: '' });
+    wx.cloud.callFunction({
+      name: 'gallery',
+      data: { action: 'pending' },
+      success: (res) => {
+        const d = (res && res.result) || {};
+        if (!d.ok) {
+          const raw = d.error || '读取失败';
+          self.setData({
+            loading: false,
+            err: raw === '未知 action' ? '实拍图服务未部署（cloudfunctions/gallery）' : raw,
+            rows: []
+          });
+          return;
+        }
+        const rows = (d.items || []).map(x => ({
+          id: x.id,
+          title: x.dishName || '菜品实拍',
+          dishName: x.nick || '冰箱用户',
+          images: [x.fileID],
+          status: x.status,
+          statusText: '待审核',
+          atText: self.fmtTime(x.at),
+          isPhoto: true
         }));
         self.setData({ loading: false, rows: rows });
       },
@@ -192,7 +228,7 @@ Page({
     const it = this.data.rows[i];
     if (!it) return;
     // 按来源选云函数
-    const fn = it.isDish ? 'sharedDishes' : (it.isImage ? 'comments' : 'videos');
+    const fn = it.isDish ? 'sharedDishes' : (it.isPhoto ? 'gallery' : (it.isImage ? 'comments' : 'videos'));
     wx.cloud.callFunction({
       name: fn,
       data: { action: action, id: it.id },

@@ -3,6 +3,7 @@
   <view class="tabs">
     <view class="{{tab == 'pending' ? 'tab on' : 'tab'}}" data-tab="pending" bindtap="onTab">视频待审</view>
     <view class="{{tab == 'dishes' ? 'tab on' : 'tab'}}" data-tab="dishes" bindtap="onTab">菜谱待审</view>
+    <view class="{{tab == 'photos' ? 'tab on' : 'tab'}}" data-tab="photos" bindtap="onTab">实拍图</view>
     <view class="{{tab == 'images' ? 'tab on' : 'tab'}}" data-tab="images" bindtap="onTab">评论图片</view>
     <view class="{{tab == 'all' ? 'tab on' : 'tab'}}" data-tab="all" bindtap="onTab">全部视频</view>
   </view>
@@ -31,7 +32,7 @@
         <view class="dline">做法：{{item.steps}} 步</view>
       </view>
 
-      <view wx:if="{{item.isImage && item.images.length}}" class="cmshots">
+      <view wx:if="{{(item.isImage || item.isPhoto) && item.images.length}}" class="cmshots">
         <image
           wx:for="{{item.images}}" wx:for-item="im" wx:for-index="ii" wx:key="*this"
           class="cmshot" src="{{im}}" mode="aspectFill"
