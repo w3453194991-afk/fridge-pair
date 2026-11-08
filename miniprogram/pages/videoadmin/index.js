@@ -273,8 +273,9 @@ Page({
           '',
           'videos 返回：' + (v.error ? ('调用失败 ' + v.error) : ('isAdmin=' + (v.isAdmin ? '是' : '否') + '，管理员数=' + (v.adminCount || 0) + (v.source ? '，来源=' + v.source : ''))),
           '',
-          'users 记录：' + (v.userFound === undefined ? '(旧版videos，读不到)' : (v.userFound ? '已找到' : '未找到')),
+          'users 记录：' + (v.userFound === undefined ? '(旧版videos，读不到)' : (v.userFound ? '已找到' : ('未找到，库里有 ' + (v.userTotal || 0) + ' 条'))),
           'users.isAdmin 标记：' + (v.userFound === undefined ? '(旧版videos)' : (v.userFlag === null ? '无此字段' : (v.userFlag ? 'true' : 'false'))),
+          (v.userSample && v.userSample.length) ? ('库里 openid 样本：' + v.userSample.map(s => s.key + '=' + s.val).join('；')) : '',
           v.userErr ? ('查询出错：' + v.userErr) : '',
           '',
           '最终判定：' + (d.finalIsAdmin ? '✅ 是管理员' : '❌ 不是管理员')

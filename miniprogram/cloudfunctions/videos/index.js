@@ -77,18 +77,32 @@ exports.main = async (event) => {
   let adminSource = adminsFromEnv().length ? 'env' : 'db';
 
   /* 额外兜底：users 集合里该账号带 isAdmin: true 也算管理员
-     方便直接在数据库控制台勾选，不用改环境变量、不用重新部署 */
-  let userDoc = { found: false, flag: null, err: '' };
+     依次尝试 openid / _openid 两种字段名 */
+  let userDoc = { found: false, flag: null, err: '', total: 0, sample: [] };
   if (OPENID) {
     try {
       const ur = await db.collection('users').where({ openid: OPENID }).limit(1).get();
-      if (ur.data && ur.data.length) {
+      let doc = (ur.data || [])[0];
+      if (!doc) {
+        const ur2 = await db.collection('users').where({ _openid: OPENID }).limit(1).get();
+        doc = (ur2.data || [])[0];
+      }
+      if (doc) {
         userDoc.found = true;
-        userDoc.flag = ur.data[0].isAdmin === true;
+        userDoc.flag = doc.isAdmin === true;
         if (!isAdmin && userDoc.flag) {
           isAdmin = true;
           adminSource = 'users.isAdmin';
         }
+      } else {
+        // 诊断用：把库里前几条的 openid 摘出来对比
+        const all = await db.collection('users').limit(5).get();
+        userDoc.total = (all.data || []).length;
+        userDoc.sample = (all.data || []).map(x => ({
+          key: x.openid ? 'openid' : (x._openid ? '_openid' : '(无)'),
+          val: String(x.openid || x._openid || '').slice(0, 10) + '…',
+          admin: x.isAdmin === true
+        }));
       }
     } catch (e) {
       userDoc.err = String((e && e.message) || e);
@@ -103,7 +117,9 @@ exports.main = async (event) => {
       source: adminSource,
       userFound: userDoc.found,
       userFlag: userDoc.flag,
-      userErr: userDoc.err
+      userErr: userDoc.err,
+      userTotal: userDoc.total,
+      userSample: userDoc.sample
     };
   }
 
