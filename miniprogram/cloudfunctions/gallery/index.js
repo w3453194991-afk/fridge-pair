@@ -31,13 +31,19 @@ function adminsFromEnv() {
     .split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
 }
 
+/* 名单兼容：数组 or 逗号分隔字符串 */
+function normList(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.map(s => String(s).trim()).filter(Boolean);
+  return String(raw).split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
+}
+
 async function getAdminList() {
   const env = adminsFromEnv();
   if (env.length) return env;
   try {
     const r = await db.collection(SETTINGS_COL).doc('admin').get();
-    const list = (r && r.data && r.data.openids) || [];
-    return Array.isArray(list) ? list.filter(Boolean) : [];
+    return normList(r && r.data && r.data.openids);
   } catch (e) {
     return [];
   }
