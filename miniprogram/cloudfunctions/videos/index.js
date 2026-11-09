@@ -34,6 +34,13 @@ function adminsFromEnv() {
     .split(/[,，\s]+/).map(s => s.trim()).filter(Boolean);
 }
 
+/* 宽松比对：只保留字母数字、下划线、横线，忽略空格/换行/零宽字符等 */
+function sameId(a, b) {
+  const n = s => String(s || '').replace(/[^0-9A-Za-z_-]/g, '');
+  const x = n(a), y = n(b);
+  return !!x && x === y;
+}
+
 /* 名单兼容：数组 or 逗号分隔字符串 */
 function normList(raw) {
   if (!raw) return [];
@@ -79,7 +86,8 @@ exports.main = async (event) => {
   const { OPENID } = cloud.getWXContext();
   const action = (event && event.action) || 'list';
   const list = await admins();
-  let isAdmin = list.indexOf(OPENID) >= 0;
+  const callerId = String((event && event.openid) || OPENID || '');
+  let isAdmin = list.some(x => sameId(x, callerId));
   let adminSource = adminsFromEnv().length ? 'env' : 'db';
 
   /* 额外兜底：users 集合里该账号带 isAdmin: true 也算管理员

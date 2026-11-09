@@ -53,11 +53,18 @@ async function getAdminList() {
   }
 }
 
+/* 宽松比对：只保留字母数字、下划线、横线，忽略空格/换行/零宽字符等 */
+function sameId(a, b) {
+  const n = s => String(s || '').replace(/[^0-9A-Za-z_-]/g, '');
+  const x = n(a), y = n(b);
+  return !!x && x === y;
+}
+
 /* 管理员判定：直接比对名单，不跨函数调用 */
 async function isAdminUser(openid) {
   if (!openid) return false;
   const list = await getAdminList();
-  return list.indexOf(openid) >= 0;
+  return list.some(x => sameId(x, openid));
 }
 
 /* 评论通知：给视频作者发一条订阅消息
