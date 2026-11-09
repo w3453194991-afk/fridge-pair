@@ -245,6 +245,41 @@ Page({
     });
   },
 
+  /* 一键把当前账号设为管理员（openid 由系统提供，不用手抄） */
+  onClaimSelf() {
+    if (!wx.cloud) { wx.showToast({ title: '未配置云开发', icon: 'none' }); return; }
+    wx.showModal({
+      title: '设为管理员',
+      content: '会把当前账号写入 settings/admin，之后你就能审核内容了。',
+      success: (r) => {
+        if (!r.confirm) return;
+        wx.showLoading({ title: '写入中…', mask: true });
+        wx.cloud.callFunction({
+          name: 'videos',
+          data: { action: 'claimSelf', token: 'ddm-setup-2026' },
+          success: (res) => {
+            wx.hideLoading();
+            const d = (res && res.result) || {};
+            if (!d.ok) {
+              wx.showModal({ title: '写入失败', content: (d.error || '') + (d.hint ? '\n' + d.hint : ''), showCancel: false });
+              return;
+            }
+            wx.showModal({
+              title: '已设为管理员',
+              content: 'openid 长度 ' + d.savedLen + '\n重新进入本页即可审核。',
+              showCancel: false,
+              success: () => this.load(this.data.tab)
+            });
+          },
+          fail: (e) => {
+            wx.hideLoading();
+            wx.showModal({ title: '调用失败', content: String((e && e.errMsg) || ''), showCancel: false });
+          }
+        });
+      }
+    });
+  },
+
   /* 诊断：带真实用户身份跑一遍管理员判定 */
   onDiag() {
     if (!wx.cloud) { wx.showToast({ title: '未配置云开发', icon: 'none' }); return; }

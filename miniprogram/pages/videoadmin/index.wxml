@@ -16,6 +16,7 @@
   <view wx:elif="{{err}}" class="card errcard">
     <view class="etxt">{{err}}</view>
     <view class="ehint">需要管理员权限：在云函数 videos 的环境变量里配置 ADMIN_OPENIDS（你的 openid），保存后重新部署 videos。其他函数会自动向 videos 询问，不需要重复配置。</view>
+    <view class="btn primary mt" bindtap="onClaimSelf">👑 把当前账号设为管理员</view>
     <view class="btn ghost mt" bindtap="onDiag">🔍 诊断（看真实 openid）</view>
     <view class="btn ghost mt" bindtap="onBack">返回</view>
   </view>

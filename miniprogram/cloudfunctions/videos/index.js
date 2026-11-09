@@ -140,6 +140,26 @@ exports.main = async (event) => {
     };
   }
 
+  /* 把自己设为管理员：直接用系统返回的 openid，杜绝手抄错误 */
+  if (action === 'claimSelf') {
+    if (String(event.token || '') !== 'ddm-setup-2026') {
+      return { ok: false, error: 'token 不对' };
+    }
+    if (!OPENID) return { ok: false, error: '拿不到 openid（请在真机小程序里点）' };
+    try {
+      await db.collection(SETTINGS).doc('admin').set({
+        data: { openids: [OPENID], at: Date.now() }
+      });
+      return { ok: true, saved: OPENID, savedLen: OPENID.length };
+    } catch (e) {
+      return {
+        ok: false,
+        error: String((e && e.message) || e),
+        hint: '需要先建 settings 集合（权限：所有用户不可读写）'
+      };
+    }
+  }
+
   /* 强制写入管理员（控制台用，带口令；绕开手工填写的错字问题） */
   if (action === 'forceClaim') {
     if (String(event.token || '') !== 'ddm-setup-2026') {
