@@ -185,8 +185,18 @@ exports.main = async (event) => {
       return {
         ok: true,
         openid: OPENID,
+        openidLen: String(OPENID || '').length,
+        openidNormLen: String(OPENID || '').replace(/[^0-9A-Za-z_-]/g, '').length,
         selfAdminCount: self.length,
-        selfIsAdmin: self.indexOf(OPENID) >= 0,
+        selfIsAdmin: self.some(x => sameId(x, OPENID)),
+        selfNormLens: self.map(x => String(x).replace(/[^0-9A-Za-z_-]/g, '').length),
+        selfDiffAt: self.map(x => {
+          const a = String(x).replace(/[^0-9A-Za-z_-]/g, '');
+          const b = String(OPENID || '').replace(/[^0-9A-Za-z_-]/g, '');
+          const n = Math.min(a.length, b.length);
+          for (let i = 0; i < n; i++) if (a[i] !== b[i]) return i;
+          return a.length === b.length ? -1 : n;
+        }),
         videosWhoami: vres,
         finalIsAdmin: isAdmin
       };

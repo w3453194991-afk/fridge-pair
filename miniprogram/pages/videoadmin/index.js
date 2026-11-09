@@ -267,17 +267,14 @@ Page({
         const v = d.videosWhoami || {};
         const lines = [
           '你的 openid：' + (d.openid || '(空)'),
+          '长度：' + (d.openidLen || 0) + '（去符号后 ' + (d.openidNormLen || 0) + '）',
           '',
-          'comments 自己配的管理员数：' + (d.selfAdminCount || 0),
+          'comments 管理员数：' + (d.selfAdminCount || 0),
           'comments 自认管理员：' + (d.selfIsAdmin ? '是' : '否'),
+          (d.selfNormLens && d.selfNormLens.length) ? ('名单去符号长度：' + d.selfNormLens.join('、')) : '',
+          (d.selfDiffAt && d.selfDiffAt.length) ? ('首个差异位置：' + d.selfDiffAt.map(i => (i === -1 ? '完全一致' : ('第 ' + i + ' 位'))).join('、')) : '',
           '',
-          'videos 返回：' + (v.error ? ('调用失败 ' + v.error) : ('isAdmin=' + (v.isAdmin ? '是' : '否') + '，管理员数=' + (v.adminCount || 0) + (v.source ? '，来源=' + v.source : ''))),
-          (v.adminLens && v.adminLens.length) ? ('名单长度：' + v.adminLens.join('、') + '（你的长度 ' + (v.openidLen || 0) + '）') : '',
-          (v.adminHeads && v.adminHeads.length) ? ('名单开头：' + v.adminHeads.join('、')) : '',
-          '',
-          'users 记录：' + (v.userFound === undefined ? '(旧版videos，读不到)' : (v.userFound ? '已找到' : ('未找到，库里有 ' + (v.userTotal || 0) + ' 条'))),
-          'users.isAdmin 标记：' + (v.userFound === undefined ? '(旧版videos)' : (v.userFlag === null ? '无此字段' : (v.userFlag ? 'true' : 'false'))),
-          (v.userSample && v.userSample.length) ? ('库里 openid 样本：' + v.userSample.map(s => s.key + '=' + s.val).join('；')) : '',
+          'videos 返回：' + (v.error ? ('调用失败 ' + v.error) : ('isAdmin=' + (v.isAdmin ? '是' : '否') + '，来源=' + (v.source || '?'))),
           v.userErr ? ('查询出错：' + v.userErr) : '',
           '',
           '最终判定：' + (d.finalIsAdmin ? '✅ 是管理员' : '❌ 不是管理员')
