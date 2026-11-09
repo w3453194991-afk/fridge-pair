@@ -120,6 +120,9 @@ exports.main = async (event) => {
       ok: true,
       isAdmin: isAdmin,
       adminCount: list.length,
+      adminLens: list.map(s => String(s).length),
+      adminHeads: list.map(s => String(s).slice(0, 8)),
+      openidLen: String(OPENID || '').length,
       source: adminSource,
       userFound: userDoc.found,
       userFlag: userDoc.flag,
@@ -127,6 +130,27 @@ exports.main = async (event) => {
       userTotal: userDoc.total,
       userSample: userDoc.sample
     };
+  }
+
+  /* 强制写入管理员（控制台用，带口令；绕开手工填写的错字问题） */
+  if (action === 'forceClaim') {
+    if (String(event.token || '') !== 'ddm-setup-2026') {
+      return { ok: false, error: 'token 不对' };
+    }
+    const oid = String(event.openid || '').replace(/\s/g, '');
+    if (!oid) return { ok: false, error: '缺少 openid' };
+    try {
+      await db.collection(SETTINGS).doc('admin').set({
+        data: { openids: [oid], at: Date.now() }
+      });
+      return { ok: true, saved: oid, savedLen: oid.length };
+    } catch (e) {
+      return {
+        ok: false,
+        error: String((e && e.message) || e),
+        hint: '需要先建 settings 集合（权限：所有用户不可读写）'
+      };
+    }
   }
 
   /* 一次性认领管理员：当前没有任何管理员时，调用者成为管理员 */

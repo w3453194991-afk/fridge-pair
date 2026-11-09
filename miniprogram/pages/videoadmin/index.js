@@ -272,6 +272,8 @@ Page({
           'comments 自认管理员：' + (d.selfIsAdmin ? '是' : '否'),
           '',
           'videos 返回：' + (v.error ? ('调用失败 ' + v.error) : ('isAdmin=' + (v.isAdmin ? '是' : '否') + '，管理员数=' + (v.adminCount || 0) + (v.source ? '，来源=' + v.source : ''))),
+          (v.adminLens && v.adminLens.length) ? ('名单长度：' + v.adminLens.join('、') + '（你的长度 ' + (v.openidLen || 0) + '）') : '',
+          (v.adminHeads && v.adminHeads.length) ? ('名单开头：' + v.adminHeads.join('、')) : '',
           '',
           'users 记录：' + (v.userFound === undefined ? '(旧版videos，读不到)' : (v.userFound ? '已找到' : ('未找到，库里有 ' + (v.userTotal || 0) + ' 条'))),
           'users.isAdmin 标记：' + (v.userFound === undefined ? '(旧版videos)' : (v.userFlag === null ? '无此字段' : (v.userFlag ? 'true' : 'false'))),
