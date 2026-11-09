@@ -21,8 +21,18 @@ Page({
     // 没登录过 → 直接去登录页，不放开场动画
     try {
       S.load();
+      const fam0 = S.state.family || {};
 
-      // 主存储丢了登录态时，用轻量会话兜底恢复，避免每次都回登录页
+      /* 登录态判定放宽：只要「有 openid」或「有家庭成员」就算已登录，
+         避免 loggedIn 标记被云端旧值/清缓存搞丢后反复要求登录 */
+      const hasIdentity = !!(fam0.openid || (fam0.members || []).length);
+      if (!fam0.loggedIn && hasIdentity) {
+        S.state.family.loggedIn = true;
+        try { S.save(); } catch (e) {}
+        console.log('[splash] 依身份信息恢复登录态');
+      }
+
+      // 主存储丢了登录态时，再用轻量会话兜底
       if (!(S.state.family && S.state.family.loggedIn)) {
         const ses = SESSION.read();
         if (ses) {

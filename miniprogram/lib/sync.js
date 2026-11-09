@@ -75,6 +75,7 @@ module.exports = {
     if (attached) return;
     attached = true;
     const orig = S.save.bind(S);
+    S._saveRaw = orig;              // 供 pull 落盘用，避免触发再次上传
     S.save = function () {
       const r = orig.apply(null, arguments);
       schedulePush();
@@ -103,7 +104,11 @@ module.exports = {
         if (keep.openid) S.state.family.openid = keep.openid;
         S.state.family.loggedIn = true;
       }
-      try { S.saveLocal ? S.saveLocal() : null; } catch (e) {}
+      // 真正落盘（用原始 save，避免又触发一次上传形成循环）
+      try {
+        if (typeof S._saveRaw === 'function') S._saveRaw();
+        else if (typeof S.saveLocal === 'function') S.saveLocal();
+      } catch (e) {}
       log('已合并云端数据');
       return true;
     });

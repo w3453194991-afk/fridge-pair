@@ -27,6 +27,17 @@ Page({
       envVersion: env,
       cloudReady: !!(CFG && CFG.CLOUD_ENV)
     });
+
+    // 已登录就不要停在登录页（例如从分享链接/返回栈误入）
+    try {
+      S.load();
+      const f = S.state.family || {};
+      if (f.loggedIn || f.openid || (f.members || []).length) {
+        f.loggedIn = true;
+        try { S.save(); } catch (e) {}
+        wx.reLaunch({ url: '/pages/splash/index' });
+      }
+    } catch (e) {}
   },
 
   onAgree() {
