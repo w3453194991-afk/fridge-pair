@@ -55,7 +55,7 @@ async function getAdminList() {
 
 /* 宽松比对：只保留字母数字、下划线、横线，忽略空格/换行/零宽字符等 */
 function sameId(a, b) {
-  const n = s => String(s || '').replace(/[^0-9A-Za-z_-]/g, '');
+  const n = s => String(s || '').toLowerCase().replace(/[^0-9a-z_-]/g, '');
   const x = n(a), y = n(b);
   return !!x && x === y;
 }
