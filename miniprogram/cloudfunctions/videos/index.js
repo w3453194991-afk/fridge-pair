@@ -25,8 +25,9 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV });
 const db = cloud.database();
 const COL = 'videos';
 
-/* 管理员名单：环境变量 ADMIN_OPENIDS 优先，其次读 settings/admin 集合
-   这样不想折腾环境变量时，调一次 claimAdmin 就能把自己设成管理员 */
+/* 管理员名单：环境变量 ADMIN_OPENIDS 优先，其次读 settings/admin 集合的 openids
+   维护方式：云开发控制台 → 数据库 → settings → admin → openids（逗号分隔多个），
+   改完立即生效，不需要重新部署，也不提供任何在线提权接口。 */
 const SETTINGS = 'settings';
 
 function adminsFromEnv() {
@@ -140,67 +141,8 @@ exports.main = async (event) => {
     };
   }
 
-  /* 把自己设为管理员：直接用系统返回的 openid，杜绝手抄错误 */
-  if (action === 'claimSelf') {
-    if (String(event.token || '') !== 'ddm-setup-2026') {
-      return { ok: false, error: 'token 不对' };
-    }
-    if (!OPENID) return { ok: false, error: '拿不到 openid（请在真机小程序里点）' };
-    try {
-      await db.collection(SETTINGS).doc('admin').set({
-        data: { openids: [OPENID], at: Date.now() }
-      });
-      return { ok: true, saved: OPENID, savedLen: OPENID.length };
-    } catch (e) {
-      return {
-        ok: false,
-        error: String((e && e.message) || e),
-        hint: '需要先建 settings 集合（权限：所有用户不可读写）'
-      };
-    }
-  }
-
-  /* 强制写入管理员（控制台用，带口令；绕开手工填写的错字问题） */
-  if (action === 'forceClaim') {
-    if (String(event.token || '') !== 'ddm-setup-2026') {
-      return { ok: false, error: 'token 不对' };
-    }
-    const oid = String(event.openid || '').replace(/\s/g, '');
-    if (!oid) return { ok: false, error: '缺少 openid' };
-    try {
-      await db.collection(SETTINGS).doc('admin').set({
-        data: { openids: [oid], at: Date.now() }
-      });
-      return { ok: true, saved: oid, savedLen: oid.length };
-    } catch (e) {
-      return {
-        ok: false,
-        error: String((e && e.message) || e),
-        hint: '需要先建 settings 集合（权限：所有用户不可读写）'
-      };
-    }
-  }
-
-  /* 一次性认领管理员：当前没有任何管理员时，调用者成为管理员 */
-  if (action === 'claimAdmin') {
-    if (list.length) {
-      return {
-        ok: false,
-        error: '已有管理员：' + list.join(','),
-        hint: '如需新增，直接改云函数环境变量 ADMIN_OPENIDS，或改 settings/admin 集合的 openids 数组'
-      };
-    }
-    try {
-      await db.collection(SETTINGS).doc('admin').set({ data: { openids: [OPENID], at: Date.now() } });
-      return { ok: true, openid: OPENID, hint: '已设你为管理员，重新进审核页即可' };
-    } catch (e) {
-      return {
-        ok: false,
-        error: String((e && e.message) || e),
-        hint: '集合 settings 可能不存在，去云开发控制台新建一个名为 settings 的集合（权限：所有用户不可读写）'
-      };
-    }
-  }
+  /* 管理员只能通过 settings/admin 集合维护（控制台手动改），
+     不提供任何「自己在线上把自己设成管理员」的接口。 */
 
   try {
     /* ---------- 视频库：有视频的菜（按菜聚合） ---------- */
