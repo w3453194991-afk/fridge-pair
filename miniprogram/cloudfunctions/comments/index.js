@@ -177,7 +177,7 @@ exports.main = async (event) => {
       const self = await getAdminList();
       let vres = null;
       try {
-        const r = await cloud.callFunction({ name: 'videos', data: { action: 'whoami' } });
+        const r = await cloud.callFunction({ name: 'videos', data: { action: 'whoami', openid: OPENID } });
         vres = (r && r.result) || null;
       } catch (e) {
         vres = { error: String((e && (e.errMsg || e.message)) || e) };
