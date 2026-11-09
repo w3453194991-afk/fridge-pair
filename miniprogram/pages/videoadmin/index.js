@@ -275,7 +275,6 @@ Page({
           (d.selfDiffAt && d.selfDiffAt.length) ? ('首个差异位置：' + d.selfDiffAt.map(i => (i === -1 ? '完全一致' : ('第 ' + i + ' 位'))).join('、')) : '',
           '',
           'videos 返回：' + (v.error ? ('调用失败 ' + v.error) : ('isAdmin=' + (v.isAdmin ? '是' : '否') + '，来源=' + (v.source || '?'))),
-          v.userErr ? ('查询出错：' + v.userErr) : '',
           '',
           '最终判定：' + (d.finalIsAdmin ? '✅ 是管理员' : '❌ 不是管理员')
         ].filter(Boolean);

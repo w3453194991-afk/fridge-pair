@@ -88,41 +88,11 @@ exports.main = async (event) => {
   const action = (event && event.action) || 'list';
   const list = await admins();
   const callerId = String((event && event.openid) || OPENID || '');
-  let isAdmin = list.some(x => sameId(x, callerId));
-  let adminSource = adminsFromEnv().length ? 'env' : 'db';
+  const isAdmin = list.some(x => sameId(x, callerId));
+  const adminSource = adminsFromEnv().length ? 'env' : 'db';
 
-  /* 额外兜底：users 集合里该账号带 isAdmin: true 也算管理员
-     依次尝试 openid / _openid 两种字段名 */
-  let userDoc = { found: false, flag: null, err: '', total: 0, sample: [] };
-  if (OPENID) {
-    try {
-      const ur = await db.collection('users').where({ openid: OPENID }).limit(1).get();
-      let doc = (ur.data || [])[0];
-      if (!doc) {
-        const ur2 = await db.collection('users').where({ _openid: OPENID }).limit(1).get();
-        doc = (ur2.data || [])[0];
-      }
-      if (doc) {
-        userDoc.found = true;
-        userDoc.flag = doc.isAdmin === true;
-        if (!isAdmin && userDoc.flag) {
-          isAdmin = true;
-          adminSource = 'users.isAdmin';
-        }
-      } else {
-        // 诊断用：把库里前几条的 openid 摘出来对比
-        const all = await db.collection('users').limit(5).get();
-        userDoc.total = (all.data || []).length;
-        userDoc.sample = (all.data || []).map(x => ({
-          key: x.openid ? 'openid' : (x._openid ? '_openid' : '(无)'),
-          val: String(x.openid || x._openid || '').slice(0, 10) + '…',
-          admin: x.isAdmin === true
-        }));
-      }
-    } catch (e) {
-      userDoc.err = String((e && e.message) || e);
-    }
-  }
+  /* 管理员只有两个来源：环境变量 ADMIN_OPENIDS、settings/admin.openids
+     不再读 users.isAdmin —— 那个字段谁都能在数据库里加，等于后门 */
 
   if (action === 'whoami') {
     return {
@@ -131,13 +101,8 @@ exports.main = async (event) => {
       adminCount: list.length,
       adminLens: list.map(s => String(s).length),
       adminHeads: list.map(s => String(s).slice(0, 8)),
-      openidLen: String(OPENID || '').length,
-      source: adminSource,
-      userFound: userDoc.found,
-      userFlag: userDoc.flag,
-      userErr: userDoc.err,
-      userTotal: userDoc.total,
-      userSample: userDoc.sample
+      openidLen: String(callerId || '').length,
+      source: adminSource
     };
   }
 
