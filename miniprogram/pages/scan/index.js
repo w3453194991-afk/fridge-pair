@@ -144,9 +144,9 @@ Page({
           }
 
           const isMock = d.source !== 'baidu';
-          let label = '百度 AI 识别（云函数）';
+          let label = '拍照识别（云端）';
           if (isMock) {
-            label = d.hint ? ('演示数据 · ' + d.hint) : '演示数据（云端未接入百度 AI）';
+            label = d.hint ? ('演示数据 · ' + d.hint) : '演示数据（云端未接入识别服务）';
           }
           self.applyResult(list, label, isMock);
         },
@@ -184,7 +184,7 @@ Page({
           self.showError(d.error ? ('识别失败：' + d.error) : '识别没有返回结果');
           return;
         }
-        self.applyResult(list, d.source === 'baidu' ? '百度 AI 识别' : '服务端识别');
+        self.applyResult(list, d.source === 'baidu' ? '拍照识别' : '服务端识别');
       },
       fail: (err) => {
         const msg = (err && err.errMsg) || '未知错误';

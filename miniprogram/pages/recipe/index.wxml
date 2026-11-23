@@ -165,5 +165,5 @@
     <view wx:if="{{!pairRows.length}}" class="empty"><view class="e">🧩</view><view>暂未匹配到组合</view></view>
   </block>
 
-  <ai-fab />
+  
 </view>

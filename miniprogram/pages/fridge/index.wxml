@@ -46,17 +46,17 @@
     </view>
   </view>
 
-  <!-- AI 营养对对碰 -->
-  <view wx:if="{{hasAI}}" class="ai">
+  <!-- 营养搭配推荐 -->
+  <view wx:if="{{hasPick}}" class="ai">
     <view class="row between">
-      <text class="aitag">✨ AI 营养对对碰</text>
-      <text class="aiswap" bindtap="onShuffleAI">换一组 ↻</text>
+      <text class="aitag">✨ 营养搭配推荐</text>
+      <text class="aiswap" bindtap="onShufflePick">换一组 ↻</text>
     </view>
-    <view class="aipair">{{aiA}} + {{aiB}}</view>
-    <view class="aiwhy">{{aiWhy}}</view>
+    <view class="aipair">{{pickA}} + {{pickB}}</view>
+    <view class="aiwhy">{{pickWhy}}</view>
     <view class="row between airow">
       <view class="aitags"><text>相生搭配</text><text>冰箱里有</text></view>
-      <view class="aigo" bindtap="onAIDish">看教程 →</view>
+      <view class="aigo" bindtap="onPickDish">看教程 →</view>
     </view>
   </view>
 
@@ -83,7 +83,7 @@
   </view>
   <view class="quickrow">
     <view class="quick" bindtap="onNearby">🛒 买菜清单</view>
-    <view class="quick" bindtap="onChat">🤖 问冰箱</view>
+    
   </view>
   <view class="quickrow">
     <view class="quick vid" bindtap="onVideoLib">🎬 视频库{{videoCount ? ' · ' + videoCount + ' 个做法视频' : ''}}</view>
@@ -136,5 +136,5 @@
     </view>
   </view>
 
-  <ai-fab />
+  
 </view>

@@ -19,7 +19,7 @@ Page({
     total: 0,
     isFridgeEmpty: false,
     dateText: '',
-    aiA: '', aiB: '', aiWhy: '', aiDishId: '', hasAI: false,
+    pickA: '', pickB: '', pickWhy: '', pickDishId: '', hasPick: false,
     meals: [],
     hasMenu: false,
     videoCount: 0,
@@ -61,10 +61,6 @@ Page({
       },
       fail: () => {}
     });
-  },
-
-  onChat() {
-    wx.navigateTo({ url: '/pages/chat/index' });
   },
 
   onNearby() {
@@ -135,7 +131,7 @@ Page({
       let urgentText = '';
       if (urgent.length) urgentText = '⚡ ' + urgent.length + ' 种临期：' + urgent.map(f => f.name).join('、') + '，优先吃掉';
 
-      // AI 搭配
+      // 营养搭配推荐
       let ai = { a: '', b: '', why: '', id: '', has: false };
       try {
         const sug = E.topSuggestion(st.foods, this.data.aiIdx || 0);
@@ -182,7 +178,7 @@ Page({
         name: st.family.name || '我',
         members: (st.family.members || []).length,
         dateText: dateText,
-        aiA: ai.a, aiB: ai.b, aiWhy: ai.why, aiDishId: ai.id, hasAI: ai.has,
+        pickA: ai.a, pickB: ai.b, pickWhy: ai.why, pickDishId: ai.id, hasPick: ai.has,
         meals: meals,
         hasMenu: meals.length > 0
       }, () => this.drawRing(c, total));
@@ -236,13 +232,13 @@ Page({
       });
   },
 
-  onShuffleAI() {
+  onShufflePick() {
     this.setData({ aiIdx: (this.data.aiIdx || 0) + 1 }, () => this.refresh());
   },
 
-  onAIDish() {
-    if (this.data.aiDishId) {
-      wx.navigateTo({ url: '/pages/dish/index?id=' + this.data.aiDishId });
+  onPickDish() {
+    if (this.data.pickDishId) {
+      wx.navigateTo({ url: '/pages/dish/index?id=' + this.data.pickDishId });
     } else {
       wx.switchTab({ url: '/pages/recipe/index' });
     }

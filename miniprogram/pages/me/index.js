@@ -73,10 +73,6 @@ Page({
     });
   },
 
-  onChat() {
-    wx.navigateTo({ url: '/pages/chat/index' });
-  },
-
   onSettings() {
     wx.navigateTo({ url: '/pages/settings/index' });
   },

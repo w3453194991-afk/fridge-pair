@@ -36,10 +36,10 @@
     <view class="sd-s">{{sysStripe}}</view>
   </view>
 
-  <!-- AI 生成 -->
+  <!-- 一周配餐 -->
   <view class="aicard" bindtap="onGenerate">
     <view class="row between">
-      <view class="aitag">✨ AI 个性化配餐</view>
+      <view class="aitag">✨ 一周营养配餐</view>
       <view class="aidays">7 天</view>
     </view>
     <view class="aititle">{{hasMenu ? '重新生成一周营养食谱' : '生成一周不重样营养食谱'}}</view>
@@ -61,7 +61,7 @@
   <view class="sec"><view class="bar2"></view><view class="t">周末家庭聚餐</view></view>
   <view class="card">
     <view class="pt">• 一键排一桌菜</view>
-    <view class="pd">AI 盘点冰箱现有食材 → 自动搭配一桌菜 + 全套教程 → 算出缺什么、买多少。</view>
+    <view class="pd">盘点冰箱现有食材 → 自动搭配一桌菜 + 全套教程 → 算出缺什么、买多少。</view>
     <view class="btn primary" bindtap="onParty">🎉 开启聚餐规划</view>
   </view>
 
@@ -122,5 +122,5 @@
     </view>
   </block>
 
-  <ai-fab />
+  
 </view>

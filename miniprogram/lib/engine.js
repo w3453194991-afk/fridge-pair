@@ -664,7 +664,7 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       return { reply: '可以问我：今晚吃什么 / 什么快坏了 / 冰箱还有啥 / 买什么 / 怎么做番茄炒蛋', chips: defaultChips() };
     }
 
-    // 先看是不是「让 AI 改设置」的指令（过敏原 / 疾病史 / 体系 / 置顶 / 入库…）
+    // 先看是不是「修改设置」的指令（过敏原 / 疾病史 / 体系 / 置顶 / 入库…）
     const cmd = parseCommand(text, state);
     if (cmd) {
       return { reply: cmd.say, chips: defaultChips(), action: cmd.op ? { op: cmd.op, value: cmd.value } : null };
@@ -758,7 +758,7 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
       };
     }
 
-    // 指令：让 AI 直接改设置（已在上方处理，这里保留兜底）
+    // 指令：直接修改设置（已在上方处理，这里保留兜底）
     // 兜底：搜索
     const res = search(text, foods);
     return {
@@ -867,7 +867,7 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
   }
 
   /* ============================================================
-     指令解析：让 AI 能"操作界面"
+     指令解析：让指令能"操作界面"
      返回 { op, value, say } —— say 是给用户的确认语
      ============================================================ */
   const ALLERGY_SYN = {

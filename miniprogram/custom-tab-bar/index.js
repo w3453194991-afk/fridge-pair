@@ -45,10 +45,6 @@ Component({
           fail: () => {}
         });
       });
-    },
-
-    chat() {
-      wx.navigateTo({ url: '/pages/chat/index' });
     }
   }
 });

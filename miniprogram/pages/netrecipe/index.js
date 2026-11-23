@@ -183,13 +183,13 @@ Page({
     wx.navigateBack();
   },
 
-  /* 网上取不到时，用本地规则生成一份（带 AI 生成标记），保证有菜可用 */
+  /* 网上取不到时，用本地规则生成一份（带参考做法标记），保证有菜可用 */
   onLocalGen() {
     const name = String(this.data.q || '').trim();
     if (!name) return;
     wx.showModal({
       title: '用模板生成',
-      content: '「' + name + '」网上没取到，将按菜名规则生成一份做法（标注为 AI 生成，仅供参考）。',
+      content: '「' + name + '」网上没取到，将按菜名规则生成一份做法（标注为参考做法，仅供参考）。',
       success: (r) => {
         if (!r.confirm) return;
         try {
