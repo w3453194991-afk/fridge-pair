@@ -49,7 +49,7 @@
       <text class="dgo">›</text>
     </view>
     <view class="line2 row between" bindtap="onNearby">
-      <text>🧭 附近超市</text>
+      <text>🛒 买菜清单</text>
       <text class="dgo">›</text>
     </view>
     <view class="line2 row between" bindtap="onMyVideos">

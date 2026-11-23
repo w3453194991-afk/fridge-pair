@@ -1,40 +1,31 @@
 <view class="wrap tablewrap">
 
   <view class="card">
-    <view class="t1">🧭 找最近的超市</view>
-    <view class="t2">授权定位后可以在微信地图里搜超市、菜市场，直接看路线。</view>
+    <view class="t1">🛒 买菜清单</view>
+    <view class="t2">把本周缺的食材一键复制出来，贴给家人代买，或直接粘到微信搜一搜找超市。</view>
 
-    <view class="btn primary mt" bindtap="onLocate">① 获取我的位置</view>
-    <view class="btn ghost mt" bindtap="onMap">② 在地图上找超市</view>
-
-    <view wx:if="{{status}}" class="status">⏳ {{status}}</view>
-    <view class="muted mt">{{city}}</view>
-  </view>
-
-  <view wx:if="{{advice}}" class="card tip">
-    <view class="tt">🛒 采购提示</view>
-    <view class="muted">{{advice}}</view>
-  </view>
-
-  <view wx:if="{{shops.length}}" class="card">
-    <view class="tt">已找到</view>
-    <view wx:for="{{shops}}" wx:key="name" class="shop" data-i="{{index}}" bindtap="onOpen">
-      <view class="sname">{{item.name}}</view>
-      <view class="saddr">{{item.addr}}</view>
-      <view class="sgo">导航 ›</view>
+    <view class="mt row">
+      <view class="label">本周缺</view>
+      <view class="val">{{advice}}</view>
     </view>
-  </view>
 
-  <view class="btn ghost" bindtap="onCopy">复制「超市 生鲜」去地图 App 搜</view>
+    <view wx:if="{{missing.length}}" class="chips">
+      <view wx:for="{{missing}}" wx:key="*this" class="chip">{{item}}</view>
+    </view>
+
+    <view class="btn primary mt" bindtap="onCopyList">复制采购清单</view>
+    <view class="btn ghost mt" bindtap="onCopyWords">复制「超市 生鲜 菜市场」</view>
+    <view class="btn ghost mt" bindtap="onBack">回冰箱看看</view>
+  </view>
 
   <view class="card note">
-    <view class="nt">打不开地图？</view>
+    <view class="nt">关于「附近超市」</view>
     <view class="nc">
-      ① 开发者工具不支持地图选点 → 用「真机预览」<br/>
-      ② 检查是否拒绝了位置权限 → 点下面按钮去开启<br/>
-      ③ 小程序后台需开通「按需打开位置接口」
+      本页不再获取你的位置：<br/>
+      ① 复制清单后，在微信「搜一搜」里搜超市即可；<br/>
+      ② 也可以把清单直接发给家人代买；<br/>
+      ③ 不申请定位权限，避免弹授权框打扰。
     </view>
-    <view class="btn ghost mt" bindtap="onPerm">打开权限设置</view>
   </view>
 
 </view>

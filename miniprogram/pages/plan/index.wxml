@@ -70,7 +70,7 @@
     <view class="bar2"></view>
     <view class="t">采购清单</view>
     <view class="n">{{cartCount}} 项</view>
-    <view class="nearby" bindtap="onNearby">附近超市 ›</view>
+    <view class="nearby" bindtap="onNearby">买菜清单 ›</view>
   </view>
   <view wx:if="{{cartCount}}" class="card">
     <view wx:for="{{cart}}" wx:key="idx" class="cartitem">

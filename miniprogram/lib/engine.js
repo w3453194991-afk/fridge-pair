@@ -1005,7 +1005,7 @@ const localStorage = __shim.localStorage || { getItem: function () { return null
 
     if (/打开|看看|看一下|去/.test(t)) {
       const navMap = [
-        [/超市|买菜|附近/, 'nearby', '附近超市'],
+        [/超市|买菜|附近/, 'nearby', '买菜清单'],
         [/健康|过敏|疾病/, 'health', '健康档案'],
         [/报告|周报|统计/, 'report', '每周报告'],
         [/冰箱|库存/, 'fridge', '冰箱'],

@@ -6,7 +6,7 @@
 
    不处理的后果：
      · 开发者工具里正常
-     · 正式版里 wx.chooseMedia / wx.getLocation 直接 fail
+     · 正式版里 wx.chooseMedia 直接 fail
        （errMsg 里带 "privacy permission is not authorized"）
 
    用法：

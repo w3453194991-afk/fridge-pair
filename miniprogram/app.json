@@ -56,15 +56,6 @@
       }
     ]
   },
-  "permission": {
-    "scope.userLocation": {
-      "desc": "用于查找离你家最近的超市"
-    }
-  },
-  "requiredPrivateInfos": [
-    "getLocation",
-    "chooseLocation"
-  ],
   "style": "v2",
   "sitemapLocation": "sitemap.json"
 }
